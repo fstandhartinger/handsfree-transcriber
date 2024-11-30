@@ -1,10 +1,9 @@
-interface Position {
-  x: number;
-  y: number;
-}
+import React from 'react';
+
+type TouchOrMouseEvent = React.Touch | React.MouseEvent;
 
 export const getCharacterPositionFromTouch = (
-  event: React.MouseEvent | React.Touch,
+  event: TouchOrMouseEvent,
   divRef: React.RefObject<HTMLDivElement>,
   text: string
 ): number => {
@@ -13,13 +12,12 @@ export const getCharacterPositionFromTouch = (
   const div = divRef.current;
   const rect = div.getBoundingClientRect();
   
-  const clientX = event.clientX;
-  const clientY = event.clientY;
+  const clientX = 'clientX' in event ? event.clientX : event.clientX;
+  const clientY = 'clientY' in event ? event.clientY : event.clientY;
   
   const x = clientX - rect.left;
   const y = clientY - rect.top;
 
-  // Create a range to find the exact text position
   const range = document.createRange();
   const textNode = Array.from(div.childNodes).find(node => node.nodeType === Node.TEXT_NODE);
   
@@ -28,7 +26,6 @@ export const getCharacterPositionFromTouch = (
   let position = 0;
   const textContent = textNode.textContent || '';
   
-  // Binary search to find the closest position
   let left = 0;
   let right = textContent.length;
   

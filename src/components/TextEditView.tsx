@@ -20,10 +20,11 @@ const TextEditView = ({ text: initialText, onBack }: TextEditViewProps) => {
   const { toast } = useToast();
 
   const handleStyleChange = async (style: string) => {
-    setIsProcessing(true);
-    setPreviousText(text);
-
     try {
+      setIsProcessing(true);
+      setPreviousText(text);
+      console.log(`Applying ${style} style to text...`);
+
       const { data, error } = await supabase.functions.invoke('refine-text', {
         body: {
           text: text,
@@ -31,8 +32,12 @@ const TextEditView = ({ text: initialText, onBack }: TextEditViewProps) => {
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase function error:', error);
+        throw error;
+      }
 
+      console.log('Text successfully refined:', data);
       setText(data.text);
       toast({
         description: `Text style updated to ${style}`,
@@ -51,6 +56,7 @@ const TextEditView = ({ text: initialText, onBack }: TextEditViewProps) => {
 
   const handleUndo = () => {
     if (previousText) {
+      console.log('Undoing text changes');
       setText(previousText);
       setPreviousText(null);
       toast({

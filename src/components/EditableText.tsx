@@ -1,8 +1,5 @@
 import * as React from "react";
 import { useState, useRef } from "react";
-import { useToast } from "@/hooks/use-toast";
-import { Button } from "@/components/ui/button";
-import { ClipboardCopy } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useTranslation } from "react-i18next";
 import { getCharacterPositionFromTouch } from "./text/TouchSelectionLogic";
@@ -23,21 +20,11 @@ const EditableText = ({
   isEditMode,
   onEditModeChange
 }: EditableTextProps) => {
-  const { toast } = useToast();
   const { t } = useTranslation();
   const divRef = useRef<HTMLDivElement>(null);
   const [selectedRange, setSelectedRange] = useState<{ start: number; end: number } | null>(null);
   const [persistedRange, setPersistedRange] = useState<{ start: number; end: number } | null>(null);
   const [isSelecting, setIsSelecting] = useState(false);
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(text);
-    toast({
-      description: t('toasts.textCopied'),
-      duration: 2000,
-      className: "fixed top-4 left-1/2 -translate-x-1/2 text-xs py-2 px-3 max-w-[33vw] w-auto",
-    });
-  };
 
   const handleSelectionStart = (e: React.TouchEvent | React.MouseEvent) => {
     if (!isEditMode) return;
@@ -85,18 +72,6 @@ const EditableText = ({
 
   return (
     <div className="relative flex flex-col h-[calc(100vh-8rem)] mt-16">
-      <div className="absolute -top-12 right-0">
-        <Button
-          onClick={handleCopy}
-          variant="outline"
-          size="sm"
-          className="shadow-sm hover:shadow-md transition-shadow"
-        >
-          <ClipboardCopy className="mr-2 h-4 w-4" />
-          {t('buttons.copyText')}
-        </Button>
-      </div>
-      
       {isEditMode && (
         <div className="mb-4 text-sm text-muted-foreground bg-muted/50 p-3 rounded-md">
           {t('editMode.instruction')}
