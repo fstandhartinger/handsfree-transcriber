@@ -2,6 +2,7 @@ import * as React from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { ClipboardCopy } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface EditableTextProps {
   text: string;
@@ -11,6 +12,7 @@ interface EditableTextProps {
 
 const EditableText = ({ text, onChange, onTextSelect }: EditableTextProps) => {
   const { toast } = useToast();
+  const [isSelecting, setIsSelecting] = useState(false);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(text);
@@ -28,6 +30,7 @@ const EditableText = ({ text, onChange, onTextSelect }: EditableTextProps) => {
       textarea.selectionEnd
     );
     onTextSelect?.(selectedText || null);
+    setIsSelecting(!!selectedText);
   };
 
   return (
@@ -41,12 +44,22 @@ const EditableText = ({ text, onChange, onTextSelect }: EditableTextProps) => {
         <ClipboardCopy className="mr-2 h-4 w-4" />
         Copy Text
       </Button>
-      <textarea
-        value={text}
-        onChange={(e) => onChange(e.target.value)}
-        onSelect={handleSelect}
-        className="w-full min-h-[200px] p-4 border rounded-md shadow-sm focus:border-primary focus:ring-1 focus:ring-primary"
-      />
+      
+      <ScrollArea className="h-[60vh] w-full rounded-md border">
+        <textarea
+          value={text}
+          onChange={(e) => onChange(e.target.value)}
+          onSelect={handleSelect}
+          className={`w-full min-h-full p-4 text-lg md:text-xl focus:border-primary focus:ring-1 focus:ring-primary selection:bg-primary/20 ${
+            isSelecting ? 'selection:line-through' : ''
+          }`}
+          style={{
+            lineHeight: '1.6',
+            overflowY: 'visible',
+            resize: 'none'
+          }}
+        />
+      </ScrollArea>
     </div>
   );
 };

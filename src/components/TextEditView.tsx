@@ -121,7 +121,12 @@ const TextEditView = ({ text, onBack }: TextEditViewProps) => {
       />
 
       {isProcessing && <LoadingOverlay />}
-      {isRecordingInstruction && <RecordingModal onStop={handleStopInstructionRecording} />}
+      {isRecordingInstruction && (
+        <RecordingModal 
+          onStop={handleStopInstructionRecording}
+          selectedText={selectedText || ""}
+        />
+      )}
       {isRecordingRephrase && <RephraseModal onStop={handleStopRephraseRecording} />}
     </div>
   );
