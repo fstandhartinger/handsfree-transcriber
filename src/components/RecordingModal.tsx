@@ -1,4 +1,4 @@
-import { StopCircle } from "lucide-react";
+import { Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface RecordingModalProps {
@@ -8,10 +8,11 @@ interface RecordingModalProps {
 
 const RecordingModal = ({ onStop, selectedText }: RecordingModalProps) => {
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4">
-      <div className="bg-white p-6 rounded-lg max-w-md w-full">
-        <div className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center recording-pulse mb-4 mx-auto">
-          <div className="w-4 h-4 bg-white rounded-full" />
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
+      <div className="bg-white p-6 rounded-lg max-w-md w-full mx-4">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-4 h-4 bg-red-500 rounded-full animate-pulse" />
+          <span className="text-gray-700">Recording</span>
         </div>
         
         <div className="mb-6 space-y-4">
@@ -26,14 +27,16 @@ const RecordingModal = ({ onStop, selectedText }: RecordingModalProps) => {
           </p>
         </div>
 
-        <Button
-          onClick={onStop}
-          variant="outline"
-          size="lg"
-          className="rounded-full w-16 h-16 mx-auto block hover:bg-red-50"
-        >
-          <StopCircle className="w-8 h-8 text-red-500" />
-        </Button>
+        <div className="flex justify-center">
+          <Button
+            onClick={onStop}
+            variant="outline"
+            size="lg"
+            className="rounded-full w-16 h-16 flex items-center justify-center"
+          >
+            <Square className="w-8 h-8" />
+          </Button>
+        </div>
       </div>
     </div>
   );

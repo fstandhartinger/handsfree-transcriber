@@ -1,4 +1,4 @@
-import { Mic, FileText, AlertCircle, Undo, Users, Edit2 } from "lucide-react";
+import { Mic, FileText, AlertCircle, Undo, Users, Edit2, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface TextControlsProps {
@@ -43,58 +43,62 @@ const TextControls = ({
   return (
     <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur-sm border-t">
       <div className="flex flex-wrap gap-2 justify-center max-w-screen-lg mx-auto">
-        <Button 
-          onClick={() => onStyleChange("Formal")} 
-          className="gap-2"
-          disabled={isProcessing}
-        >
-          <FileText className="w-4 h-4" />
-          Formal
-        </Button>
-        <Button 
-          onClick={() => onStyleChange("Concise")} 
-          className="gap-2"
-          disabled={isProcessing}
-        >
-          <AlertCircle className="w-4 h-4" />
-          Concise
-        </Button>
-        <Button 
-          onClick={() => onStyleChange("Casual")} 
-          className="gap-2"
-          disabled={isProcessing}
-        >
-          <Users className="w-4 h-4" />
-          Casual
-        </Button>
-        <Button
-          onClick={isRecordingRephrase ? onStopRephraseRecording : onStartRephraseRecording}
-          className="gap-2"
-          disabled={isProcessing}
-        >
-          <Mic className="w-4 h-4" />
-          Rephrase
-        </Button>
+        {!isEditMode && (
+          <>
+            <Button 
+              onClick={() => onStyleChange("Formal")} 
+              className="gap-2"
+              disabled={isProcessing}
+            >
+              <FileText className="w-4 h-4" />
+              Formal
+            </Button>
+            <Button 
+              onClick={() => onStyleChange("Concise")} 
+              className="gap-2"
+              disabled={isProcessing}
+            >
+              <AlertCircle className="w-4 h-4" />
+              Concise
+            </Button>
+            <Button 
+              onClick={() => onStyleChange("Casual")} 
+              className="gap-2"
+              disabled={isProcessing}
+            >
+              <Users className="w-4 h-4" />
+              Casual
+            </Button>
+            <Button
+              onClick={isRecordingRephrase ? onStopRephraseRecording : onStartRephraseRecording}
+              className="gap-2"
+              disabled={isProcessing}
+            >
+              <Mic className="w-4 h-4" />
+              Rephrase
+            </Button>
+            {previousTextExists && (
+              <Button 
+                onClick={onUndo} 
+                variant="outline" 
+                className="gap-2"
+                disabled={isProcessing}
+              >
+                <Undo className="w-4 h-4" />
+                Undo
+              </Button>
+            )}
+          </>
+        )}
         <Button
           onClick={handleEditClick}
           variant={isEditMode ? "secondary" : "outline"}
           className="gap-2"
           disabled={isProcessing}
         >
-          <Edit2 className="w-4 h-4" />
+          {isEditMode ? <CheckCircle2 className="w-4 h-4" /> : <Edit2 className="w-4 h-4" />}
           {isEditMode ? "Finish edit section" : "Edit section"}
         </Button>
-        {previousTextExists && (
-          <Button 
-            onClick={onUndo} 
-            variant="outline" 
-            className="gap-2"
-            disabled={isProcessing}
-          >
-            <Undo className="w-4 h-4" />
-            Undo
-          </Button>
-        )}
       </div>
     </div>
   );
