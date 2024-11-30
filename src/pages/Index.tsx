@@ -68,14 +68,14 @@ const Index = () => {
             toast({
               description: "Text copied to clipboard",
               duration: 2000,
-              className: "top-0 right-0 fixed mt-4 mr-4 text-sm py-2 px-3",
+              className: "top-0 right-0 fixed mt-4 mr-4 text-sm py-2 px-3 max-w-[50vw] w-auto",
             });
           } catch (error) {
             console.error('Transcription error:', error);
             toast({
               description: "Error transcribing audio. Please try again.",
               variant: "destructive",
-              className: "top-0 right-0 fixed mt-4 mr-4",
+              className: "top-0 right-0 fixed mt-4 mr-4 max-w-[50vw] w-auto",
             });
           } finally {
             setIsTranscribing(false);
@@ -90,6 +90,7 @@ const Index = () => {
       toast({
         description: "Error processing audio. Please try again.",
         variant: "destructive",
+        className: "top-0 right-0 fixed mt-4 mr-4 max-w-[50vw] w-auto",
       });
     }
   }, [toast]);

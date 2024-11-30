@@ -50,14 +50,14 @@ const TextEditView = ({ text, onBack }: TextEditViewProps) => {
       toast({
         description: "Updated text copied to clipboard",
         duration: 2000,
-        className: "top-0 right-0 fixed mt-4 mr-4 text-sm py-2 px-3",
+        className: "top-0 right-0 fixed mt-4 mr-4 text-sm py-2 px-3 max-w-[50vw] w-auto",
       });
     } catch (error) {
       console.error('Style change error:', error);
       toast({
         description: error instanceof Error ? error.message : "Error updating text style. Please try again.",
         variant: "destructive",
-        className: "top-0 right-0 fixed mt-4 mr-4",
+        className: "top-0 right-0 fixed mt-4 mr-4 max-w-[50vw] w-auto",
       });
     } finally {
       setIsProcessing(false);
