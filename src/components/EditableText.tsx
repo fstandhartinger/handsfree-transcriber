@@ -40,7 +40,7 @@ const EditableText = ({ text, onChange, onTextSelect, isEditMode, onEditModeChan
     const x = touchEvent.clientX - rect.left;
     const y = touchEvent.clientY - rect.top;
     
-    // Create a temporary element to measure text
+    // Create a temporary element for text measurement
     const temp = document.createElement('div');
     temp.style.cssText = window.getComputedStyle(div).cssText;
     temp.style.height = 'auto';
@@ -49,14 +49,16 @@ const EditableText = ({ text, onChange, onTextSelect, isEditMode, onEditModeChan
     temp.style.whiteSpace = 'pre-wrap';
     document.body.appendChild(temp);
 
+    // Split text into lines and find the target line
     const lines = text.split('\n');
     let totalHeight = 0;
     let targetLine = 0;
-    
-    // Find the target line based on Y position
+    let lineHeight = 0;
+
+    // Calculate line heights and find target line
     for (let i = 0; i < lines.length; i++) {
       temp.textContent = lines[i];
-      const lineHeight = temp.offsetHeight;
+      lineHeight = temp.offsetHeight;
       if (totalHeight + lineHeight > y) {
         targetLine = i;
         break;
@@ -64,18 +66,43 @@ const EditableText = ({ text, onChange, onTextSelect, isEditMode, onEditModeChan
       totalHeight += lineHeight;
     }
 
-    // Calculate the character position in the line based on X position
+    // Calculate character position within the line
     let position = 0;
     for (let i = 0; i < targetLine; i++) {
       position += lines[i].length + 1; // +1 for newline
     }
 
-    temp.textContent = lines[targetLine];
-    const charWidth = temp.offsetWidth / lines[targetLine].length;
-    position += Math.round(x / charWidth);
+    // Find exact character position in the line
+    const currentLine = lines[targetLine];
+    temp.textContent = '';
+    let closestPos = 0;
+    let minDiff = Number.MAX_VALUE;
+
+    // Binary search for the closest character position
+    let left = 0;
+    let right = currentLine.length;
+
+    while (left <= right) {
+      const mid = Math.floor((left + right) / 2);
+      temp.textContent = currentLine.substring(0, mid);
+      const charX = temp.offsetWidth;
+      const diff = Math.abs(charX - x);
+
+      if (diff < minDiff) {
+        minDiff = diff;
+        closestPos = mid;
+      }
+
+      if (charX < x) {
+        left = mid + 1;
+      } else {
+        right = mid - 1;
+      }
+    }
 
     document.body.removeChild(temp);
-    return Math.max(0, Math.min(position, text.length));
+    console.log('Selected position in line:', closestPos);
+    return position + closestPos;
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -88,7 +115,7 @@ const EditableText = ({ text, onChange, onTextSelect, isEditMode, onEditModeChan
     setIsSelecting(true);
     setPersistedRange(null);
     
-    console.log('Touch start at position:', position);
+    console.log('Touch start position:', position);
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
@@ -98,7 +125,7 @@ const EditableText = ({ text, onChange, onTextSelect, isEditMode, onEditModeChan
     const position = getCharacterPositionFromTouch(touch);
     setSelectedRange(prev => prev ? { ...prev, end: position } : null);
     
-    console.log('Touch move to position:', position);
+    console.log('Touch move position:', position);
   };
 
   const handleTouchEnd = () => {
