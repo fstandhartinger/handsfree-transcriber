@@ -51,7 +51,11 @@ serve(async (req) => {
       throw new Error('No transcription received from Whisper');
     }
 
-    return new Response(JSON.stringify({ transcription: output.transcription }), {
+    // Trim the transcription before returning
+    const trimmedTranscription = output.transcription.trim();
+    console.log('Trimmed transcription:', trimmedTranscription);
+
+    return new Response(JSON.stringify({ transcription: trimmedTranscription }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
