@@ -28,7 +28,12 @@ const resources = {
         status: "Recording",
         instruction: "Explain how you would like the text to be rephrased, for example: 'shorter and more serious' or 'translate to french'",
         editInstruction: "Speak your correction instructions...\n(e.g. \"Make this part more detailed\" or \"Remove this\")",
-        markedText: "Marked text:"
+        markedText: "Marked text:",
+        rephraseTitle: "Rephrase Text",
+        rephraseDescription: "Press the microphone button and speak how you would like the text to be rephrased.",
+        instructionTitle: "Edit Text",
+        instructionDescription: "Press the microphone button and speak your instructions for editing the marked text.",
+        selectedText: "Selected text:"
       },
       toasts: {
         textCopied: "Text copied to clipboard",
