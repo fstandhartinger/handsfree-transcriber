@@ -18,7 +18,7 @@ const EditableText = ({ text, onChange, onTextSelect, isEditMode, onEditModeChan
   const { toast } = useToast();
   const { t } = useTranslation();
   const [isSelecting, setIsSelecting] = useState(false);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const divRef = useRef<HTMLDivElement>(null);
   const [touchStartPos, setTouchStartPos] = useState<{ x: number; y: number } | null>(null);
   const [selectedRange, setSelectedRange] = useState<{ start: number; end: number } | null>(null);
 
@@ -31,17 +31,17 @@ const EditableText = ({ text, onChange, onTextSelect, isEditMode, onEditModeChan
     });
   };
 
-  const getCharacterPositionFromTouch = (touch: Touch): number => {
-    if (!textareaRef.current) return 0;
+  const getCharacterPositionFromTouch = (touchEvent: React.Touch): number => {
+    if (!divRef.current) return 0;
     
-    const textarea = textareaRef.current;
-    const rect = textarea.getBoundingClientRect();
-    const x = touch.clientX - rect.left;
-    const y = touch.clientY - rect.top;
+    const div = divRef.current;
+    const rect = div.getBoundingClientRect();
+    const x = touchEvent.clientX - rect.left;
+    const y = touchEvent.clientY - rect.top;
     
     // Create a temporary element to measure text
     const temp = document.createElement('div');
-    temp.style.cssText = window.getComputedStyle(textarea).cssText;
+    temp.style.cssText = window.getComputedStyle(div).cssText;
     temp.style.height = 'auto';
     temp.style.position = 'absolute';
     temp.style.visibility = 'hidden';
@@ -156,7 +156,7 @@ const EditableText = ({ text, onChange, onTextSelect, isEditMode, onEditModeChan
       <ScrollArea className="h-full w-full rounded-md border">
         <div className="h-full w-full p-4">
           <div
-            ref={textareaRef}
+            ref={divRef}
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
