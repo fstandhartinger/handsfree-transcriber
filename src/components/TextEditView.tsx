@@ -8,6 +8,8 @@ import EditableText from "./EditableText";
 import TextControls from "./TextControls";
 import ShareButton from "./ShareButton";
 import InstallButton from "./InstallButton";
+import RephraseModal from "./RephraseModal";
+import RecordingModal from "./RecordingModal";
 import { useAudioRecording } from "./hooks/useAudioRecording";
 import { useAudioProcessing } from "./hooks/useAudioProcessing";
 
@@ -132,6 +134,15 @@ const TextEditView = ({ text, onBack }: TextEditViewProps) => {
         onEditModeChange={handleEditModeChange}
         onCancel={handleCancelEdit}
       />
+      {isRecordingRephrase && (
+        <RephraseModal onStop={handleStopRephraseRecording} />
+      )}
+      {isRecordingInstruction && selectedText && (
+        <RecordingModal 
+          onStop={handleStopInstructionRecording}
+          selectedText={selectedText}
+        />
+      )}
     </div>
   );
 };
