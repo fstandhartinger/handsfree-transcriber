@@ -1,4 +1,4 @@
-import { Mic, Strikethrough, FileText, MessageSquare, Undo } from "lucide-react";
+import { Mic, Strikethrough, FileText, MessageSquare, Undo, Smile } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface TextControlsProps {
@@ -52,7 +52,7 @@ const TextControls = ({
           className="gap-2"
           disabled={isProcessing}
         >
-          <MessageSquare className="w-4 h-4" />
+          <Smile className="w-4 h-4" />
           Casual
         </Button>
         <Button
