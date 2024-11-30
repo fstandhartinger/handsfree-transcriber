@@ -1,4 +1,4 @@
-import { Mic, FileText, AlertCircle, Undo, Users, Edit2, CheckCircle2, X } from "lucide-react";
+import { Mic, FileText, AlertCircle, Undo, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
 
@@ -36,14 +36,6 @@ const TextControls = ({
   onCancel,
 }: TextControlsProps) => {
   const { t } = useTranslation();
-  
-  const handleEditClick = () => {
-    if (isEditMode) {
-      onStartInstructionRecording();
-    } else {
-      onEditModeChange(true);
-    }
-  };
 
   return (
     <div className="fixed bottom-4 right-4 flex flex-col-reverse gap-2">
@@ -81,14 +73,6 @@ const TextControls = ({
             <Mic className="w-5 h-5" />
             {t('buttons.rephrase')}
           </Button>
-          <Button
-            onClick={() => onEditModeChange(true)}
-            className="rounded-full shadow-lg flex items-center gap-2 px-4"
-            disabled={isProcessing}
-          >
-            <Edit2 className="w-5 h-5" />
-            {t('buttons.edit')}
-          </Button>
           {previousTextExists && (
             <Button 
               onClick={onUndo} 
@@ -101,28 +85,7 @@ const TextControls = ({
             </Button>
           )}
         </>
-      ) : (
-        <>
-          <Button
-            onClick={onCancel}
-            variant="outline"
-            className="rounded-full shadow-lg flex items-center gap-2 px-4"
-            disabled={isProcessing}
-          >
-            <X className="w-5 h-5" />
-            {t('buttons.cancel')}
-          </Button>
-          <Button
-            onClick={handleEditClick}
-            variant="secondary"
-            className="rounded-full shadow-lg flex items-center gap-2 px-4"
-            disabled={isProcessing}
-          >
-            <CheckCircle2 className="w-5 h-5" />
-            {t('buttons.finishEdit')}
-          </Button>
-        </>
-      )}
+      ) : null}
     </div>
   );
 };
