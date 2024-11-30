@@ -18,18 +18,22 @@ const ShareButton = ({ text }: ShareButtonProps) => {
   const isMobile = useIsMobile();
 
   const handleShare = async () => {
+    console.log('Attempting to share with navigator.share...');
     if (navigator.share) {
       try {
         await navigator.share({
           text: text,
         });
+        console.log('Content shared successfully via navigator.share');
       } catch (error) {
+        // Only fallback if it's not an AbortError (user cancelling the share)
         if ((error as Error).name !== 'AbortError') {
           console.error('Error sharing:', error);
           handleWhatsAppShare();
         }
       }
     } else {
+      console.log('Web Share API not supported, falling back to WhatsApp...');
       handleWhatsAppShare();
     }
   };
