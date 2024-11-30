@@ -1,9 +1,11 @@
-import { ArrowLeft, FileText, MessageSquare, Check, Undo, Mic, StopCircle } from "lucide-react";
+import { ArrowLeft, FileText, MessageSquare, Check, Undo, Mic } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
+import RecordingModal from "./RecordingModal";
+import LoadingOverlay from "./LoadingOverlay";
 
 interface TextEditViewProps {
   text: string;
@@ -17,6 +19,7 @@ const TextEditView = ({ text, onBack }: TextEditViewProps) => {
   const [isRecordingInstruction, setIsRecordingInstruction] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const { toast } = useToast();
 
@@ -63,6 +66,7 @@ const TextEditView = ({ text, onBack }: TextEditViewProps) => {
   const startInstructionRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
       audioChunksRef.current = [];
@@ -89,6 +93,10 @@ const TextEditView = ({ text, onBack }: TextEditViewProps) => {
 
     try {
       mediaRecorderRef.current.stop();
+      // Stop all tracks in the stream
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+      }
       setIsRecordingInstruction(false);
       setIsProcessing(true);
 
@@ -232,33 +240,8 @@ const TextEditView = ({ text, onBack }: TextEditViewProps) => {
         )}
       </div>
 
-      {isProcessing && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-lg">
-            <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-            <p className="text-center">Processing...</p>
-          </div>
-        </div>
-      )}
-
-      {isRecordingInstruction && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-lg max-w-md">
-            <div className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center recording-pulse mb-4 mx-auto">
-              <div className="w-4 h-4 bg-white rounded-full" />
-            </div>
-            <p className="text-center mb-4">Speak your correction instructions...</p>
-            <Button
-              onClick={stopInstructionRecording}
-              variant="outline"
-              size="lg"
-              className="rounded-full w-16 h-16 mx-auto block"
-            >
-              <StopCircle className="w-8 h-8" />
-            </Button>
-          </div>
-        </div>
-      )}
+      {isProcessing && <LoadingOverlay />}
+      {isRecordingInstruction && <RecordingModal onStop={stopInstructionRecording} />}
     </div>
   );
 };

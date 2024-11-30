@@ -22,11 +22,14 @@ serve(async (req) => {
 
     console.log('Starting Whisper transcription...');
     
+    // Create a temporary URL for the audio data
+    const audioUrl = `data:audio/mp3;base64,${audioDataUri}`;
+    
     const output = await replicate.run(
       "openai/whisper:3c08daf437fe359eb158a5123c395673f0a113dd8b4bd01ddce5936850e2a981",
       {
         input: {
-          audio: audioDataUri,
+          audio: audioUrl,
           model: "large-v3",
           language: "auto",
           translate: false,
