@@ -92,7 +92,7 @@ const TextEditView = ({ text, onBack }: TextEditViewProps) => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <div className="p-4 flex items-center justify-between border-b">
+      <div className="p-4 flex items-center justify-between">
         <Button
           onClick={onBack}
           variant="ghost"

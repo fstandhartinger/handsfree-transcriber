@@ -26,12 +26,13 @@ const ShareButton = ({ text }: ShareButtonProps) => {
       } catch (error) {
         if ((error as Error).name !== 'AbortError') {
           console.error('Error sharing:', error);
-          toast({
-            description: "Error sharing text",
-            variant: "destructive",
-          });
+          // Fallback für Android wenn Web Share API fehlschlägt
+          handleWhatsAppShare();
         }
       }
+    } else {
+      // Fallback wenn Web Share API nicht verfügbar
+      handleWhatsAppShare();
     }
   };
 
