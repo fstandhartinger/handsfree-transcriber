@@ -42,10 +42,14 @@ const EditableText = ({
   const handleSelectionStart = (e: React.TouchEvent | React.MouseEvent) => {
     if (!isEditMode) return;
     
-    const touchEvent = 'touches' in e ? e.touches[0] : e;
-    const position = getCharacterPositionFromTouch(touchEvent, divRef, text);
-    console.log('Selection started at position:', position);
-    setSelectedRange({ start: position, end: position });
+    if ('touches' in e && e.touches.length > 0) {
+      const position = getCharacterPositionFromTouch(e.touches[0], divRef, text);
+      setSelectedRange({ start: position, end: position });
+    } else if ('clientX' in e) {
+      const position = getCharacterPositionFromTouch(e, divRef, text);
+      setSelectedRange({ start: position, end: position });
+    }
+    
     setPersistedRange(null);
     setIsSelecting(true);
   };
@@ -53,10 +57,13 @@ const EditableText = ({
   const handleSelectionMove = (e: React.TouchEvent | React.MouseEvent) => {
     if (!isEditMode || !selectedRange || !isSelecting) return;
     
-    const touchEvent = 'touches' in e ? e.touches[0] : e;
-    const position = getCharacterPositionFromTouch(touchEvent, divRef, text);
-    console.log('Selection moved to position:', position);
-    setSelectedRange(prev => prev ? { ...prev, end: position } : null);
+    if ('touches' in e && e.touches.length > 0) {
+      const position = getCharacterPositionFromTouch(e.touches[0], divRef, text);
+      setSelectedRange(prev => prev ? { ...prev, end: position } : null);
+    } else if ('clientX' in e) {
+      const position = getCharacterPositionFromTouch(e, divRef, text);
+      setSelectedRange(prev => prev ? { ...prev, end: position } : null);
+    }
   };
 
   const handleSelectionEnd = () => {
