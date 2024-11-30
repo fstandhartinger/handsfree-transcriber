@@ -19,7 +19,7 @@ const EditableText = ({ text, onChange, onTextSelect }: EditableTextProps) => {
     toast({
       description: "Text copied to clipboard",
       duration: 2000,
-      className: "top-0 right-0 fixed mt-4 mr-4 text-sm py-2 px-3 max-w-[50vw] w-auto",
+      className: "fixed top-4 left-1/2 -translate-x-1/2 text-xs py-2 px-3 max-w-[33vw] w-auto",
     });
   };
 
