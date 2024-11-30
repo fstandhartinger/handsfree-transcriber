@@ -28,6 +28,7 @@ const EditableText = ({
   const divRef = useRef<HTMLDivElement>(null);
   const [selectedRange, setSelectedRange] = useState<{ start: number; end: number } | null>(null);
   const [persistedRange, setPersistedRange] = useState<{ start: number; end: number } | null>(null);
+  const [isSelecting, setIsSelecting] = useState(false);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(text);
@@ -38,25 +39,35 @@ const EditableText = ({
     });
   };
 
-  const handleTouchStart = (e: React.TouchEvent) => {
+  const handleSelectionStart = (e: React.TouchEvent | React.MouseEvent) => {
     if (!isEditMode) return;
     
-    const position = getCharacterPositionFromTouch(e.touches[0], divRef, text);
-    console.log('Touch start at position:', position);
+    const position = getCharacterPositionFromTouch(
+      'touches' in e ? e.touches[0] : e as MouseEvent, 
+      divRef, 
+      text
+    );
+    console.log('Selection started at position:', position);
     setSelectedRange({ start: position, end: position });
     setPersistedRange(null);
+    setIsSelecting(true);
   };
 
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isEditMode || !selectedRange) return;
+  const handleSelectionMove = (e: React.TouchEvent | React.MouseEvent) => {
+    if (!isEditMode || !selectedRange || !isSelecting) return;
     
-    const position = getCharacterPositionFromTouch(e.touches[0], divRef, text);
-    console.log('Touch move to position:', position);
+    const position = getCharacterPositionFromTouch(
+      'touches' in e ? e.touches[0] : e as MouseEvent, 
+      divRef, 
+      text
+    );
+    console.log('Selection moved to position:', position);
     setSelectedRange(prev => prev ? { ...prev, end: position } : null);
   };
 
-  const handleTouchEnd = () => {
+  const handleSelectionEnd = () => {
     if (!isEditMode || !selectedRange) return;
+    setIsSelecting(false);
     
     const start = Math.min(selectedRange.start, selectedRange.end);
     const end = Math.max(selectedRange.start, selectedRange.end);
@@ -95,9 +106,13 @@ const EditableText = ({
         <div className="p-4">
           <div
             ref={divRef}
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
+            onTouchStart={handleSelectionStart}
+            onTouchMove={handleSelectionMove}
+            onTouchEnd={handleSelectionEnd}
+            onMouseDown={handleSelectionStart}
+            onMouseMove={handleSelectionMove}
+            onMouseUp={handleSelectionEnd}
+            onMouseLeave={() => setIsSelecting(false)}
             className={`whitespace-pre-wrap ${
               isEditMode ? 'text-xl md:text-2xl' : 'text-lg md:text-xl'
             }`}

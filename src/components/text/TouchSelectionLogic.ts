@@ -4,7 +4,7 @@ interface Position {
 }
 
 export const getCharacterPositionFromTouch = (
-  touchEvent: React.Touch,
+  touchEvent: React.Touch | MouseEvent,
   divRef: React.RefObject<HTMLDivElement>,
   text: string
 ): number => {
@@ -12,62 +12,49 @@ export const getCharacterPositionFromTouch = (
   
   const div = divRef.current;
   const rect = div.getBoundingClientRect();
-  const touchX = touchEvent.clientX - rect.left;
-  const touchY = touchEvent.clientY - rect.top;
+  
+  // Handle both touch and mouse events
+  const clientX = 'touches' in touchEvent ? touchEvent.touches[0].clientX : touchEvent.clientX;
+  const clientY = 'touches' in touchEvent ? touchEvent.touches[0].clientY : touchEvent.clientY;
+  
+  const x = clientX - rect.left;
+  const y = clientY - rect.top;
 
-  // Erstelle temporäres Element für Textmessungen
-  const temp = document.createElement('div');
-  temp.style.cssText = window.getComputedStyle(div).cssText;
-  temp.style.position = 'absolute';
-  temp.style.visibility = 'hidden';
-  temp.style.whiteSpace = 'pre-wrap';
-  document.body.appendChild(temp);
-
-  const lines = text.split('\n');
+  // Create a range to find the exact text position
+  const range = document.createRange();
+  const textNode = Array.from(div.childNodes).find(node => node.nodeType === Node.TEXT_NODE);
+  
+  if (!textNode) return 0;
+  
   let position = 0;
-  let foundPosition = false;
-
-  // Finde die richtige Zeile
-  let currentHeight = 0;
-  for (let i = 0; i < lines.length && !foundPosition; i++) {
-    const line = lines[i];
-    temp.textContent = line;
-    const lineHeight = temp.offsetHeight;
+  const textContent = textNode.textContent || '';
+  
+  // Binary search to find the closest position
+  let left = 0;
+  let right = textContent.length;
+  
+  while (left < right) {
+    const mid = Math.floor((left + right) / 2);
     
-    if (currentHeight <= touchY && touchY <= currentHeight + lineHeight) {
-      // Exakte Zeichenposition in der Zeile finden
-      let left = 0;
-      let right = line.length;
-      
-      while (left <= right) {
-        const mid = Math.floor((left + right) / 2);
-        temp.textContent = line.substring(0, mid);
-        const width = temp.offsetWidth;
-        
-        if (Math.abs(width - touchX) < 5) { // 5px Toleranz
-          position += mid;
-          foundPosition = true;
-          break;
-        }
-        
-        if (width < touchX) {
-          left = mid + 1;
-        } else {
-          right = mid - 1;
-        }
-      }
-      
-      if (!foundPosition) {
-        position += left;
-      }
+    range.setStart(textNode, 0);
+    range.setEnd(textNode, mid);
+    const rangeRect = range.getBoundingClientRect();
+    
+    if (Math.abs(rangeRect.right - clientX) < 5 && 
+        Math.abs(rangeRect.top + rangeRect.height/2 - clientY) < 10) {
+      position = mid;
       break;
     }
     
-    currentHeight += lineHeight;
-    position += line.length + 1; // +1 für den Zeilenumbruch
+    if (rangeRect.right < clientX) {
+      left = mid + 1;
+    } else {
+      right = mid;
+    }
+    
+    position = left;
   }
-
-  document.body.removeChild(temp);
-  console.log('Touch position calculated:', { x: touchX, y: touchY, charPosition: position });
+  
+  console.log('Selection position calculated:', { x, y, position });
   return Math.min(position, text.length);
 };
