@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import EditableText from "@/components/EditableText";
 import TextControls from "@/components/TextControls";
 import ShareButton from "@/components/ShareButton";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface TextEditViewProps {
   text: string;
@@ -13,6 +15,50 @@ interface TextEditViewProps {
 const TextEditView = ({ text: initialText, onBack }: TextEditViewProps) => {
   const [text, setText] = useState(initialText);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [previousText, setPreviousText] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const { toast } = useToast();
+
+  const handleStyleChange = async (style: string) => {
+    setIsProcessing(true);
+    setPreviousText(text);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('refine-text', {
+        body: {
+          text: text,
+          instruction: `Make this text more ${style.toLowerCase()}`,
+        },
+      });
+
+      if (error) throw error;
+
+      setText(data.text);
+      toast({
+        description: `Text style updated to ${style}`,
+        duration: 2000,
+      });
+    } catch (error) {
+      console.error('Error updating text style:', error);
+      toast({
+        description: "Error updating text style",
+        variant: "destructive",
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleUndo = () => {
+    if (previousText) {
+      setText(previousText);
+      setPreviousText(null);
+      toast({
+        description: "Changes undone",
+        duration: 2000,
+      });
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col p-4 relative">
@@ -37,10 +83,10 @@ const TextEditView = ({ text: initialText, onBack }: TextEditViewProps) => {
           onEditModeChange={setIsEditMode}
         />
         <TextControls 
-          onStyleChange={() => {}} 
-          onUndo={() => {}} 
-          previousTextExists={false}
-          isProcessing={false}
+          onStyleChange={handleStyleChange}
+          onUndo={handleUndo}
+          previousTextExists={!!previousText}
+          isProcessing={isProcessing}
           onStartInstructionRecording={() => {}}
           onStopInstructionRecording={() => {}}
           isRecordingInstruction={false}

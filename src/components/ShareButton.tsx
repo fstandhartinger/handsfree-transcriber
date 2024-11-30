@@ -26,7 +26,6 @@ const ShareButton = ({ text }: ShareButtonProps) => {
         });
         console.log('Content shared successfully via navigator.share');
       } catch (error) {
-        // Only fallback if it's not an AbortError (user cancelling the share)
         if ((error as Error).name !== 'AbortError') {
           console.error('Error sharing:', error);
           handleWhatsAppShare();
@@ -43,44 +42,26 @@ const ShareButton = ({ text }: ShareButtonProps) => {
     window.open(whatsappUrl, '_blank');
   };
 
-  const handleClipboardShare = async () => {
-    try {
-      await navigator.clipboard.writeText(text);
-      toast({
-        description: "Text copied to clipboard",
-        duration: 2000,
-      });
-    } catch (error) {
-      console.error('Error copying to clipboard:', error);
-      toast({
-        description: "Error copying to clipboard",
-        variant: "destructive",
-      });
-    }
-  };
-
-  // On mobile devices, use the native share dialog
   if (isMobile) {
     return (
       <Button
         onClick={handleShare}
         variant="outline"
         size="icon"
-        className="fixed top-4 right-4 w-10 h-10 p-0 flex items-center justify-center"
+        className="w-10 h-10 p-0 flex items-center justify-center"
       >
         <Share2 className="h-4 w-4" />
       </Button>
     );
   }
 
-  // On desktop, show our custom dropdown menu
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
           variant="outline"
           size="icon"
-          className="fixed top-4 right-4 w-10 h-10 p-0 flex items-center justify-center"
+          className="w-10 h-10 p-0 flex items-center justify-center"
         >
           <Share2 className="h-4 w-4" />
         </Button>
@@ -88,9 +69,6 @@ const ShareButton = ({ text }: ShareButtonProps) => {
       <DropdownMenuContent align="end">
         <DropdownMenuItem onClick={handleWhatsAppShare}>
           WhatsApp Web
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleClipboardShare}>
-          Copy to clipboard
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
