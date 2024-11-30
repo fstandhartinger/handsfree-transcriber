@@ -22,6 +22,9 @@ const resources = {
       },
       toasts: {
         textCopied: "Text copied to clipboard"
+      },
+      editMode: {
+        instruction: "Select any text you want to modify. Selected text will be marked with a strikethrough."
       }
     }
   },
@@ -45,6 +48,9 @@ const resources = {
       },
       toasts: {
         textCopied: "Text in die Zwischenablage kopiert"
+      },
+      editMode: {
+        instruction: "Wählen Sie den Text aus, den Sie ändern möchten. Ausgewählter Text wird durchgestrichen dargestellt."
       }
     }
   }

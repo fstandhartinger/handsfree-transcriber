@@ -52,6 +52,12 @@ const EditableText = ({ text, onChange, onTextSelect, isEditMode, onEditModeChan
         </Button>
       </div>
       
+      {isEditMode && (
+        <div className="mb-4 text-sm text-muted-foreground bg-muted/50 p-3 rounded-md">
+          {t('editMode.instruction')}
+        </div>
+      )}
+
       <ScrollArea className="h-full w-full rounded-md border">
         <div className="h-full w-full p-4">
           <textarea
