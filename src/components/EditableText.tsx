@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { ClipboardCopy } from "lucide-react";
@@ -18,6 +18,9 @@ const EditableText = ({ text, onChange, onTextSelect, isEditMode, onEditModeChan
   const { toast } = useToast();
   const { t } = useTranslation();
   const [isSelecting, setIsSelecting] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [touchStartPos, setTouchStartPos] = useState<{ x: number; y: number } | null>(null);
+  const [selectedRange, setSelectedRange] = useState<{ start: number; end: number } | null>(null);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(text);
@@ -28,14 +31,106 @@ const EditableText = ({ text, onChange, onTextSelect, isEditMode, onEditModeChan
     });
   };
 
-  const handleSelect = (e: React.SyntheticEvent<HTMLTextAreaElement>) => {
-    const textarea = e.target as HTMLTextAreaElement;
-    const selectedText = textarea.value.substring(
-      textarea.selectionStart,
-      textarea.selectionEnd
-    );
-    onTextSelect?.(selectedText || null);
+  const getCharacterPositionFromTouch = (touch: Touch): number => {
+    if (!textareaRef.current) return 0;
+    
+    const textarea = textareaRef.current;
+    const rect = textarea.getBoundingClientRect();
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
+    
+    // Create a temporary element to measure text
+    const temp = document.createElement('div');
+    temp.style.cssText = window.getComputedStyle(textarea).cssText;
+    temp.style.height = 'auto';
+    temp.style.position = 'absolute';
+    temp.style.visibility = 'hidden';
+    temp.style.whiteSpace = 'pre-wrap';
+    document.body.appendChild(temp);
+
+    const lines = text.split('\n');
+    let totalHeight = 0;
+    let targetLine = 0;
+    
+    // Find the target line based on Y position
+    for (let i = 0; i < lines.length; i++) {
+      temp.textContent = lines[i];
+      const lineHeight = temp.offsetHeight;
+      if (totalHeight + lineHeight > y) {
+        targetLine = i;
+        break;
+      }
+      totalHeight += lineHeight;
+    }
+
+    // Calculate the character position in the line based on X position
+    let position = 0;
+    for (let i = 0; i < targetLine; i++) {
+      position += lines[i].length + 1; // +1 for newline
+    }
+
+    temp.textContent = lines[targetLine];
+    const charWidth = temp.offsetWidth / lines[targetLine].length;
+    position += Math.round(x / charWidth);
+
+    document.body.removeChild(temp);
+    return Math.max(0, Math.min(position, text.length));
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (!isEditMode) return;
+    
+    const touch = e.touches[0];
+    setTouchStartPos({ x: touch.clientX, y: touch.clientY });
+    const position = getCharacterPositionFromTouch(touch);
+    setSelectedRange({ start: position, end: position });
+    setIsSelecting(true);
+    
+    console.log('Touch start at position:', position);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isEditMode || !touchStartPos || !selectedRange) return;
+    
+    const touch = e.touches[0];
+    const position = getCharacterPositionFromTouch(touch);
+    setSelectedRange(prev => prev ? { ...prev, end: position } : null);
+    
+    console.log('Touch move to position:', position);
+  };
+
+  const handleTouchEnd = () => {
+    if (!isEditMode || !selectedRange) return;
+    
+    const start = Math.min(selectedRange.start, selectedRange.end);
+    const end = Math.max(selectedRange.start, selectedRange.end);
+    const selectedText = text.substring(start, end);
+    
+    if (selectedText) {
+      onTextSelect?.(selectedText);
+      console.log('Selected text:', selectedText);
+    }
+    
+    setTouchStartPos(null);
+    setSelectedRange(null);
     setIsSelecting(!!selectedText);
+  };
+
+  const getHighlightedText = () => {
+    if (!selectedRange || !isEditMode) return text;
+
+    const start = Math.min(selectedRange.start, selectedRange.end);
+    const end = Math.max(selectedRange.start, selectedRange.end);
+
+    return (
+      <>
+        {text.substring(0, start)}
+        <span className="bg-primary/20 line-through">
+          {text.substring(start, end)}
+        </span>
+        {text.substring(end)}
+      </>
+    );
   };
 
   return (
@@ -60,21 +155,27 @@ const EditableText = ({ text, onChange, onTextSelect, isEditMode, onEditModeChan
 
       <ScrollArea className="h-full w-full rounded-md border">
         <div className="h-full w-full p-4">
+          <div
+            ref={textareaRef}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+            className={`w-full h-full min-h-[calc(100vh-16rem)] whitespace-pre-wrap ${
+              isEditMode ? 'text-xl md:text-2xl' : 'text-lg md:text-xl'
+            }`}
+            style={{
+              lineHeight: '1.6',
+              userSelect: isEditMode ? 'none' : 'text',
+              cursor: isEditMode ? 'default' : 'text'
+            }}
+          >
+            {getHighlightedText()}
+          </div>
           <textarea
             value={text}
             onChange={(e) => onChange(e.target.value)}
-            onSelect={handleSelect}
             readOnly={isEditMode}
-            className={`w-full h-full min-h-[calc(100vh-16rem)] ${isEditMode ? 'text-xl md:text-2xl' : 'text-lg md:text-xl'} 
-              focus:border-primary focus:ring-1 focus:ring-primary selection:bg-primary/20
-              ${isSelecting && isEditMode ? 'selection:line-through' : ''}`}
-            style={{
-              lineHeight: '1.6',
-              resize: 'none',
-              border: 'none',
-              outline: 'none',
-              background: 'transparent'
-            }}
+            className="sr-only"
           />
         </div>
       </ScrollArea>
