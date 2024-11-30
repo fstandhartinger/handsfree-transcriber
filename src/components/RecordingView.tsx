@@ -1,4 +1,3 @@
-import { StopCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface RecordingViewProps {
@@ -7,18 +6,16 @@ interface RecordingViewProps {
 
 const RecordingView = ({ onStop }: RecordingViewProps) => {
   return (
-    <div className="flex flex-col items-center gap-8">
-      <div className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center recording-pulse">
-        <div className="w-4 h-4 bg-white rounded-full" />
-      </div>
+    <div className="flex flex-col items-center gap-4">
+      <div className="w-4 h-4 bg-red-500 rounded-full recording-pulse" />
       <Button
         onClick={onStop}
-        variant="outline"
         size="lg"
-        className="rounded-full w-16 h-16"
+        className="w-16 h-16 rounded-full bg-red-500 hover:bg-red-600 flex items-center justify-center"
       >
-        <StopCircle className="w-8 h-8" />
+        <div className="w-8 h-8 bg-white" /> {/* Custom filled square stop icon */}
       </Button>
+      <p className="text-lg">Recording...</p>
     </div>
   );
 };

@@ -26,6 +26,7 @@ const TextEditView = ({ text, onBack }: TextEditViewProps) => {
 
   const handleStyleChange = async (style: string) => {
     try {
+      console.log('Starting style change:', style);
       setIsProcessing(true);
       setPreviousText(currentText);
 
@@ -33,19 +34,28 @@ const TextEditView = ({ text, onBack }: TextEditViewProps) => {
         body: { text: currentText, style: style.toLowerCase() },
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase function error:', error);
+        throw new Error(`Failed to refine text: ${error.message}`);
+      }
 
+      if (!data || !data.text) {
+        console.error('Invalid response data:', data);
+        throw new Error('Invalid response from text refinement service');
+      }
+
+      console.log('Style change successful:', data);
       setCurrentText(data.text);
       navigator.clipboard.writeText(data.text);
       toast({
         description: "Updated text copied to clipboard",
         duration: 2000,
-        className: "top-0 right-0 fixed mt-4 mr-4",
+        className: "top-0 right-0 fixed mt-4 mr-4 text-sm py-2 px-3",
       });
     } catch (error) {
       console.error('Style change error:', error);
       toast({
-        description: "Error updating text style. Please try again.",
+        description: error instanceof Error ? error.message : "Error updating text style. Please try again.",
         variant: "destructive",
         className: "top-0 right-0 fixed mt-4 mr-4",
       });

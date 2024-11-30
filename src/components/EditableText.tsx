@@ -17,7 +17,7 @@ const EditableText = ({ text, onChange, onTextSelect }: EditableTextProps) => {
     toast({
       description: "Text copied to clipboard",
       duration: 2000,
-      className: "top-0 right-0 fixed mt-4 mr-4",
+      className: "top-0 right-0 fixed mt-4 mr-4 text-sm py-2 px-3",
     });
   };
 

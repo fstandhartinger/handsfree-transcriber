@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from "react";
-import { Mic, StopCircle, ArrowLeft, FileText, MessageSquare, Check, Undo, Edit2 } from "lucide-react";
+import { Mic } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import RecordingView from "@/components/RecordingView";
@@ -63,19 +63,19 @@ const Index = () => {
 
             if (error) throw error;
             
-            const transcription = data.transcription;
-            setTranscribedText(transcription);
-            navigator.clipboard.writeText(transcription);
+            setTranscribedText(data.transcription);
+            navigator.clipboard.writeText(data.transcription);
             toast({
               description: "Text copied to clipboard",
               duration: 2000,
-              className: "top-0 right-0 fixed mt-4 mr-4",
+              className: "top-0 right-0 fixed mt-4 mr-4 text-sm py-2 px-3",
             });
           } catch (error) {
             console.error('Transcription error:', error);
             toast({
               description: "Error transcribing audio. Please try again.",
               variant: "destructive",
+              className: "top-0 right-0 fixed mt-4 mr-4",
             });
           } finally {
             setIsTranscribing(false);
