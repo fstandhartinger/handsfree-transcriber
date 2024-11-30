@@ -45,63 +45,65 @@ const TextControls = ({
 
   return (
     <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur-sm border-t">
-      <div className="flex flex-wrap gap-2 justify-center max-w-screen-lg mx-auto">
-        {!isEditMode && (
-          <>
-            <Button 
-              onClick={() => onStyleChange("Formal")} 
-              className="gap-2"
-              disabled={isProcessing}
-            >
-              <FileText className="w-4 h-4" />
-              {t('buttons.formal')}
-            </Button>
-            <Button 
-              onClick={() => onStyleChange("Concise")} 
-              className="gap-2"
-              disabled={isProcessing}
-            >
-              <AlertCircle className="w-4 h-4" />
-              {t('buttons.concise')}
-            </Button>
-            <Button 
-              onClick={() => onStyleChange("Casual")} 
-              className="gap-2"
-              disabled={isProcessing}
-            >
-              <Users className="w-4 h-4" />
-              {t('buttons.casual')}
-            </Button>
-            <Button
-              onClick={isRecordingRephrase ? onStopRephraseRecording : onStartRephraseRecording}
-              className="gap-2"
-              disabled={isProcessing}
-            >
-              <Mic className="w-4 h-4" />
-              {t('buttons.rephrase')}
-            </Button>
-            {previousTextExists && (
+      <div className="flex flex-wrap gap-2 justify-between max-w-screen-lg mx-auto">
+        <div className="flex flex-wrap gap-2">
+          {!isEditMode && (
+            <>
               <Button 
-                onClick={onUndo} 
-                variant="outline" 
+                onClick={() => onStyleChange("Formal")} 
                 className="gap-2"
                 disabled={isProcessing}
               >
-                <Undo className="w-4 h-4" />
-                Undo
+                <FileText className="w-4 h-4" />
+                {t('buttons.formal')}
               </Button>
-            )}
-          </>
+              <Button 
+                onClick={() => onStyleChange("Concise")} 
+                className="gap-2"
+                disabled={isProcessing}
+              >
+                <AlertCircle className="w-4 h-4" />
+                {t('buttons.concise')}
+              </Button>
+              <Button 
+                onClick={() => onStyleChange("Casual")} 
+                className="gap-2"
+                disabled={isProcessing}
+              >
+                <Users className="w-4 h-4" />
+                {t('buttons.casual')}
+              </Button>
+              <Button
+                onClick={isRecordingRephrase ? onStopRephraseRecording : onStartRephraseRecording}
+                className="gap-2"
+                disabled={isProcessing}
+              >
+                <Mic className="w-4 h-4" />
+                {t('buttons.rephrase')}
+              </Button>
+            </>
+          )}
+          <Button
+            onClick={handleEditClick}
+            variant={isEditMode ? "secondary" : "outline"}
+            className="gap-2"
+            disabled={isProcessing}
+          >
+            {isEditMode ? <CheckCircle2 className="w-4 h-4" /> : <Edit2 className="w-4 h-4" />}
+            {isEditMode ? t('buttons.finishEdit') : t('buttons.edit')}
+          </Button>
+        </div>
+        {previousTextExists && !isEditMode && (
+          <Button 
+            onClick={onUndo} 
+            variant="outline" 
+            className="gap-2 ml-auto"
+            disabled={isProcessing}
+          >
+            <Undo className="w-4 h-4" />
+            Undo
+          </Button>
         )}
-        <Button
-          onClick={handleEditClick}
-          variant={isEditMode ? "secondary" : "outline"}
-          className="gap-2"
-          disabled={isProcessing}
-        >
-          {isEditMode ? <CheckCircle2 className="w-4 h-4" /> : <Edit2 className="w-4 h-4" />}
-          {isEditMode ? t('buttons.finishEdit') : t('buttons.edit')}
-        </Button>
       </div>
     </div>
   );
