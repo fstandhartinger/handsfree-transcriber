@@ -13,6 +13,7 @@ interface TextEditViewProps {
 
 const TextEditView = ({ text: initialText, onBack }: TextEditViewProps) => {
   const [text, setText] = useState(initialText);
+  const [isEditMode, setIsEditMode] = useState(false);
   const { toast } = useToast();
 
   const handleCopyToClipboard = async () => {
@@ -55,8 +56,28 @@ const TextEditView = ({ text: initialText, onBack }: TextEditViewProps) => {
       </div>
 
       <div className="flex-1 mt-16">
-        <EditableText text={text} onChange={setText} />
-        <TextControls text={text} onTextChange={setText} />
+        <EditableText 
+          text={text} 
+          onChange={setText} 
+          isEditMode={isEditMode}
+          onEditModeChange={setIsEditMode}
+        />
+        <TextControls 
+          onStyleChange={() => {}} 
+          onUndo={() => {}} 
+          previousTextExists={false}
+          isProcessing={false}
+          onStartInstructionRecording={() => {}}
+          onStopInstructionRecording={() => {}}
+          isRecordingInstruction={false}
+          selectedText={null}
+          onStartRephraseRecording={() => {}}
+          onStopRephraseRecording={() => {}}
+          isRecordingRephrase={false}
+          isEditMode={isEditMode}
+          onEditModeChange={setIsEditMode}
+          onCancel={() => setIsEditMode(false)}
+        />
       </div>
     </div>
   );
