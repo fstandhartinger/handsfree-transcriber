@@ -5,6 +5,7 @@ import EditableText from "@/components/EditableText";
 import TextControls from "@/components/TextControls";
 import ShareButton from "@/components/ShareButton";
 import InstallButton from "@/components/InstallButton";
+import RecordingModal from "@/components/RecordingModal";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -19,6 +20,8 @@ const TextEditView = ({ text: initialText, onBack }: TextEditViewProps) => {
   const [previousText, setPreviousText] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedText, setSelectedText] = useState<string | null>(null);
+  const [showRephraseModal, setShowRephraseModal] = useState(false);
+  const [isRecordingRephrase, setIsRecordingRephrase] = useState(false);
   const { toast } = useToast();
 
   const handleStyleChange = async (style: string) => {
@@ -70,12 +73,18 @@ const TextEditView = ({ text: initialText, onBack }: TextEditViewProps) => {
 
   const handleStartRephraseRecording = () => {
     console.log('Starting rephrase recording');
-    // Implementation will be added later
+    setShowRephraseModal(true);
   };
 
   const handleStopRephraseRecording = () => {
     console.log('Stopping rephrase recording');
-    // Implementation will be added later
+    setIsRecordingRephrase(false);
+    setShowRephraseModal(false);
+  };
+
+  const handleStartRecording = () => {
+    console.log('Starting actual recording');
+    setIsRecordingRephrase(true);
   };
 
   return (
@@ -114,12 +123,22 @@ const TextEditView = ({ text: initialText, onBack }: TextEditViewProps) => {
           selectedText={selectedText}
           onStartRephraseRecording={handleStartRephraseRecording}
           onStopRephraseRecording={handleStopRephraseRecording}
-          isRecordingRephrase={false}
+          isRecordingRephrase={isRecordingRephrase}
           isEditMode={isEditMode}
           onEditModeChange={setIsEditMode}
           onCancel={() => setIsEditMode(false)}
         />
       </div>
+
+      {showRephraseModal && (
+        <RecordingModal
+          onStop={handleStopRephraseRecording}
+          selectedText={selectedText}
+          mode="rephrase"
+          isRecording={isRecordingRephrase}
+          onStartRecording={handleStartRecording}
+        />
+      )}
     </div>
   );
 };
