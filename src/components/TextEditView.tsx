@@ -84,6 +84,7 @@ const TextEditView = ({ text, onBack }: TextEditViewProps) => {
     const audioBlob = await stopInstructionRecording();
     await processAudioForInstruction(audioBlob, selectedText);
     setSelectedText(null);
+    setIsEditMode(false); // Exit edit mode after processing is complete
   };
 
   const handleStopRephraseRecording = async () => {
