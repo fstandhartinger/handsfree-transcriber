@@ -1,4 +1,4 @@
-import { Mic, FileText, AlertCircle, Undo, Users, Edit2, CheckCircle2 } from "lucide-react";
+import { Mic, FileText, AlertCircle, Undo, Users, Edit2, CheckCircle2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
 
@@ -16,6 +16,7 @@ interface TextControlsProps {
   isRecordingRephrase: boolean;
   isEditMode: boolean;
   onEditModeChange: (isEdit: boolean) => void;
+  onCancel?: () => void;
 }
 
 const TextControls = ({
@@ -32,6 +33,7 @@ const TextControls = ({
   isRecordingRephrase,
   isEditMode,
   onEditModeChange,
+  onCancel,
 }: TextControlsProps) => {
   const { t } = useTranslation();
   
@@ -83,15 +85,38 @@ const TextControls = ({
               </Button>
             </>
           )}
-          <Button
-            onClick={handleEditClick}
-            variant={isEditMode ? "secondary" : "outline"}
-            className="gap-2"
-            disabled={isProcessing}
-          >
-            {isEditMode ? <CheckCircle2 className="w-4 h-4" /> : <Edit2 className="w-4 h-4" />}
-            {isEditMode ? t('buttons.finishEdit') : t('buttons.edit')}
-          </Button>
+          {isEditMode ? (
+            <>
+              <Button
+                onClick={onCancel}
+                variant="outline"
+                className="gap-2"
+                disabled={isProcessing}
+              >
+                <X className="w-4 h-4" />
+                Cancel
+              </Button>
+              <Button
+                onClick={handleEditClick}
+                variant="secondary"
+                className="gap-2"
+                disabled={isProcessing}
+              >
+                <CheckCircle2 className="w-4 h-4" />
+                {t('buttons.finishEdit')}
+              </Button>
+            </>
+          ) : (
+            <Button
+              onClick={handleEditClick}
+              variant="outline"
+              className="gap-2"
+              disabled={isProcessing}
+            >
+              <Edit2 className="w-4 h-4" />
+              {t('buttons.edit')}
+            </Button>
+          )}
         </div>
         {previousTextExists && !isEditMode && (
           <Button 

@@ -64,6 +64,7 @@ const EditableText = ({ text, onChange, onTextSelect, isEditMode, onEditModeChan
             value={text}
             onChange={(e) => onChange(e.target.value)}
             onSelect={handleSelect}
+            readOnly={isEditMode}
             className={`w-full h-full min-h-[calc(100vh-16rem)] ${isEditMode ? 'text-xl md:text-2xl' : 'text-lg md:text-xl'} 
               focus:border-primary focus:ring-1 focus:ring-primary selection:bg-primary/20
               ${isSelecting && isEditMode ? 'selection:line-through' : ''}`}

@@ -21,6 +21,7 @@ const TextEditView = ({ text, onBack }: TextEditViewProps) => {
   const [previousText, setPreviousText] = useState<string | null>(null);
   const [selectedText, setSelectedText] = useState<string | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [textBeforeEdit, setTextBeforeEdit] = useState<string | null>(null);
   const { toast } = useToast();
   
   const { 
@@ -80,11 +81,28 @@ const TextEditView = ({ text, onBack }: TextEditViewProps) => {
     }
   };
 
+  const handleEditModeChange = (isEdit: boolean) => {
+    if (isEdit) {
+      setTextBeforeEdit(currentText);
+    }
+    setIsEditMode(isEdit);
+  };
+
+  const handleCancel = () => {
+    if (textBeforeEdit !== null) {
+      setCurrentText(textBeforeEdit);
+    }
+    setIsEditMode(false);
+    setSelectedText(null);
+    setTextBeforeEdit(null);
+  };
+
   const handleStopInstructionRecording = async () => {
     const audioBlob = await stopInstructionRecording();
     await processAudioForInstruction(audioBlob, selectedText);
     setSelectedText(null);
-    setIsEditMode(false); // Exit edit mode after processing is complete
+    setIsEditMode(false);
+    setTextBeforeEdit(null);
   };
 
   const handleStopRephraseRecording = async () => {
@@ -107,7 +125,7 @@ const TextEditView = ({ text, onBack }: TextEditViewProps) => {
         onChange={setCurrentText}
         onTextSelect={setSelectedText}
         isEditMode={isEditMode}
-        onEditModeChange={setIsEditMode}
+        onEditModeChange={handleEditModeChange}
       />
 
       <TextControls
@@ -123,7 +141,8 @@ const TextEditView = ({ text, onBack }: TextEditViewProps) => {
         onStopRephraseRecording={handleStopRephraseRecording}
         isRecordingRephrase={isRecordingRephrase}
         isEditMode={isEditMode}
-        onEditModeChange={setIsEditMode}
+        onEditModeChange={handleEditModeChange}
+        onCancel={handleCancel}
       />
 
       {isProcessing && <LoadingOverlay />}
