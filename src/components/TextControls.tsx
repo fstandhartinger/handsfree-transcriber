@@ -1,4 +1,4 @@
-import { Mic, Strikethrough, Clipboard, FileText, MessageSquare, Undo } from "lucide-react";
+import { Mic, Strikethrough, FileText, MessageSquare, Undo } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface TextControlsProps {
@@ -10,6 +10,9 @@ interface TextControlsProps {
   onStopInstructionRecording: () => void;
   isRecordingInstruction: boolean;
   selectedText: string | null;
+  onStartRephraseRecording: () => void;
+  onStopRephraseRecording: () => void;
+  isRecordingRephrase: boolean;
 }
 
 const TextControls = ({
@@ -21,6 +24,9 @@ const TextControls = ({
   onStopInstructionRecording,
   isRecordingInstruction,
   selectedText,
+  onStartRephraseRecording,
+  onStopRephraseRecording,
+  isRecordingRephrase,
 }: TextControlsProps) => {
   return (
     <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur-sm border-t">
@@ -50,7 +56,7 @@ const TextControls = ({
           Casual
         </Button>
         <Button
-          onClick={() => onStyleChange("Rephrase")}
+          onClick={isRecordingRephrase ? onStopRephraseRecording : onStartRephraseRecording}
           className="gap-2"
           disabled={isProcessing}
         >

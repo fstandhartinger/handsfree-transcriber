@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import RecordingModal from "./RecordingModal";
+import RephraseModal from "./RephraseModal";
 import LoadingOverlay from "./LoadingOverlay";
 import TextControls from "./TextControls";
 import EditableText from "./EditableText";
@@ -20,7 +21,16 @@ const TextEditView = ({ text, onBack }: TextEditViewProps) => {
   const [selectedText, setSelectedText] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
-  const { isRecording, startRecording, stopRecording } = useAudioRecording();
+  const { 
+    isRecording: isRecordingInstruction, 
+    startRecording: startInstructionRecording, 
+    stopRecording: stopInstructionRecording 
+  } = useAudioRecording();
+  const {
+    isRecording: isRecordingRephrase,
+    startRecording: startRephraseRecording,
+    stopRecording: stopRephraseRecording
+  } = useAudioRecording();
 
   const handleStyleChange = async (style: string) => {
     try {
@@ -40,14 +50,12 @@ const TextEditView = ({ text, onBack }: TextEditViewProps) => {
       toast({
         description: "Updated text copied to clipboard",
         duration: 2000,
-        className: "top-0 right-0 fixed mt-4 mr-4 text-sm py-2 px-3 max-w-[50vw] w-auto",
       });
     } catch (error) {
       console.error('Style change error:', error);
       toast({
         description: error instanceof Error ? error.message : "Error updating text style",
         variant: "destructive",
-        className: "top-0 right-0 fixed mt-4 mr-4 max-w-[50vw] w-auto",
       });
     } finally {
       setIsProcessing(false);
@@ -62,7 +70,6 @@ const TextEditView = ({ text, onBack }: TextEditViewProps) => {
       toast({
         description: "Previous text restored and copied to clipboard",
         duration: 2000,
-        className: "top-0 right-0 fixed mt-4 mr-4",
       });
     }
   };
@@ -70,7 +77,7 @@ const TextEditView = ({ text, onBack }: TextEditViewProps) => {
   const handleStopInstructionRecording = async () => {
     try {
       setIsProcessing(true);
-      const audioBlob = await stopRecording();
+      const audioBlob = await stopInstructionRecording();
       const reader = new FileReader();
       
       reader.onloadend = async () => {
@@ -126,6 +133,63 @@ const TextEditView = ({ text, onBack }: TextEditViewProps) => {
     }
   };
 
+  const handleStopRephraseRecording = async () => {
+    try {
+      setIsProcessing(true);
+      const audioBlob = await stopRephraseRecording();
+      const reader = new FileReader();
+      
+      reader.onloadend = async () => {
+        const base64Audio = reader.result as string;
+        const audioDataUri = base64Audio.split(',')[1];
+        
+        try {
+          const { data: transcriptionData, error: transcriptionError } = 
+            await supabase.functions.invoke('transcribe', {
+              body: { audioDataUri },
+            });
+
+          if (transcriptionError) throw transcriptionError;
+
+          const { data: refinementData, error: refinementError } = 
+            await supabase.functions.invoke('refine-text', {
+              body: {
+                text: currentText,
+                instruction: `Rephrase this text according to these instructions: ${transcriptionData.transcription}`,
+              },
+            });
+
+          if (refinementError) throw refinementError;
+
+          setPreviousText(currentText);
+          setCurrentText(refinementData.text);
+          navigator.clipboard.writeText(refinementData.text);
+          toast({
+            description: "Text rephrased and copied to clipboard",
+            duration: 2000,
+          });
+        } catch (error) {
+          console.error('Text rephrasing error:', error);
+          toast({
+            description: "Error processing rephrasing. Please try again.",
+            variant: "destructive",
+          });
+        } finally {
+          setIsProcessing(false);
+        }
+      };
+
+      reader.readAsDataURL(audioBlob);
+    } catch (error) {
+      console.error('Error processing audio:', error);
+      setIsProcessing(false);
+      toast({
+        description: "Error processing audio. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col max-w-4xl mx-auto p-4">
       <Button
@@ -147,14 +211,18 @@ const TextEditView = ({ text, onBack }: TextEditViewProps) => {
         onUndo={handleUndo}
         previousTextExists={!!previousText}
         isProcessing={isProcessing}
-        onStartInstructionRecording={startRecording}
+        onStartInstructionRecording={startInstructionRecording}
         onStopInstructionRecording={handleStopInstructionRecording}
-        isRecordingInstruction={isRecording}
+        isRecordingInstruction={isRecordingInstruction}
         selectedText={selectedText}
+        onStartRephraseRecording={startRephraseRecording}
+        onStopRephraseRecording={handleStopRephraseRecording}
+        isRecordingRephrase={isRecordingRephrase}
       />
 
       {isProcessing && <LoadingOverlay />}
-      {isRecording && <RecordingModal onStop={handleStopInstructionRecording} />}
+      {isRecordingInstruction && <RecordingModal onStop={handleStopInstructionRecording} />}
+      {isRecordingRephrase && <RephraseModal onStop={handleStopRephraseRecording} />}
     </div>
   );
 };
