@@ -46,90 +46,75 @@ const TextControls = ({
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur-sm border-t">
-      <div className="flex flex-wrap gap-2 justify-between max-w-screen-lg mx-auto">
-        <div className="flex flex-wrap gap-2">
-          {!isEditMode && (
-            <>
-              <Button 
-                onClick={() => onStyleChange("Formal")} 
-                className="gap-2"
-                disabled={isProcessing}
-              >
-                <FileText className="w-4 h-4" />
-                {t('buttons.formal')}
-              </Button>
-              <Button 
-                onClick={() => onStyleChange("Concise")} 
-                className="gap-2"
-                disabled={isProcessing}
-              >
-                <AlertCircle className="w-4 h-4" />
-                {t('buttons.concise')}
-              </Button>
-              <Button 
-                onClick={() => onStyleChange("Casual")} 
-                className="gap-2"
-                disabled={isProcessing}
-              >
-                <Users className="w-4 h-4" />
-                {t('buttons.casual')}
-              </Button>
-              <Button
-                onClick={isRecordingRephrase ? onStopRephraseRecording : onStartRephraseRecording}
-                className="gap-2"
-                disabled={isProcessing}
-              >
-                <Mic className="w-4 h-4" />
-                {t('buttons.rephrase')}
-              </Button>
-            </>
-          )}
-          {isEditMode ? (
-            <>
-              <Button
-                onClick={onCancel}
-                variant="outline"
-                className="gap-2"
-                disabled={isProcessing}
-              >
-                <X className="w-4 h-4" />
-                Cancel
-              </Button>
-              <Button
-                onClick={handleEditClick}
-                variant="secondary"
-                className="gap-2"
-                disabled={isProcessing}
-              >
-                <CheckCircle2 className="w-4 h-4" />
-                {t('buttons.finishEdit')}
-              </Button>
-            </>
-          ) : (
-            <Button
-              onClick={handleEditClick}
-              variant="outline"
-              className="gap-2"
-              disabled={isProcessing}
-            >
-              <Edit2 className="w-4 h-4" />
-              {t('buttons.edit')}
-            </Button>
-          )}
-        </div>
-        {previousTextExists && !isEditMode && (
+    <div className="fixed bottom-4 right-4 flex flex-col-reverse gap-2">
+      {!isEditMode ? (
+        <>
           <Button 
-            onClick={onUndo} 
-            variant="outline" 
-            className="gap-2 ml-auto"
+            onClick={() => onStyleChange("Formal")} 
+            size="icon"
+            className="rounded-full shadow-lg"
             disabled={isProcessing}
           >
-            <Undo className="w-4 h-4" />
-            Undo
+            <FileText className="w-5 h-5" />
           </Button>
-        )}
-      </div>
+          <Button 
+            onClick={() => onStyleChange("Concise")} 
+            size="icon"
+            className="rounded-full shadow-lg"
+            disabled={isProcessing}
+          >
+            <AlertCircle className="w-5 h-5" />
+          </Button>
+          <Button 
+            onClick={() => onStyleChange("Casual")} 
+            size="icon"
+            className="rounded-full shadow-lg"
+            disabled={isProcessing}
+          >
+            <Users className="w-5 h-5" />
+          </Button>
+          <Button
+            onClick={isRecordingRephrase ? onStopRephraseRecording : onStartRephraseRecording}
+            size="icon"
+            className="rounded-full shadow-lg"
+            disabled={isProcessing}
+          >
+            <Mic className="w-5 h-5" />
+          </Button>
+          {previousTextExists && (
+            <Button 
+              onClick={onUndo} 
+              variant="outline" 
+              size="icon"
+              className="rounded-full shadow-lg"
+              disabled={isProcessing}
+            >
+              <Undo className="w-5 h-5" />
+            </Button>
+          )}
+        </>
+      ) : (
+        <>
+          <Button
+            onClick={onCancel}
+            variant="outline"
+            size="icon"
+            className="rounded-full shadow-lg"
+            disabled={isProcessing}
+          >
+            <X className="w-5 h-5" />
+          </Button>
+          <Button
+            onClick={handleEditClick}
+            variant="secondary"
+            size="icon"
+            className="rounded-full shadow-lg"
+            disabled={isProcessing}
+          >
+            <CheckCircle2 className="w-5 h-5" />
+          </Button>
+        </>
+      )}
     </div>
   );
 };
