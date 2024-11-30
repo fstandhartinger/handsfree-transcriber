@@ -12,7 +12,7 @@ interface EditableTextProps {
 
 const EditableText = ({ text, onChange, onTextSelect }: EditableTextProps) => {
   const { toast } = useToast();
-  const [isSelecting, setIsSelecting] = useState(false);
+  const [isSelecting, setIsSelecting] = React.useState(false);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(text);
