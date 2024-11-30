@@ -40,12 +40,12 @@ const TextControls = ({
           Formal
         </Button>
         <Button 
-          onClick={() => onStyleChange("Neutral")} 
+          onClick={() => onStyleChange("Concise")} 
           className="gap-2"
           disabled={isProcessing}
         >
           <MessageSquare className="w-4 h-4" />
-          Neutral
+          Concise
         </Button>
         <Button 
           onClick={() => onStyleChange("Casual")} 
