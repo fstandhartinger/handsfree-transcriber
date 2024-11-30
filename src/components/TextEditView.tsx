@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import EditableText from "./EditableText";
 import TextControls from "./TextControls";
 import ShareButton from "./ShareButton";
+import InstallButton from "./InstallButton";
 import { useAudioRecording } from "./hooks/useAudioRecording";
 import { useAudioProcessing } from "./hooks/useAudioProcessing";
 
@@ -100,6 +101,7 @@ const TextEditView = ({ text, onBack }: TextEditViewProps) => {
         >
           <ArrowLeft className="h-4 w-4" />
         </Button>
+        <InstallButton />
         <ShareButton text={currentText} />
       </div>
       <ScrollArea className="flex-1 p-4">
