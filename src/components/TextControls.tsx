@@ -23,61 +23,63 @@ const TextControls = ({
   selectedText,
 }: TextControlsProps) => {
   return (
-    <div className="flex flex-wrap gap-2 justify-center">
-      <Button 
-        onClick={() => onStyleChange("Formal")} 
-        className="gap-2"
-        disabled={isProcessing}
-      >
-        <FileText className="w-4 h-4" />
-        Formal
-      </Button>
-      <Button 
-        onClick={() => onStyleChange("Neutral")} 
-        className="gap-2"
-        disabled={isProcessing}
-      >
-        <MessageSquare className="w-4 h-4" />
-        Neutral
-      </Button>
-      <Button 
-        onClick={() => onStyleChange("Casual")} 
-        className="gap-2"
-        disabled={isProcessing}
-      >
-        <MessageSquare className="w-4 h-4" />
-        Casual
-      </Button>
-      <Button
-        onClick={() => onStyleChange("Rephrase")}
-        className="gap-2"
-        disabled={isProcessing}
-      >
-        <Mic className="w-4 h-4" />
-        Rephrase
-      </Button>
-      {previousTextExists && (
+    <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur-sm border-t">
+      <div className="flex flex-wrap gap-2 justify-center max-w-screen-lg mx-auto">
         <Button 
-          onClick={onUndo} 
-          variant="outline" 
+          onClick={() => onStyleChange("Formal")} 
           className="gap-2"
           disabled={isProcessing}
         >
-          <Undo className="w-4 h-4" />
-          Undo
+          <FileText className="w-4 h-4" />
+          Formal
         </Button>
-      )}
-      {selectedText && (
+        <Button 
+          onClick={() => onStyleChange("Neutral")} 
+          className="gap-2"
+          disabled={isProcessing}
+        >
+          <MessageSquare className="w-4 h-4" />
+          Neutral
+        </Button>
+        <Button 
+          onClick={() => onStyleChange("Casual")} 
+          className="gap-2"
+          disabled={isProcessing}
+        >
+          <MessageSquare className="w-4 h-4" />
+          Casual
+        </Button>
         <Button
-          onClick={isRecordingInstruction ? onStopInstructionRecording : onStartInstructionRecording}
-          variant="secondary"
+          onClick={() => onStyleChange("Rephrase")}
           className="gap-2"
           disabled={isProcessing}
         >
-          <Strikethrough className="w-4 h-4" />
-          Edit Selection
+          <Mic className="w-4 h-4" />
+          Rephrase
         </Button>
-      )}
+        {previousTextExists && (
+          <Button 
+            onClick={onUndo} 
+            variant="outline" 
+            className="gap-2"
+            disabled={isProcessing}
+          >
+            <Undo className="w-4 h-4" />
+            Undo
+          </Button>
+        )}
+        {selectedText && (
+          <Button
+            onClick={isRecordingInstruction ? onStopInstructionRecording : onStartInstructionRecording}
+            variant="secondary"
+            className="gap-2"
+            disabled={isProcessing}
+          >
+            <Strikethrough className="w-4 h-4" />
+            Edit Selection
+          </Button>
+        )}
+      </div>
     </div>
   );
 };
