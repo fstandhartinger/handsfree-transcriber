@@ -20,6 +20,7 @@ const TextEditView = ({ text, onBack }: TextEditViewProps) => {
   const [currentText, setCurrentText] = useState(text);
   const [previousText, setPreviousText] = useState<string | null>(null);
   const [selectedText, setSelectedText] = useState<string | null>(null);
+  const [isEditMode, setIsEditMode] = useState(false);
   const { toast } = useToast();
   
   const { 
@@ -104,6 +105,8 @@ const TextEditView = ({ text, onBack }: TextEditViewProps) => {
         text={currentText}
         onChange={setCurrentText}
         onTextSelect={setSelectedText}
+        isEditMode={isEditMode}
+        onEditModeChange={setIsEditMode}
       />
 
       <TextControls
@@ -118,6 +121,8 @@ const TextEditView = ({ text, onBack }: TextEditViewProps) => {
         onStartRephraseRecording={startRephraseRecording}
         onStopRephraseRecording={handleStopRephraseRecording}
         isRecordingRephrase={isRecordingRephrase}
+        isEditMode={isEditMode}
+        onEditModeChange={setIsEditMode}
       />
 
       {isProcessing && <LoadingOverlay />}

@@ -2,19 +2,20 @@ import * as React from "react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { ClipboardCopy, Edit2, Mic } from "lucide-react";
+import { ClipboardCopy, Mic } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface EditableTextProps {
   text: string;
   onChange: (newText: string) => void;
   onTextSelect?: (selectedText: string | null) => void;
+  isEditMode: boolean;
+  onEditModeChange: (isEdit: boolean) => void;
 }
 
-const EditableText = ({ text, onChange, onTextSelect }: EditableTextProps) => {
+const EditableText = ({ text, onChange, onTextSelect, isEditMode, onEditModeChange }: EditableTextProps) => {
   const { toast } = useToast();
   const [isSelecting, setIsSelecting] = useState(false);
-  const [isEditMode, setIsEditMode] = useState(false);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(text);
@@ -35,29 +36,9 @@ const EditableText = ({ text, onChange, onTextSelect }: EditableTextProps) => {
     setIsSelecting(!!selectedText);
   };
 
-  const toggleEditMode = () => {
-    setIsEditMode(!isEditMode);
-    if (!isEditMode) {
-      toast({
-        description: "Editiermodus aktiviert - markieren Sie Text zum Korrigieren",
-        duration: 3000,
-        className: "fixed top-4 left-1/2 -translate-x-1/2 text-xs py-2 px-3 max-w-[33vw] w-auto",
-      });
-    }
-  };
-
   return (
     <div className="relative w-full">
-      <div className="absolute -top-12 right-0 flex gap-2">
-        <Button
-          onClick={toggleEditMode}
-          variant={isEditMode ? "secondary" : "outline"}
-          size="sm"
-          className="shadow-sm hover:shadow-md transition-shadow"
-        >
-          <Edit2 className="mr-2 h-4 w-4" />
-          {isEditMode ? 'Bearbeiten beenden' : 'Text bearbeiten'}
-        </Button>
+      <div className="absolute -top-12 right-0">
         <Button
           onClick={handleCopy}
           variant="outline"

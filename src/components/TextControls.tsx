@@ -1,4 +1,4 @@
-import { Mic, Strikethrough, FileText, AlertCircle, Undo, Users } from "lucide-react";
+import { Mic, Strikethrough, FileText, AlertCircle, Undo, Users, Edit2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface TextControlsProps {
@@ -13,6 +13,8 @@ interface TextControlsProps {
   onStartRephraseRecording: () => void;
   onStopRephraseRecording: () => void;
   isRecordingRephrase: boolean;
+  isEditMode: boolean;
+  onEditModeChange: (isEdit: boolean) => void;
 }
 
 const TextControls = ({
@@ -27,6 +29,8 @@ const TextControls = ({
   onStartRephraseRecording,
   onStopRephraseRecording,
   isRecordingRephrase,
+  isEditMode,
+  onEditModeChange,
 }: TextControlsProps) => {
   return (
     <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur-sm border-t">
@@ -62,6 +66,15 @@ const TextControls = ({
         >
           <Mic className="w-4 h-4" />
           Rephrase
+        </Button>
+        <Button
+          onClick={() => onEditModeChange(!isEditMode)}
+          variant={isEditMode ? "secondary" : "outline"}
+          className="gap-2"
+          disabled={isProcessing}
+        >
+          <Edit2 className="w-4 h-4" />
+          Edit section
         </Button>
         {previousTextExists && (
           <Button 
