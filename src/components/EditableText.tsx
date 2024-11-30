@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { ClipboardCopy } from "lucide-react";
+import { ClipboardCopy, Edit2, Mic } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface EditableTextProps {
@@ -12,7 +12,8 @@ interface EditableTextProps {
 
 const EditableText = ({ text, onChange, onTextSelect }: EditableTextProps) => {
   const { toast } = useToast();
-  const [isSelecting, setIsSelecting] = React.useState(false);
+  const [isSelecting, setIsSelecting] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(text);
@@ -33,26 +34,48 @@ const EditableText = ({ text, onChange, onTextSelect }: EditableTextProps) => {
     setIsSelecting(!!selectedText);
   };
 
+  const toggleEditMode = () => {
+    setIsEditMode(!isEditMode);
+    if (!isEditMode) {
+      toast({
+        description: "Editiermodus aktiviert - markieren Sie Text zum Korrigieren",
+        duration: 3000,
+        className: "fixed top-4 left-1/2 -translate-x-1/2 text-xs py-2 px-3 max-w-[33vw] w-auto",
+      });
+    }
+  };
+
   return (
     <div className="relative w-full">
-      <Button
-        onClick={handleCopy}
-        variant="outline"
-        size="sm"
-        className="absolute -top-12 right-0 shadow-sm hover:shadow-md transition-shadow"
-      >
-        <ClipboardCopy className="mr-2 h-4 w-4" />
-        Copy Text
-      </Button>
+      <div className="absolute -top-12 right-0 flex gap-2">
+        <Button
+          onClick={toggleEditMode}
+          variant={isEditMode ? "secondary" : "outline"}
+          size="sm"
+          className="shadow-sm hover:shadow-md transition-shadow"
+        >
+          <Edit2 className="mr-2 h-4 w-4" />
+          {isEditMode ? 'Bearbeiten beenden' : 'Text bearbeiten'}
+        </Button>
+        <Button
+          onClick={handleCopy}
+          variant="outline"
+          size="sm"
+          className="shadow-sm hover:shadow-md transition-shadow"
+        >
+          <ClipboardCopy className="mr-2 h-4 w-4" />
+          Copy Text
+        </Button>
+      </div>
       
-      <ScrollArea className="h-[60vh] w-full rounded-md border selection-mode">
+      <ScrollArea className={`h-[60vh] w-full rounded-md border ${isEditMode ? 'selection-mode' : ''}`}>
         <textarea
           value={text}
           onChange={(e) => onChange(e.target.value)}
           onSelect={handleSelect}
-          className={`w-full min-h-full p-4 text-lg md:text-xl focus:border-primary focus:ring-1 focus:ring-primary selection:bg-primary/20 ${
-            isSelecting ? 'selection:line-through' : ''
-          }`}
+          className={`w-full min-h-full p-4 ${isEditMode ? 'text-xl md:text-2xl' : 'text-lg md:text-xl'} 
+            focus:border-primary focus:ring-1 focus:ring-primary selection:bg-primary/20
+            ${isSelecting && isEditMode ? 'selection:line-through' : ''}`}
           style={{
             lineHeight: '1.6',
             overflowY: 'visible',
@@ -60,6 +83,19 @@ const EditableText = ({ text, onChange, onTextSelect }: EditableTextProps) => {
           }}
         />
       </ScrollArea>
+
+      {isSelecting && isEditMode && (
+        <Button
+          className="fixed bottom-20 left-1/2 -translate-x-1/2 shadow-lg"
+          onClick={() => {
+            // This will be handled by the parent component through onTextSelect
+            console.log("Edit selection requested");
+          }}
+        >
+          <Mic className="mr-2 h-4 w-4" />
+          Korrektur aufnehmen
+        </Button>
+      )}
     </div>
   );
 };
