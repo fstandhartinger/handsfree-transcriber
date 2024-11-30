@@ -1,4 +1,4 @@
-import { ArrowLeft, FileText, MessageSquare, Check, Undo, Mic } from "lucide-react";
+import { ArrowLeft, FileText, MessageSquare, Check, Undo, Mic, StopCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
