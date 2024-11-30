@@ -134,7 +134,7 @@ const EditableText = ({ text, onChange, onTextSelect, isEditMode, onEditModeChan
   };
 
   return (
-    <div className="relative w-full h-[calc(100vh-14rem)]">
+    <div className="relative w-full h-[calc(100vh-2rem)]">
       <div className="absolute -top-12 right-0">
         <Button
           onClick={handleCopy}
@@ -153,14 +153,14 @@ const EditableText = ({ text, onChange, onTextSelect, isEditMode, onEditModeChan
         </div>
       )}
 
-      <ScrollArea className="h-full w-full rounded-md border">
+      <ScrollArea className="h-full w-full">
         <div className="h-full w-full p-4">
           <div
             ref={divRef}
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
-            className={`w-full h-full min-h-[calc(100vh-16rem)] whitespace-pre-wrap ${
+            className={`w-full h-full min-h-[calc(100vh-4rem)] whitespace-pre-wrap ${
               isEditMode ? 'text-xl md:text-2xl' : 'text-lg md:text-xl'
             }`}
             style={{

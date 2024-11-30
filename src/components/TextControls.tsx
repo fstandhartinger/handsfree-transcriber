@@ -51,45 +51,45 @@ const TextControls = ({
         <>
           <Button 
             onClick={() => onStyleChange("Formal")} 
-            size="icon"
-            className="rounded-full shadow-lg"
+            className="rounded-full shadow-lg flex items-center gap-2 px-4"
             disabled={isProcessing}
           >
             <FileText className="w-5 h-5" />
+            {t('buttons.formal')}
           </Button>
           <Button 
             onClick={() => onStyleChange("Concise")} 
-            size="icon"
-            className="rounded-full shadow-lg"
+            className="rounded-full shadow-lg flex items-center gap-2 px-4"
             disabled={isProcessing}
           >
             <AlertCircle className="w-5 h-5" />
+            {t('buttons.concise')}
           </Button>
           <Button 
             onClick={() => onStyleChange("Casual")} 
-            size="icon"
-            className="rounded-full shadow-lg"
+            className="rounded-full shadow-lg flex items-center gap-2 px-4"
             disabled={isProcessing}
           >
             <Users className="w-5 h-5" />
+            {t('buttons.casual')}
           </Button>
           <Button
             onClick={isRecordingRephrase ? onStopRephraseRecording : onStartRephraseRecording}
-            size="icon"
-            className="rounded-full shadow-lg"
+            className="rounded-full shadow-lg flex items-center gap-2 px-4"
             disabled={isProcessing}
           >
             <Mic className="w-5 h-5" />
+            {t('buttons.rephrase')}
           </Button>
           {previousTextExists && (
             <Button 
               onClick={onUndo} 
               variant="outline" 
-              size="icon"
-              className="rounded-full shadow-lg"
+              className="rounded-full shadow-lg flex items-center gap-2 px-4"
               disabled={isProcessing}
             >
               <Undo className="w-5 h-5" />
+              Undo
             </Button>
           )}
         </>
@@ -98,20 +98,20 @@ const TextControls = ({
           <Button
             onClick={onCancel}
             variant="outline"
-            size="icon"
-            className="rounded-full shadow-lg"
+            className="rounded-full shadow-lg flex items-center gap-2 px-4"
             disabled={isProcessing}
           >
             <X className="w-5 h-5" />
+            Cancel
           </Button>
           <Button
             onClick={handleEditClick}
             variant="secondary"
-            size="icon"
-            className="rounded-full shadow-lg"
+            className="rounded-full shadow-lg flex items-center gap-2 px-4"
             disabled={isProcessing}
           >
             <CheckCircle2 className="w-5 h-5" />
+            {t('buttons.finishEdit')}
           </Button>
         </>
       )}
