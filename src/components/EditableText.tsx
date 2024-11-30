@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState } from "react"; // Add this import
+import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { ClipboardCopy, Edit2, Mic } from "lucide-react";
@@ -89,7 +89,6 @@ const EditableText = ({ text, onChange, onTextSelect }: EditableTextProps) => {
         <Button
           className="fixed bottom-20 left-1/2 -translate-x-1/2 shadow-lg"
           onClick={() => {
-            // This will be handled by the parent component through onTextSelect
             console.log("Edit selection requested");
           }}
         >
