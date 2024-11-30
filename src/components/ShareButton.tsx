@@ -7,7 +7,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
-import { useMobile } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface ShareButtonProps {
   text: string;
@@ -15,7 +15,7 @@ interface ShareButtonProps {
 
 const ShareButton = ({ text }: ShareButtonProps) => {
   const { toast } = useToast();
-  const isMobile = useMobile();
+  const isMobile = useIsMobile();
 
   const handleShare = async () => {
     if (navigator.share) {

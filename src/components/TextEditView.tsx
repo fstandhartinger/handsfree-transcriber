@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import EditableText from "./EditableText";
 import TextControls from "./TextControls";
 import ShareButton from "./ShareButton";
+import { useAudioRecording } from "./hooks/useAudioRecording";
 import { useAudioProcessing } from "./hooks/useAudioProcessing";
 
 interface TextEditViewProps {
@@ -22,23 +23,17 @@ const TextEditView = ({ text, onBack }: TextEditViewProps) => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [textBeforeEdit, setTextBeforeEdit] = useState<string | null>(null);
   const { toast } = useToast();
+  const {
+    isRecording: isRecordingInstruction,
+    startRecording: startInstructionRecording,
+    stopRecording: handleStopInstructionRecording,
+  } = useAudioRecording();
 
   const {
-    isProcessing,
-    isRecordingInstruction,
-    isRecordingRephrase,
-    startInstructionRecording,
-    startRephraseRecording,
-    handleStopInstructionRecording,
-    handleStopRephraseRecording,
-  } = useAudioProcessing({
-    currentText,
-    selectedText,
-    onSuccess: (newText) => {
-      setCurrentText(newText);
-      addToHistory(newText);
-    },
-  });
+    isRecording: isRecordingRephrase,
+    startRecording: startRephraseRecording,
+    stopRecording: handleStopRephraseRecording,
+  } = useAudioRecording();
 
   const addToHistory = (newText: string) => {
     const newHistory = textHistory.slice(0, historyIndex + 1);
@@ -46,6 +41,12 @@ const TextEditView = ({ text, onBack }: TextEditViewProps) => {
     setTextHistory(newHistory);
     setHistoryIndex(newHistory.length - 1);
   };
+
+  const { isProcessing, processAudioForRephrase, processAudioForInstruction } = useAudioProcessing(
+    currentText,
+    addToHistory,
+    setCurrentText
+  );
 
   const handleUndo = () => {
     if (historyIndex > 0) {
