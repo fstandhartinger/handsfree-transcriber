@@ -67,10 +67,15 @@ const resources = {
         undo: "Rückgängig"
       },
       recording: {
-        status: "Aufnahme",
-        instruction: "Erklären Sie, wie der Text umformuliert werden soll, zum Beispiel: 'kürzer und ernster' oder 'auf französisch übersetzen'",
+        status: "Aufnahme läuft...",
+        instruction: "Erklären Sie, wie der Text umformuliert werden soll, zum Beispiel: 'kürzer und ernster' oder 'auf Französisch übersetzen'",
         editInstruction: "Sprechen Sie Ihre Korrekturanweisungen...\n(z.B. \"Mache diesen Teil ausführlicher\" oder \"Entferne das\")",
-        markedText: "Markierter Text:"
+        markedText: "Markierter Text:",
+        rephraseTitle: "Text umformulieren",
+        rephraseDescription: "Drücken Sie auf das Mikrofon und sprechen Sie, wie der Text umformuliert werden soll.",
+        instructionTitle: "Text bearbeiten",
+        instructionDescription: "Drücken Sie auf das Mikrofon und sprechen Sie Ihre Anweisungen zur Bearbeitung des markierten Texts.",
+        selectedText: "Ausgewählter Text:"
       },
       toasts: {
         textCopied: "Text in die Zwischenablage kopiert",

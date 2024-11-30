@@ -8,6 +8,8 @@ import InstallButton from "@/components/InstallButton";
 import RecordingModal from "@/components/RecordingModal";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useAudioRecording } from "@/hooks/useAudioRecording";
+import { useAudioProcessing } from "@/hooks/useAudioProcessing";
 
 interface TextEditViewProps {
   text: string;
@@ -23,6 +25,16 @@ const TextEditView = ({ text: initialText, onBack }: TextEditViewProps) => {
   const [showRephraseModal, setShowRephraseModal] = useState(false);
   const [isRecordingRephrase, setIsRecordingRephrase] = useState(false);
   const { toast } = useToast();
+
+  const { isRecording, startRecording, stopRecording } = useAudioRecording();
+  const { processAudioForRephrase } = useAudioProcessing(
+    text,
+    (newText: string) => {
+      setPreviousText(text);
+      setText(newText);
+    },
+    setText
+  );
 
   const handleStyleChange = async (style: string) => {
     try {
@@ -76,15 +88,29 @@ const TextEditView = ({ text: initialText, onBack }: TextEditViewProps) => {
     setShowRephraseModal(true);
   };
 
-  const handleStopRephraseRecording = () => {
+  const handleStopRephraseRecording = async () => {
     console.log('Stopping rephrase recording');
-    setIsRecordingRephrase(false);
-    setShowRephraseModal(false);
+    try {
+      const audioBlob = await stopRecording();
+      if (audioBlob) {
+        await processAudioForRephrase(audioBlob);
+      }
+    } catch (error) {
+      console.error('Error processing audio:', error);
+      toast({
+        description: "Error processing audio",
+        variant: "destructive",
+      });
+    } finally {
+      setIsRecordingRephrase(false);
+      setShowRephraseModal(false);
+    }
   };
 
-  const handleStartRecording = () => {
+  const handleStartRecording = async () => {
     console.log('Starting actual recording');
     setIsRecordingRephrase(true);
+    await startRecording();
   };
 
   return (
