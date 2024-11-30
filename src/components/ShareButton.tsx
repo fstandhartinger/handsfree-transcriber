@@ -26,12 +26,10 @@ const ShareButton = ({ text }: ShareButtonProps) => {
       } catch (error) {
         if ((error as Error).name !== 'AbortError') {
           console.error('Error sharing:', error);
-          // Fallback für Android wenn Web Share API fehlschlägt
           handleWhatsAppShare();
         }
       }
     } else {
-      // Fallback wenn Web Share API nicht verfügbar
       handleWhatsAppShare();
     }
   };
@@ -39,11 +37,6 @@ const ShareButton = ({ text }: ShareButtonProps) => {
   const handleWhatsAppShare = () => {
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
     window.open(whatsappUrl, '_blank');
-  };
-
-  const handleEmailShare = () => {
-    const emailUrl = `mailto:?body=${encodeURIComponent(text)}`;
-    window.location.href = emailUrl;
   };
 
   const handleClipboardShare = async () => {
@@ -62,6 +55,7 @@ const ShareButton = ({ text }: ShareButtonProps) => {
     }
   };
 
+  // On mobile devices, use the native share dialog
   if (isMobile) {
     return (
       <Button
@@ -75,6 +69,7 @@ const ShareButton = ({ text }: ShareButtonProps) => {
     );
   }
 
+  // On desktop, show our custom dropdown menu
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -88,10 +83,7 @@ const ShareButton = ({ text }: ShareButtonProps) => {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem onClick={handleWhatsAppShare}>
-          WhatsApp
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleEmailShare}>
-          Email
+          WhatsApp Web
         </DropdownMenuItem>
         <DropdownMenuItem onClick={handleClipboardShare}>
           Copy to clipboard
