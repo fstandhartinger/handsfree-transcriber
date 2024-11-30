@@ -81,6 +81,14 @@ const TextControls = ({
             <Mic className="w-5 h-5" />
             {t('buttons.rephrase')}
           </Button>
+          <Button
+            onClick={() => onEditModeChange(true)}
+            className="rounded-full shadow-lg flex items-center gap-2 px-4"
+            disabled={isProcessing}
+          >
+            <Edit2 className="w-5 h-5" />
+            {t('buttons.edit')}
+          </Button>
           {previousTextExists && (
             <Button 
               onClick={onUndo} 
@@ -89,7 +97,7 @@ const TextControls = ({
               disabled={isProcessing}
             >
               <Undo className="w-5 h-5" />
-              Undo
+              {t('buttons.undo')}
             </Button>
           )}
         </>
@@ -102,7 +110,7 @@ const TextControls = ({
             disabled={isProcessing}
           >
             <X className="w-5 h-5" />
-            Cancel
+            {t('buttons.cancel')}
           </Button>
           <Button
             onClick={handleEditClick}
