@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useState } from "react"; // Add this import
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { ClipboardCopy, Edit2, Mic } from "lucide-react";
