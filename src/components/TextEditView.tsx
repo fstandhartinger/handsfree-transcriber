@@ -9,6 +9,7 @@ import LoadingOverlay from "./LoadingOverlay";
 import TextControls from "./TextControls";
 import EditableText from "./EditableText";
 import { useAudioRecording } from "./hooks/useAudioRecording";
+import { useAudioProcessing } from "./hooks/useAudioProcessing";
 
 interface TextEditViewProps {
   text: string;
@@ -19,23 +20,29 @@ const TextEditView = ({ text, onBack }: TextEditViewProps) => {
   const [currentText, setCurrentText] = useState(text);
   const [previousText, setPreviousText] = useState<string | null>(null);
   const [selectedText, setSelectedText] = useState<string | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
+  
   const { 
     isRecording: isRecordingInstruction, 
     startRecording: startInstructionRecording, 
     stopRecording: stopInstructionRecording 
   } = useAudioRecording();
+  
   const {
     isRecording: isRecordingRephrase,
     startRecording: startRephraseRecording,
     stopRecording: stopRephraseRecording
   } = useAudioRecording();
 
+  const {
+    isProcessing,
+    processAudioForRephrase,
+    processAudioForInstruction
+  } = useAudioProcessing(currentText, setPreviousText, setCurrentText);
+
   const handleStyleChange = async (style: string) => {
     try {
       console.log('Starting style change:', style);
-      setIsProcessing(true);
       setPreviousText(currentText);
 
       const { data, error } = await supabase.functions.invoke('refine-text', {
@@ -57,8 +64,6 @@ const TextEditView = ({ text, onBack }: TextEditViewProps) => {
         description: error instanceof Error ? error.message : "Error updating text style",
         variant: "destructive",
       });
-    } finally {
-      setIsProcessing(false);
     }
   };
 
@@ -75,119 +80,14 @@ const TextEditView = ({ text, onBack }: TextEditViewProps) => {
   };
 
   const handleStopInstructionRecording = async () => {
-    try {
-      setIsProcessing(true);
-      const audioBlob = await stopInstructionRecording();
-      const reader = new FileReader();
-      
-      reader.onloadend = async () => {
-        const base64Audio = reader.result as string;
-        const audioDataUri = base64Audio.split(',')[1];
-        
-        try {
-          const { data: transcriptionData, error: transcriptionError } = 
-            await supabase.functions.invoke('transcribe', {
-              body: { audioDataUri },
-            });
-
-          if (transcriptionError) throw transcriptionError;
-
-          const { data: refinementData, error: refinementError } = 
-            await supabase.functions.invoke('refine-text', {
-              body: {
-                text: currentText,
-                instruction: transcriptionData.transcription,
-                selectedText: selectedText,
-              },
-            });
-
-          if (refinementError) throw refinementError;
-
-          setPreviousText(currentText);
-          setCurrentText(refinementData.text);
-          setSelectedText(null);
-          navigator.clipboard.writeText(refinementData.text);
-          toast({
-            description: "Text updated and copied to clipboard",
-            duration: 2000,
-          });
-        } catch (error) {
-          console.error('Text refinement error:', error);
-          toast({
-            description: "Error processing instruction. Please try again.",
-            variant: "destructive",
-          });
-        } finally {
-          setIsProcessing(false);
-        }
-      };
-
-      reader.readAsDataURL(audioBlob);
-    } catch (error) {
-      console.error('Error processing audio:', error);
-      setIsProcessing(false);
-      toast({
-        description: "Error processing audio. Please try again.",
-        variant: "destructive",
-      });
-    }
+    const audioBlob = await stopInstructionRecording();
+    await processAudioForInstruction(audioBlob, selectedText);
+    setSelectedText(null);
   };
 
   const handleStopRephraseRecording = async () => {
-    try {
-      setIsProcessing(true);
-      const audioBlob = await stopRephraseRecording();
-      const reader = new FileReader();
-      
-      reader.onloadend = async () => {
-        const base64Audio = reader.result as string;
-        const audioDataUri = base64Audio.split(',')[1];
-        
-        try {
-          const { data: transcriptionData, error: transcriptionError } = 
-            await supabase.functions.invoke('transcribe', {
-              body: { audioDataUri },
-            });
-
-          if (transcriptionError) throw transcriptionError;
-
-          const { data: refinementData, error: refinementError } = 
-            await supabase.functions.invoke('refine-text', {
-              body: {
-                text: currentText,
-                instruction: `Rephrase this text according to these instructions: ${transcriptionData.transcription}`,
-              },
-            });
-
-          if (refinementError) throw refinementError;
-
-          setPreviousText(currentText);
-          setCurrentText(refinementData.text);
-          navigator.clipboard.writeText(refinementData.text);
-          toast({
-            description: "Text rephrased and copied to clipboard",
-            duration: 2000,
-          });
-        } catch (error) {
-          console.error('Text rephrasing error:', error);
-          toast({
-            description: "Error processing rephrasing. Please try again.",
-            variant: "destructive",
-          });
-        } finally {
-          setIsProcessing(false);
-        }
-      };
-
-      reader.readAsDataURL(audioBlob);
-    } catch (error) {
-      console.error('Error processing audio:', error);
-      setIsProcessing(false);
-      toast({
-        description: "Error processing audio. Please try again.",
-        variant: "destructive",
-      });
-    }
+    const audioBlob = await stopRephraseRecording();
+    await processAudioForRephrase(audioBlob);
   };
 
   return (
