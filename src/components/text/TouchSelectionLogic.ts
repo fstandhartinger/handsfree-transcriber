@@ -12,8 +12,9 @@ export const getCharacterPositionFromTouch = (
   const div = divRef.current;
   const rect = div.getBoundingClientRect();
   
-  const clientX = 'clientX' in event ? event.clientX : event.clientX;
-  const clientY = 'clientY' in event ? event.clientY : event.clientY;
+  // Handle both mouse and touch events correctly
+  const clientX = 'touches' in event ? event.clientX : event.clientX;
+  const clientY = 'touches' in event ? event.clientY : event.clientY;
   
   const x = clientX - rect.left;
   const y = clientY - rect.top;
