@@ -1,6 +1,11 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
+const getBrowserLanguage = () => {
+  const browserLang = navigator.language.toLowerCase();
+  return browserLang.startsWith('de') ? 'de' : 'en';
+};
+
 const resources = {
   en: {
     translation: {
@@ -60,7 +65,7 @@ i18n
   .use(initReactI18next)
   .init({
     resources,
-    lng: "en",
+    lng: getBrowserLanguage(),
     fallbackLng: "en",
     interpolation: {
       escapeValue: false
