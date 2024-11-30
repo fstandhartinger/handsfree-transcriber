@@ -43,7 +43,7 @@ const EditableText = ({
     if (!isEditMode) return;
     
     const position = getCharacterPositionFromTouch(
-      'touches' in e ? e.touches[0] : e as MouseEvent, 
+      'touches' in e ? e.touches[0] : e, 
       divRef, 
       text
     );
@@ -57,7 +57,7 @@ const EditableText = ({
     if (!isEditMode || !selectedRange || !isSelecting) return;
     
     const position = getCharacterPositionFromTouch(
-      'touches' in e ? e.touches[0] : e as MouseEvent, 
+      'touches' in e ? e.touches[0] : e, 
       divRef, 
       text
     );

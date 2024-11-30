@@ -4,7 +4,7 @@ interface Position {
 }
 
 export const getCharacterPositionFromTouch = (
-  touchEvent: React.Touch | MouseEvent,
+  touchEvent: Touch | React.MouseEvent<Element, MouseEvent>,
   divRef: React.RefObject<HTMLDivElement>,
   text: string
 ): number => {
