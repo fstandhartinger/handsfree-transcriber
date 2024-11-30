@@ -2,8 +2,10 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
 const getBrowserLanguage = () => {
-  const browserLang = navigator.language.toLowerCase();
-  return browserLang.startsWith('de') ? 'de' : 'en';
+  console.log('Browser language:', navigator.language);
+  const browserLang = navigator.language.split('-')[0].toLowerCase();
+  console.log('Detected language:', browserLang === 'de' ? 'de' : 'en');
+  return browserLang === 'de' ? 'de' : 'en';
 };
 
 const resources = {
@@ -17,7 +19,10 @@ const resources = {
         casual: "Casual",
         rephrase: "Rephrase",
         copyText: "Copy Text",
-        stop: "Stop"
+        stop: "Stop",
+        share: "Share",
+        cancel: "Cancel",
+        undo: "Undo"
       },
       recording: {
         status: "Recording",
@@ -26,10 +31,18 @@ const resources = {
         markedText: "Marked text:"
       },
       toasts: {
-        textCopied: "Text copied to clipboard"
+        textCopied: "Text copied to clipboard",
+        shareSuccess: "Text shared successfully",
+        shareFailed: "Failed to share text"
       },
       editMode: {
         instruction: "Select any text you want to modify. Selected text will be marked with a strikethrough."
+      },
+      share: {
+        title: "Share via",
+        whatsapp: "WhatsApp",
+        email: "Email",
+        clipboard: "Copy to Clipboard"
       }
     }
   },
@@ -43,7 +56,10 @@ const resources = {
         casual: "Umgangssprachlich",
         rephrase: "Umformulieren",
         copyText: "Text kopieren",
-        stop: "Stopp"
+        stop: "Stopp",
+        share: "Teilen",
+        cancel: "Abbrechen",
+        undo: "Rückgängig"
       },
       recording: {
         status: "Aufnahme",
@@ -52,10 +68,18 @@ const resources = {
         markedText: "Markierter Text:"
       },
       toasts: {
-        textCopied: "Text in die Zwischenablage kopiert"
+        textCopied: "Text in die Zwischenablage kopiert",
+        shareSuccess: "Text erfolgreich geteilt",
+        shareFailed: "Fehler beim Teilen des Textes"
       },
       editMode: {
         instruction: "Wählen Sie den Text aus, den Sie ändern möchten. Ausgewählter Text wird durchgestrichen dargestellt."
+      },
+      share: {
+        title: "Teilen über",
+        whatsapp: "WhatsApp",
+        email: "E-Mail",
+        clipboard: "In Zwischenablage kopieren"
       }
     }
   }
@@ -71,5 +95,7 @@ i18n
       escapeValue: false
     }
   });
+
+console.log('i18n initialized with language:', i18n.language);
 
 export default i18n;
