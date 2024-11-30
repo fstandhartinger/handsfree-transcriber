@@ -2,7 +2,7 @@ import * as React from "react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { ClipboardCopy, Mic } from "lucide-react";
+import { ClipboardCopy } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface EditableTextProps {
@@ -69,18 +69,6 @@ const EditableText = ({ text, onChange, onTextSelect, isEditMode, onEditModeChan
           />
         </div>
       </ScrollArea>
-
-      {isSelecting && isEditMode && (
-        <Button
-          className="fixed bottom-20 left-1/2 -translate-x-1/2 shadow-lg"
-          onClick={() => {
-            console.log("Edit selection requested");
-          }}
-        >
-          <Mic className="mr-2 h-4 w-4" />
-          Korrektur aufnehmen
-        </Button>
-      )}
     </div>
   );
 };

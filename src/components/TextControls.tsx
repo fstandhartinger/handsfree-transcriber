@@ -1,4 +1,4 @@
-import { Mic, Strikethrough, FileText, AlertCircle, Undo, Users, Edit2 } from "lucide-react";
+import { Mic, FileText, AlertCircle, Undo, Users, Edit2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface TextControlsProps {
@@ -32,6 +32,14 @@ const TextControls = ({
   isEditMode,
   onEditModeChange,
 }: TextControlsProps) => {
+  const handleEditClick = () => {
+    if (isEditMode) {
+      onStartInstructionRecording();
+    } else {
+      onEditModeChange(true);
+    }
+  };
+
   return (
     <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur-sm border-t">
       <div className="flex flex-wrap gap-2 justify-center max-w-screen-lg mx-auto">
@@ -68,13 +76,13 @@ const TextControls = ({
           Rephrase
         </Button>
         <Button
-          onClick={() => onEditModeChange(!isEditMode)}
+          onClick={handleEditClick}
           variant={isEditMode ? "secondary" : "outline"}
           className="gap-2"
           disabled={isProcessing}
         >
           <Edit2 className="w-4 h-4" />
-          Edit section
+          {isEditMode ? "Finish edit section" : "Edit section"}
         </Button>
         {previousTextExists && (
           <Button 
@@ -85,17 +93,6 @@ const TextControls = ({
           >
             <Undo className="w-4 h-4" />
             Undo
-          </Button>
-        )}
-        {selectedText && (
-          <Button
-            onClick={isRecordingInstruction ? onStopInstructionRecording : onStartInstructionRecording}
-            variant="secondary"
-            className="gap-2"
-            disabled={isProcessing}
-          >
-            <Strikethrough className="w-4 h-4" />
-            Edit Selection
           </Button>
         )}
       </div>
