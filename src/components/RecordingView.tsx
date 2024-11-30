@@ -7,7 +7,6 @@ interface RecordingViewProps {
 const RecordingView = ({ onStop }: RecordingViewProps) => {
   return (
     <div className="flex flex-col items-center gap-4">
-      <div className="w-4 h-4 bg-red-500 rounded-full animate-pulse" />
       <Button
         onClick={onStop}
         size="lg"
