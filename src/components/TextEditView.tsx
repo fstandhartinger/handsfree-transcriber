@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import EditableText from "@/components/EditableText";
 import TextControls from "@/components/TextControls";
 import ShareButton from "@/components/ShareButton";
+import InstallButton from "@/components/InstallButton";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -17,13 +18,14 @@ const TextEditView = ({ text: initialText, onBack }: TextEditViewProps) => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [previousText, setPreviousText] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [selectedText, setSelectedText] = useState<string | null>(null);
   const { toast } = useToast();
 
   const handleStyleChange = async (style: string) => {
     try {
+      console.log(`Applying ${style} style to text...`);
       setIsProcessing(true);
       setPreviousText(text);
-      console.log(`Applying ${style} style to text...`);
 
       const { data, error } = await supabase.functions.invoke('refine-text', {
         body: {
@@ -66,25 +68,38 @@ const TextEditView = ({ text: initialText, onBack }: TextEditViewProps) => {
     }
   };
 
+  const handleStartRephraseRecording = () => {
+    console.log('Starting rephrase recording');
+    // Implementation will be added later
+  };
+
+  const handleStopRephraseRecording = () => {
+    console.log('Stopping rephrase recording');
+    // Implementation will be added later
+  };
+
   return (
     <div className="min-h-screen flex flex-col p-4 relative">
       <Button
         onClick={onBack}
         variant="outline"
         size="icon"
-        className="fixed top-4 left-4 w-10 h-10 p-0"
+        className="fixed top-4 left-4 w-10 h-10 p-0 z-50"
       >
         <ArrowLeft className="h-4 w-4" />
       </Button>
       
-      <div className="fixed top-4 right-4">
+      <div className="fixed top-4 right-4 z-50">
         <ShareButton text={text} />
       </div>
+
+      <InstallButton />
 
       <div className="flex-1 mt-16">
         <EditableText 
           text={text} 
           onChange={setText} 
+          onTextSelect={setSelectedText}
           isEditMode={isEditMode}
           onEditModeChange={setIsEditMode}
         />
@@ -96,9 +111,9 @@ const TextEditView = ({ text: initialText, onBack }: TextEditViewProps) => {
           onStartInstructionRecording={() => {}}
           onStopInstructionRecording={() => {}}
           isRecordingInstruction={false}
-          selectedText={null}
-          onStartRephraseRecording={() => {}}
-          onStopRephraseRecording={() => {}}
+          selectedText={selectedText}
+          onStartRephraseRecording={handleStartRephraseRecording}
+          onStopRephraseRecording={handleStopRephraseRecording}
           isRecordingRephrase={false}
           isEditMode={isEditMode}
           onEditModeChange={setIsEditMode}

@@ -28,15 +28,24 @@ const EditableText = ({
 
   const handleSelectionStart = (e: React.TouchEvent | React.MouseEvent) => {
     if (!isEditMode) return;
+    console.log('Selection started');
     
+    let position;
     if ('touches' in e && e.touches.length > 0) {
-      const position = getCharacterPositionFromTouch(e.touches[0], divRef, text);
-      setSelectedRange({ start: position, end: position });
+      position = getCharacterPositionFromTouch({
+        clientX: e.touches[0].clientX,
+        clientY: e.touches[0].clientY
+      }, divRef, text);
     } else if ('clientX' in e) {
-      const position = getCharacterPositionFromTouch(e, divRef, text);
-      setSelectedRange({ start: position, end: position });
+      position = getCharacterPositionFromTouch({
+        clientX: e.clientX,
+        clientY: e.clientY
+      }, divRef, text);
+    } else {
+      return;
     }
     
+    setSelectedRange({ start: position, end: position });
     setPersistedRange(null);
     setIsSelecting(true);
   };
@@ -44,18 +53,28 @@ const EditableText = ({
   const handleSelectionMove = (e: React.TouchEvent | React.MouseEvent) => {
     if (!isEditMode || !selectedRange || !isSelecting) return;
     
+    let position;
     if ('touches' in e && e.touches.length > 0) {
-      const position = getCharacterPositionFromTouch(e.touches[0], divRef, text);
-      setSelectedRange(prev => prev ? { ...prev, end: position } : null);
+      position = getCharacterPositionFromTouch({
+        clientX: e.touches[0].clientX,
+        clientY: e.touches[0].clientY
+      }, divRef, text);
     } else if ('clientX' in e) {
-      const position = getCharacterPositionFromTouch(e, divRef, text);
-      setSelectedRange(prev => prev ? { ...prev, end: position } : null);
+      position = getCharacterPositionFromTouch({
+        clientX: e.clientX,
+        clientY: e.clientY
+      }, divRef, text);
+    } else {
+      return;
     }
+    
+    setSelectedRange(prev => prev ? { ...prev, end: position } : null);
   };
 
   const handleSelectionEnd = () => {
     if (!isEditMode || !selectedRange) return;
     setIsSelecting(false);
+    console.log('Selection ended');
     
     const start = Math.min(selectedRange.start, selectedRange.end);
     const end = Math.max(selectedRange.start, selectedRange.end);
@@ -104,12 +123,6 @@ const EditableText = ({
               persistedRange={persistedRange}
             />
           </div>
-          <textarea
-            value={text}
-            onChange={(e) => onChange(e.target.value)}
-            readOnly={isEditMode}
-            className="sr-only"
-          />
         </div>
       </ScrollArea>
     </div>

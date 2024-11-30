@@ -1,9 +1,10 @@
-import React from 'react';
-
-type TouchOrMouseEvent = React.Touch | React.MouseEvent;
+interface TouchCoordinates {
+  clientX: number;
+  clientY: number;
+}
 
 export const getCharacterPositionFromTouch = (
-  event: TouchOrMouseEvent,
+  event: TouchCoordinates,
   divRef: React.RefObject<HTMLDivElement>,
   text: string
 ): number => {
@@ -12,46 +13,36 @@ export const getCharacterPositionFromTouch = (
   const div = divRef.current;
   const rect = div.getBoundingClientRect();
   
-  // Handle both mouse and touch events correctly
-  const clientX = 'touches' in event ? event.clientX : event.clientX;
-  const clientY = 'touches' in event ? event.clientY : event.clientY;
+  const clientX = event.clientX;
+  const clientY = event.clientY;
   
   const x = clientX - rect.left;
   const y = clientY - rect.top;
-
+  
   const range = document.createRange();
-  const textNode = Array.from(div.childNodes).find(node => node.nodeType === Node.TEXT_NODE);
+  const textNode = Array.from(div.childNodes).find(
+    node => node.nodeType === Node.TEXT_NODE
+  );
   
   if (!textNode) return 0;
   
   let position = 0;
-  const textContent = textNode.textContent || '';
+  let minDistance = Number.MAX_VALUE;
   
-  let left = 0;
-  let right = textContent.length;
-  
-  while (left < right) {
-    const mid = Math.floor((left + right) / 2);
+  for (let i = 0; i <= text.length; i++) {
+    range.setStart(textNode, i);
+    range.setEnd(textNode, i);
     
-    range.setStart(textNode, 0);
-    range.setEnd(textNode, mid);
     const rangeRect = range.getBoundingClientRect();
+    const distance = Math.sqrt(
+      Math.pow(rangeRect.left - clientX, 2) + Math.pow(rangeRect.top - clientY, 2)
+    );
     
-    if (Math.abs(rangeRect.right - clientX) < 5 && 
-        Math.abs(rangeRect.top + rangeRect.height/2 - clientY) < 10) {
-      position = mid;
-      break;
+    if (distance < minDistance) {
+      minDistance = distance;
+      position = i;
     }
-    
-    if (rangeRect.right < clientX) {
-      left = mid + 1;
-    } else {
-      right = mid;
-    }
-    
-    position = left;
   }
   
-  console.log('Selection position calculated:', { x, y, position });
-  return Math.min(position, text.length);
+  return position;
 };

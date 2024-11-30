@@ -10,14 +10,14 @@ const InstallButton = () => {
   const isMobile = useIsMobile();
 
   useEffect(() => {
-    // Speichere das Event für später
+    console.log('Setting up install button listeners');
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
       setIsInstallable(true);
+      console.log('App is installable');
     });
 
-    // Wenn die App installiert wird, verstecke den Button
     window.addEventListener('appinstalled', () => {
       setIsInstallable(false);
       deferredPrompt = null;
@@ -31,14 +31,12 @@ const InstallButton = () => {
       return;
     }
 
-    // Show the install prompt
+    console.log('Showing install prompt');
     deferredPrompt.prompt();
     
-    // Wait for the user to respond to the prompt
     const { outcome } = await deferredPrompt.userChoice;
     console.log(`User response to the install prompt: ${outcome}`);
     
-    // Clear the deferredPrompt variable
     deferredPrompt = null;
     setIsInstallable(false);
   };
@@ -52,7 +50,7 @@ const InstallButton = () => {
       onClick={handleInstallClick}
       variant="outline"
       size="icon"
-      className="fixed top-4 right-16"
+      className="fixed top-4 right-16 z-50"
     >
       <Download className="h-4 w-4" />
     </Button>
