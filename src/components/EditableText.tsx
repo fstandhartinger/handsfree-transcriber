@@ -70,19 +70,23 @@ const EditableText = ({ text, onChange, onTextSelect }: EditableTextProps) => {
       </div>
       
       <ScrollArea className={`h-[60vh] w-full rounded-md border ${isEditMode ? 'selection-mode' : ''}`}>
-        <textarea
-          value={text}
-          onChange={(e) => onChange(e.target.value)}
-          onSelect={handleSelect}
-          className={`w-full min-h-full p-4 ${isEditMode ? 'text-xl md:text-2xl' : 'text-lg md:text-xl'} 
-            focus:border-primary focus:ring-1 focus:ring-primary selection:bg-primary/20
-            ${isSelecting && isEditMode ? 'selection:line-through' : ''}`}
-          style={{
-            lineHeight: '1.6',
-            overflowY: 'visible',
-            resize: 'none'
-          }}
-        />
+        <div className="h-full w-full p-4">
+          <textarea
+            value={text}
+            onChange={(e) => onChange(e.target.value)}
+            onSelect={handleSelect}
+            className={`w-full h-full min-h-full ${isEditMode ? 'text-xl md:text-2xl' : 'text-lg md:text-xl'} 
+              focus:border-primary focus:ring-1 focus:ring-primary selection:bg-primary/20
+              ${isSelecting && isEditMode ? 'selection:line-through' : ''}`}
+            style={{
+              lineHeight: '1.6',
+              resize: 'none',
+              border: 'none',
+              outline: 'none',
+              background: 'transparent'
+            }}
+          />
+        </div>
       </ScrollArea>
 
       {isSelecting && isEditMode && (
