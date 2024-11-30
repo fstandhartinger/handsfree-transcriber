@@ -1,184 +1,63 @@
 import { useState } from "react";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ClipboardCopy } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import EditableText from "@/components/EditableText";
+import TextControls from "@/components/TextControls";
+import ShareButton from "@/components/ShareButton";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import EditableText from "./EditableText";
-import TextControls from "./TextControls";
-import ShareButton from "./ShareButton";
-import InstallButton from "./InstallButton";
-import RecordingModal from "./RecordingModal";
-import { useAudioRecording } from "./hooks/useAudioRecording";
-import { useAudioProcessing } from "./hooks/useAudioProcessing";
 
 interface TextEditViewProps {
   text: string;
   onBack: () => void;
 }
 
-const TextEditView = ({ text, onBack }: TextEditViewProps) => {
-  const [currentText, setCurrentText] = useState(text);
-  const [textHistory, setTextHistory] = useState<string[]>([text]);
-  const [historyIndex, setHistoryIndex] = useState(0);
-  const [selectedText, setSelectedText] = useState<string | null>(null);
-  const [isEditMode, setIsEditMode] = useState(false);
-  const [textBeforeEdit, setTextBeforeEdit] = useState<string | null>(null);
-  const [showRephraseModal, setShowRephraseModal] = useState(false);
-  const [showInstructionModal, setShowInstructionModal] = useState(false);
+const TextEditView = ({ text: initialText, onBack }: TextEditViewProps) => {
+  const [text, setText] = useState(initialText);
   const { toast } = useToast();
 
-  const {
-    isRecording: isRecordingInstruction,
-    startRecording: startInstructionRecording,
-    stopRecording: handleStopInstructionRecording,
-  } = useAudioRecording();
-
-  const {
-    isRecording: isRecordingRephrase,
-    startRecording: startRephraseRecording,
-    stopRecording: handleStopRephraseRecording,
-  } = useAudioRecording();
-
-  const addToHistory = (newText: string) => {
-    const newHistory = textHistory.slice(0, historyIndex + 1);
-    newHistory.push(newText);
-    setTextHistory(newHistory);
-    setHistoryIndex(newHistory.length - 1);
-  };
-
-  const { isProcessing, processAudioForRephrase, processAudioForInstruction } = useAudioProcessing(
-    currentText,
-    addToHistory,
-    setCurrentText
-  );
-
-  const handleUndo = () => {
-    if (historyIndex > 0) {
-      setHistoryIndex(historyIndex - 1);
-      setCurrentText(textHistory[historyIndex - 1]);
-    }
-  };
-
-  const handleStyleChange = async (style: string) => {
+  const handleCopyToClipboard = async () => {
     try {
-      const { data, error } = await supabase.functions.invoke('rephrase', {
-        body: { text: currentText, style },
-      });
-
-      if (error) throw error;
-
-      setCurrentText(data.text);
-      addToHistory(data.text);
-    } catch (error) {
-      console.error('Error:', error);
+      await navigator.clipboard.writeText(text);
       toast({
-        description: "Error processing text. Please try again.",
+        description: "Text copied to clipboard",
+        duration: 2000,
+      });
+    } catch (error) {
+      console.error('Error copying to clipboard:', error);
+      toast({
+        description: "Error copying to clipboard",
         variant: "destructive",
       });
     }
   };
 
-  const handleEditModeChange = (isEdit: boolean) => {
-    if (isEdit) {
-      setTextBeforeEdit(currentText);
-    } else {
-      setShowInstructionModal(true);
-    }
-    setIsEditMode(isEdit);
-  };
-
-  const handleCancelEdit = () => {
-    if (textBeforeEdit) {
-      setCurrentText(textBeforeEdit);
-    }
-    setIsEditMode(false);
-    setTextBeforeEdit(null);
-  };
-
-  const handleStartRephrase = () => {
-    setShowRephraseModal(true);
-  };
-
-  const handleStopRephrase = async () => {
-    const audioBlob = await handleStopRephraseRecording();
-    if (audioBlob) {
-      await processAudioForRephrase(audioBlob);
-    }
-    setShowRephraseModal(false);
-  };
-
-  const handleStartInstruction = async () => {
-    await startInstructionRecording();
-  };
-
-  const handleStopInstruction = async () => {
-    const audioBlob = await handleStopInstructionRecording();
-    if (audioBlob && selectedText) {
-      await processAudioForInstruction(audioBlob, selectedText);
-    }
-    setShowInstructionModal(false);
-  };
-
   return (
-    <div className="min-h-screen flex flex-col">
-      <div className="p-4 flex items-center justify-between">
+    <div className="min-h-screen flex flex-col p-4 relative">
+      <Button
+        onClick={onBack}
+        variant="outline"
+        size="icon"
+        className="fixed top-4 left-4 w-10 h-10 p-0"
+      >
+        <ArrowLeft className="h-4 w-4" />
+      </Button>
+      
+      <div className="fixed top-4 right-4 flex gap-2">
         <Button
-          onClick={onBack}
-          variant="ghost"
+          onClick={handleCopyToClipboard}
+          variant="outline"
           size="icon"
-          className="fixed top-4 left-4"
+          className="w-10 h-10 p-0"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ClipboardCopy className="h-4 w-4" />
         </Button>
-        <InstallButton />
-        <ShareButton text={currentText} />
+        <ShareButton text={text} />
       </div>
-      <ScrollArea className="flex-1 p-4">
-        <EditableText
-          text={currentText}
-          onChange={(newText) => {
-            setCurrentText(newText);
-            addToHistory(newText);
-          }}
-          onTextSelect={setSelectedText}
-          isEditMode={isEditMode}
-          onEditModeChange={handleEditModeChange}
-        />
-      </ScrollArea>
-      <TextControls
-        onStyleChange={handleStyleChange}
-        onUndo={handleUndo}
-        previousTextExists={historyIndex > 0}
-        isProcessing={isProcessing}
-        onStartInstructionRecording={handleStartInstruction}
-        onStopInstructionRecording={handleStopInstruction}
-        isRecordingInstruction={isRecordingInstruction}
-        selectedText={selectedText}
-        onStartRephraseRecording={handleStartRephrase}
-        onStopRephraseRecording={handleStopRephrase}
-        isRecordingRephrase={isRecordingRephrase}
-        isEditMode={isEditMode}
-        onEditModeChange={handleEditModeChange}
-        onCancel={handleCancelEdit}
-      />
-      {showRephraseModal && (
-        <RecordingModal
-          onStop={handleStopRephrase}
-          mode="rephrase"
-          isRecording={isRecordingRephrase}
-          onStartRecording={startRephraseRecording}
-        />
-      )}
-      {showInstructionModal && selectedText && (
-        <RecordingModal
-          onStop={handleStopInstruction}
-          selectedText={selectedText}
-          mode="instruction"
-          isRecording={isRecordingInstruction}
-          onStartRecording={startInstructionRecording}
-        />
-      )}
+
+      <div className="flex-1 mt-16">
+        <EditableText text={text} onChange={setText} />
+        <TextControls text={text} onTextChange={setText} />
+      </div>
     </div>
   );
 };

@@ -77,12 +77,6 @@ const Index = () => {
             if (error) throw error;
             
             setTranscribedText(data.transcription);
-            navigator.clipboard.writeText(data.transcription);
-            toast({
-              description: "Text copied to clipboard",
-              duration: 2000,
-              className: "top-0 right-0 fixed mt-4 mr-4 text-sm py-2 px-3 max-w-[50vw] w-auto",
-            });
           } catch (error) {
             console.error('Transcription error:', error);
             toast({
