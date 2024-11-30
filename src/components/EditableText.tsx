@@ -134,7 +134,7 @@ const EditableText = ({ text, onChange, onTextSelect, isEditMode, onEditModeChan
   };
 
   return (
-    <div className="relative flex flex-col h-[calc(100vh-8rem)]">
+    <div className="relative flex flex-col h-[calc(100vh-8rem)] mt-16">
       <div className="absolute -top-12 right-0">
         <Button
           onClick={handleCopy}

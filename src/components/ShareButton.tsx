@@ -67,7 +67,7 @@ const ShareButton = ({ text }: ShareButtonProps) => {
         onClick={handleShare}
         variant="outline"
         size="icon"
-        className="fixed top-4 right-16"
+        className="fixed top-4 right-4"
       >
         <Share2 className="h-4 w-4" />
       </Button>
@@ -80,7 +80,7 @@ const ShareButton = ({ text }: ShareButtonProps) => {
         <Button
           variant="outline"
           size="icon"
-          className="fixed top-4 right-16"
+          className="fixed top-4 right-4"
         >
           <Share2 className="h-4 w-4" />
         </Button>
