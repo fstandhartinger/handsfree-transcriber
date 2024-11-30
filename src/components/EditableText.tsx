@@ -37,7 +37,7 @@ const EditableText = ({ text, onChange, onTextSelect, isEditMode, onEditModeChan
   };
 
   return (
-    <div className="relative w-full">
+    <div className="relative w-full h-[calc(100vh-14rem)]">
       <div className="absolute -top-12 right-0">
         <Button
           onClick={handleCopy}
@@ -50,13 +50,13 @@ const EditableText = ({ text, onChange, onTextSelect, isEditMode, onEditModeChan
         </Button>
       </div>
       
-      <ScrollArea className={`h-[60vh] w-full rounded-md border ${isEditMode ? 'selection-mode' : ''}`}>
+      <ScrollArea className="h-full w-full rounded-md border">
         <div className="h-full w-full p-4">
           <textarea
             value={text}
             onChange={(e) => onChange(e.target.value)}
             onSelect={handleSelect}
-            className={`w-full h-full min-h-full ${isEditMode ? 'text-xl md:text-2xl' : 'text-lg md:text-xl'} 
+            className={`w-full h-full min-h-[calc(100vh-16rem)] ${isEditMode ? 'text-xl md:text-2xl' : 'text-lg md:text-xl'} 
               focus:border-primary focus:ring-1 focus:ring-primary selection:bg-primary/20
               ${isSelecting && isEditMode ? 'selection:line-through' : ''}`}
             style={{
