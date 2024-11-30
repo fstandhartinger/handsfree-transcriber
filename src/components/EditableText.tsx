@@ -21,6 +21,7 @@ const EditableText = ({ text, onChange, onTextSelect, isEditMode, onEditModeChan
   const divRef = useRef<HTMLDivElement>(null);
   const [touchStartPos, setTouchStartPos] = useState<{ x: number; y: number } | null>(null);
   const [selectedRange, setSelectedRange] = useState<{ start: number; end: number } | null>(null);
+  const [persistedRange, setPersistedRange] = useState<{ start: number; end: number } | null>(null);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(text);
@@ -85,6 +86,7 @@ const EditableText = ({ text, onChange, onTextSelect, isEditMode, onEditModeChan
     const position = getCharacterPositionFromTouch(touch);
     setSelectedRange({ start: position, end: position });
     setIsSelecting(true);
+    setPersistedRange(null);
     
     console.log('Touch start at position:', position);
   };
@@ -107,6 +109,7 @@ const EditableText = ({ text, onChange, onTextSelect, isEditMode, onEditModeChan
     const selectedText = text.substring(start, end);
     
     if (selectedText) {
+      setPersistedRange({ start, end });
       onTextSelect?.(selectedText);
       console.log('Selected text:', selectedText);
     }
@@ -117,10 +120,13 @@ const EditableText = ({ text, onChange, onTextSelect, isEditMode, onEditModeChan
   };
 
   const getHighlightedText = () => {
-    if (!selectedRange || !isEditMode) return text;
+    if (!isEditMode) return text;
 
-    const start = Math.min(selectedRange.start, selectedRange.end);
-    const end = Math.max(selectedRange.start, selectedRange.end);
+    const range = selectedRange || persistedRange;
+    if (!range) return text;
+
+    const start = Math.min(range.start, range.end);
+    const end = Math.max(range.start, range.end);
 
     return (
       <>
