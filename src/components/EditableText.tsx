@@ -1,5 +1,7 @@
 import * as React from "react";
 import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import { ClipboardCopy } from "lucide-react";
 
 interface EditableTextProps {
   text: string;
@@ -29,16 +31,22 @@ const EditableText = ({ text, onChange, onTextSelect }: EditableTextProps) => {
   };
 
   return (
-    <div className="editable-text">
+    <div className="relative w-full">
+      <Button
+        onClick={handleCopy}
+        variant="outline"
+        size="sm"
+        className="absolute -top-12 right-0 shadow-sm hover:shadow-md transition-shadow"
+      >
+        <ClipboardCopy className="mr-2 h-4 w-4" />
+        Copy Text
+      </Button>
       <textarea
         value={text}
         onChange={(e) => onChange(e.target.value)}
         onSelect={handleSelect}
-        className="border p-2 w-full"
+        className="w-full min-h-[200px] p-4 border rounded-md shadow-sm focus:border-primary focus:ring-1 focus:ring-primary"
       />
-      <button onClick={handleCopy} className="mt-2">
-        Copy Text
-      </button>
     </div>
   );
 };
