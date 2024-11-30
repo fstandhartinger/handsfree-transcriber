@@ -69,6 +69,7 @@ const Index = () => {
             toast({
               description: "Text copied to clipboard",
               duration: 2000,
+              className: "top-0 right-0 fixed mt-4 mr-4",
             });
           } catch (error) {
             console.error('Transcription error:', error);

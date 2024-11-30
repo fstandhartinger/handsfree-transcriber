@@ -1,11 +1,12 @@
-import { ArrowLeft, FileText, MessageSquare, Check, Undo, Mic } from "lucide-react";
+import { ArrowLeft, FileText, MessageSquare, Undo, Mic, StrikeThrough } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import RecordingModal from "./RecordingModal";
 import LoadingOverlay from "./LoadingOverlay";
+import TextControls from "./TextControls";
+import EditableText from "./EditableText";
 
 interface TextEditViewProps {
   text: string;
@@ -39,12 +40,14 @@ const TextEditView = ({ text, onBack }: TextEditViewProps) => {
       toast({
         description: "Updated text copied to clipboard",
         duration: 2000,
+        className: "top-0 right-0 fixed mt-4 mr-4",
       });
     } catch (error) {
       console.error('Style change error:', error);
       toast({
         description: "Error updating text style. Please try again.",
         variant: "destructive",
+        className: "top-0 right-0 fixed mt-4 mr-4",
       });
     } finally {
       setIsProcessing(false);
@@ -59,6 +62,7 @@ const TextEditView = ({ text, onBack }: TextEditViewProps) => {
       toast({
         description: "Previous text restored and copied to clipboard",
         duration: 2000,
+        className: "top-0 right-0 fixed mt-4 mr-4",
       });
     }
   };
@@ -169,76 +173,22 @@ const TextEditView = ({ text, onBack }: TextEditViewProps) => {
         <ArrowLeft className="w-6 h-6" />
       </Button>
 
-      <ScrollArea className="flex-1 bg-white rounded-lg shadow-sm p-4 mb-4">
-        <p 
-          className="text-lg leading-relaxed"
-          onMouseUp={() => {
-            const selection = window.getSelection();
-            if (selection && selection.toString()) {
-              setSelectedText(selection.toString());
-            }
-          }}
-        >
-          {currentText}
-        </p>
-      </ScrollArea>
+      <EditableText
+        text={currentText}
+        onChange={setCurrentText}
+        onTextSelect={setSelectedText}
+      />
 
-      <div className="flex flex-wrap gap-2 justify-center">
-        <Button 
-          onClick={() => handleStyleChange("Formal")} 
-          className="gap-2"
-          disabled={isProcessing}
-        >
-          <FileText className="w-4 h-4" />
-          Formal
-        </Button>
-        <Button 
-          onClick={() => handleStyleChange("Neutral")} 
-          className="gap-2"
-          disabled={isProcessing}
-        >
-          <MessageSquare className="w-4 h-4" />
-          Neutral
-        </Button>
-        <Button 
-          onClick={() => handleStyleChange("Casual")} 
-          className="gap-2"
-          disabled={isProcessing}
-        >
-          <MessageSquare className="w-4 h-4" />
-          Casual
-        </Button>
-        <Button 
-          onClick={() => handleStyleChange("Unchanged")} 
-          className="gap-2"
-          disabled={isProcessing}
-        >
-          <Check className="w-4 h-4" />
-          Unchanged
-        </Button>
-        {previousText && (
-          <Button 
-            onClick={handleUndo} 
-            variant="outline" 
-            className="gap-2"
-            disabled={isProcessing}
-          >
-            <Undo className="w-4 h-4" />
-            Undo
-          </Button>
-        )}
-        {selectedText && (
-          <Button
-            onClick={isRecordingInstruction ? stopInstructionRecording : startInstructionRecording}
-            variant="secondary"
-            className="gap-2"
-            disabled={isProcessing}
-          >
-            <Mic className="w-4 h-4" />
-            {isRecordingInstruction ? "Stop" : "Correct Selection"}
-          </Button>
-        )}
-      </div>
+      <TextControls
+        onStyleChange={handleStyleChange}
+        onUndo={handleUndo}
+        previousTextExists={!!previousText}
+        isProcessing={isProcessing}
+        onStartInstructionRecording={startInstructionRecording}
+        onStopInstructionRecording={stopInstructionRecording}
+        isRecordingInstruction={isRecordingInstruction}
+        selectedText={selectedText}
+      />
 
       {isProcessing && <LoadingOverlay />}
       {isRecordingInstruction && <RecordingModal onStop={stopInstructionRecording} />}
