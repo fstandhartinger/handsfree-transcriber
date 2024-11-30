@@ -1,4 +1,4 @@
-import { StopCircle } from "lucide-react";
+import { Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface RephraseModalProps {
@@ -19,7 +19,7 @@ const RephraseModal = ({ onStop }: RephraseModalProps) => {
           size="lg"
           className="rounded-full w-16 h-16 mx-auto block"
         >
-          <StopCircle className="w-8 h-8" />
+          <Square className="w-8 h-8" />
         </Button>
       </div>
     </div>
