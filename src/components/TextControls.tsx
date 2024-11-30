@@ -1,5 +1,6 @@
 import { Mic, FileText, AlertCircle, Undo, Users, Edit2, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "react-i18next";
 
 interface TextControlsProps {
   onStyleChange: (style: string) => void;
@@ -32,6 +33,8 @@ const TextControls = ({
   isEditMode,
   onEditModeChange,
 }: TextControlsProps) => {
+  const { t } = useTranslation();
+  
   const handleEditClick = () => {
     if (isEditMode) {
       onStartInstructionRecording();
@@ -51,7 +54,7 @@ const TextControls = ({
               disabled={isProcessing}
             >
               <FileText className="w-4 h-4" />
-              Formal
+              {t('buttons.formal')}
             </Button>
             <Button 
               onClick={() => onStyleChange("Concise")} 
@@ -59,7 +62,7 @@ const TextControls = ({
               disabled={isProcessing}
             >
               <AlertCircle className="w-4 h-4" />
-              Concise
+              {t('buttons.concise')}
             </Button>
             <Button 
               onClick={() => onStyleChange("Casual")} 
@@ -67,7 +70,7 @@ const TextControls = ({
               disabled={isProcessing}
             >
               <Users className="w-4 h-4" />
-              Casual
+              {t('buttons.casual')}
             </Button>
             <Button
               onClick={isRecordingRephrase ? onStopRephraseRecording : onStartRephraseRecording}
@@ -75,7 +78,7 @@ const TextControls = ({
               disabled={isProcessing}
             >
               <Mic className="w-4 h-4" />
-              Rephrase
+              {t('buttons.rephrase')}
             </Button>
             {previousTextExists && (
               <Button 
@@ -97,7 +100,7 @@ const TextControls = ({
           disabled={isProcessing}
         >
           {isEditMode ? <CheckCircle2 className="w-4 h-4" /> : <Edit2 className="w-4 h-4" />}
-          {isEditMode ? "Finish edit section" : "Edit section"}
+          {isEditMode ? t('buttons.finishEdit') : t('buttons.edit')}
         </Button>
       </div>
     </div>

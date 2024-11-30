@@ -4,6 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { ClipboardCopy } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useTranslation } from "react-i18next";
 
 interface EditableTextProps {
   text: string;
@@ -15,12 +16,13 @@ interface EditableTextProps {
 
 const EditableText = ({ text, onChange, onTextSelect, isEditMode, onEditModeChange }: EditableTextProps) => {
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [isSelecting, setIsSelecting] = useState(false);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(text);
     toast({
-      description: "Text copied to clipboard",
+      description: t('toasts.textCopied'),
       duration: 2000,
       className: "fixed top-4 left-1/2 -translate-x-1/2 text-xs py-2 px-3 max-w-[33vw] w-auto",
     });
@@ -46,7 +48,7 @@ const EditableText = ({ text, onChange, onTextSelect, isEditMode, onEditModeChan
           className="shadow-sm hover:shadow-md transition-shadow"
         >
           <ClipboardCopy className="mr-2 h-4 w-4" />
-          Copy Text
+          {t('buttons.copyText')}
         </Button>
       </div>
       
