@@ -1,4 +1,4 @@
-import { Mic, StrikeThrough, Clipboard } from "lucide-react";
+import { Mic, Strikethrough, Clipboard, FileText, MessageSquare, Undo } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface TextControlsProps {
@@ -74,7 +74,7 @@ const TextControls = ({
           className="gap-2"
           disabled={isProcessing}
         >
-          <StrikeThrough className="w-4 h-4" />
+          <Strikethrough className="w-4 h-4" />
           Edit Selection
         </Button>
       )}
