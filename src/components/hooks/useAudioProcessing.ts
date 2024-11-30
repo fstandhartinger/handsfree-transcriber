@@ -2,7 +2,11 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
-export const useAudioProcessing = (currentText: string, setPreviousText: (text: string) => void, setCurrentText: (text: string) => void) => {
+export const useAudioProcessing = (
+  currentText: string, 
+  addToHistory: (text: string) => void,
+  setCurrentText: (text: string) => void
+) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
 
@@ -23,7 +27,6 @@ export const useAudioProcessing = (currentText: string, setPreviousText: (text: 
 
           if (transcriptionError) throw transcriptionError;
 
-          // Show toast with transcribed instruction
           toast({
             description: `Verstanden: "${transcriptionData.transcription}"`,
             duration: 4000,
@@ -39,7 +42,7 @@ export const useAudioProcessing = (currentText: string, setPreviousText: (text: 
 
           if (refinementError) throw refinementError;
 
-          setPreviousText(currentText);
+          addToHistory(refinementData.text);
           setCurrentText(refinementData.text);
           navigator.clipboard.writeText(refinementData.text);
           toast({
@@ -96,7 +99,7 @@ export const useAudioProcessing = (currentText: string, setPreviousText: (text: 
 
           if (refinementError) throw refinementError;
 
-          setPreviousText(currentText);
+          addToHistory(refinementData.text);
           setCurrentText(refinementData.text);
           navigator.clipboard.writeText(refinementData.text);
           toast({

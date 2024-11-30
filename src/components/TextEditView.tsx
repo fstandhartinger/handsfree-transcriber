@@ -18,7 +18,8 @@ interface TextEditViewProps {
 
 const TextEditView = ({ text, onBack }: TextEditViewProps) => {
   const [currentText, setCurrentText] = useState(text);
-  const [previousText, setPreviousText] = useState<string | null>(null);
+  const [textHistory, setTextHistory] = useState<string[]>([text]); // History-Stack
+  const [historyIndex, setHistoryIndex] = useState(0);
   const [selectedText, setSelectedText] = useState<string | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [textBeforeEdit, setTextBeforeEdit] = useState<string | null>(null);
@@ -40,12 +41,24 @@ const TextEditView = ({ text, onBack }: TextEditViewProps) => {
     isProcessing,
     processAudioForRephrase,
     processAudioForInstruction
-  } = useAudioProcessing(currentText, setPreviousText, setCurrentText);
+  } = useAudioProcessing(currentText, addToHistory, setCurrentText);
+
+  // Funktion zum Hinzufügen eines neuen Textzustands zur Historie
+  function addToHistory(newText: string) {
+    console.log('Adding to history:', { newText, currentIndex: historyIndex });
+    
+    // Entferne alle Zustände nach dem aktuellen Index
+    const newHistory = textHistory.slice(0, historyIndex + 1);
+    newHistory.push(newText);
+    
+    setTextHistory(newHistory);
+    setHistoryIndex(newHistory.length - 1);
+    console.log('History updated:', { newHistory, newIndex: newHistory.length - 1 });
+  }
 
   const handleStyleChange = async (style: string) => {
     try {
       console.log('Starting style change:', style);
-      setPreviousText(currentText);
 
       const { data, error } = await supabase.functions.invoke('refine-text', {
         body: { text: currentText, style: style.toLowerCase() },
@@ -54,6 +67,7 @@ const TextEditView = ({ text, onBack }: TextEditViewProps) => {
       if (error) throw error;
       if (!data?.text) throw new Error('Invalid response from text refinement service');
 
+      addToHistory(data.text);
       setCurrentText(data.text);
       navigator.clipboard.writeText(data.text);
       toast({
@@ -70,14 +84,20 @@ const TextEditView = ({ text, onBack }: TextEditViewProps) => {
   };
 
   const handleUndo = () => {
-    if (previousText) {
+    if (historyIndex > 0) {
+      console.log('Performing undo:', { currentIndex: historyIndex, targetIndex: historyIndex - 1 });
+      
+      const previousText = textHistory[historyIndex - 1];
+      setHistoryIndex(historyIndex - 1);
       setCurrentText(previousText);
-      setPreviousText(null);
+      
       navigator.clipboard.writeText(previousText);
       toast({
         description: "Previous text restored and copied to clipboard",
         duration: 2000,
       });
+      
+      console.log('Undo complete:', { newText: previousText, newIndex: historyIndex - 1 });
     }
   };
 
@@ -122,7 +142,10 @@ const TextEditView = ({ text, onBack }: TextEditViewProps) => {
 
       <EditableText
         text={currentText}
-        onChange={setCurrentText}
+        onChange={(newText) => {
+          setCurrentText(newText);
+          addToHistory(newText);
+        }}
         onTextSelect={setSelectedText}
         isEditMode={isEditMode}
         onEditModeChange={handleEditModeChange}
@@ -131,7 +154,7 @@ const TextEditView = ({ text, onBack }: TextEditViewProps) => {
       <TextControls
         onStyleChange={handleStyleChange}
         onUndo={handleUndo}
-        previousTextExists={!!previousText}
+        previousTextExists={historyIndex > 0}
         isProcessing={isProcessing}
         onStartInstructionRecording={startInstructionRecording}
         onStopInstructionRecording={handleStopInstructionRecording}
