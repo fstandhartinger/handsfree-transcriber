@@ -1,0 +1,22 @@
+{
+  "recording": {
+    "status": "Aufnahme läuft...",
+    "markedText": "Markierter Text:",
+    "editInstruction": "Sprechen Sie Ihre Anweisungen zur Bearbeitung",
+    "rephraseTitle": "Text umformulieren",
+    "rephraseDescription": "Drücken Sie auf das Mikrofon und sprechen Sie, wie der Text umformuliert werden soll.",
+    "instructionTitle": "Text bearbeiten",
+    "instructionDescription": "Drücken Sie auf das Mikrofon und sprechen Sie Ihre Anweisungen zur Bearbeitung des markierten Texts.",
+    "selectedText": "Ausgewählter Text:"
+  },
+  "buttons": {
+    "formal": "Formell",
+    "concise": "Prägnant",
+    "casual": "Lässig",
+    "rephrase": "Umformulieren",
+    "edit": "Bearbeiten",
+    "undo": "Rückgängig",
+    "finishEdit": "Bearbeitung abschließen",
+    "cancel": "Abbrechen"
+  }
+}

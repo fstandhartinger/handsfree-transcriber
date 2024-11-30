@@ -8,7 +8,6 @@ import EditableText from "./EditableText";
 import TextControls from "./TextControls";
 import ShareButton from "./ShareButton";
 import InstallButton from "./InstallButton";
-import RephraseModal from "./RephraseModal";
 import RecordingModal from "./RecordingModal";
 import { useAudioRecording } from "./hooks/useAudioRecording";
 import { useAudioProcessing } from "./hooks/useAudioProcessing";
@@ -25,7 +24,10 @@ const TextEditView = ({ text, onBack }: TextEditViewProps) => {
   const [selectedText, setSelectedText] = useState<string | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [textBeforeEdit, setTextBeforeEdit] = useState<string | null>(null);
+  const [showRephraseModal, setShowRephraseModal] = useState(false);
+  const [showInstructionModal, setShowInstructionModal] = useState(false);
   const { toast } = useToast();
+
   const {
     isRecording: isRecordingInstruction,
     startRecording: startInstructionRecording,
@@ -80,6 +82,8 @@ const TextEditView = ({ text, onBack }: TextEditViewProps) => {
   const handleEditModeChange = (isEdit: boolean) => {
     if (isEdit) {
       setTextBeforeEdit(currentText);
+    } else {
+      setShowInstructionModal(true);
     }
     setIsEditMode(isEdit);
   };
@@ -90,6 +94,30 @@ const TextEditView = ({ text, onBack }: TextEditViewProps) => {
     }
     setIsEditMode(false);
     setTextBeforeEdit(null);
+  };
+
+  const handleStartRephrase = () => {
+    setShowRephraseModal(true);
+  };
+
+  const handleStopRephrase = async () => {
+    const audioBlob = await handleStopRephraseRecording();
+    if (audioBlob) {
+      await processAudioForRephrase(audioBlob);
+    }
+    setShowRephraseModal(false);
+  };
+
+  const handleStartInstruction = async () => {
+    await startInstructionRecording();
+  };
+
+  const handleStopInstruction = async () => {
+    const audioBlob = await handleStopInstructionRecording();
+    if (audioBlob && selectedText) {
+      await processAudioForInstruction(audioBlob, selectedText);
+    }
+    setShowInstructionModal(false);
   };
 
   return (
@@ -123,24 +151,32 @@ const TextEditView = ({ text, onBack }: TextEditViewProps) => {
         onUndo={handleUndo}
         previousTextExists={historyIndex > 0}
         isProcessing={isProcessing}
-        onStartInstructionRecording={startInstructionRecording}
-        onStopInstructionRecording={handleStopInstructionRecording}
+        onStartInstructionRecording={handleStartInstruction}
+        onStopInstructionRecording={handleStopInstruction}
         isRecordingInstruction={isRecordingInstruction}
         selectedText={selectedText}
-        onStartRephraseRecording={startRephraseRecording}
-        onStopRephraseRecording={handleStopRephraseRecording}
+        onStartRephraseRecording={handleStartRephrase}
+        onStopRephraseRecording={handleStopRephrase}
         isRecordingRephrase={isRecordingRephrase}
         isEditMode={isEditMode}
         onEditModeChange={handleEditModeChange}
         onCancel={handleCancelEdit}
       />
-      {isRecordingRephrase && (
-        <RephraseModal onStop={handleStopRephraseRecording} />
+      {showRephraseModal && (
+        <RecordingModal
+          onStop={handleStopRephrase}
+          mode="rephrase"
+          isRecording={isRecordingRephrase}
+          onStartRecording={startRephraseRecording}
+        />
       )}
-      {isRecordingInstruction && selectedText && (
-        <RecordingModal 
-          onStop={handleStopInstructionRecording}
+      {showInstructionModal && selectedText && (
+        <RecordingModal
+          onStop={handleStopInstruction}
           selectedText={selectedText}
+          mode="instruction"
+          isRecording={isRecordingInstruction}
+          onStartRecording={startInstructionRecording}
         />
       )}
     </div>
