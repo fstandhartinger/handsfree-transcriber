@@ -45,7 +45,7 @@ const EditableText = ({ text, onChange, onTextSelect }: EditableTextProps) => {
         Copy Text
       </Button>
       
-      <ScrollArea className="h-[60vh] w-full rounded-md border">
+      <ScrollArea className="h-[60vh] w-full rounded-md border selection-mode">
         <textarea
           value={text}
           onChange={(e) => onChange(e.target.value)}
