@@ -42,8 +42,8 @@ const EditableText = ({
   const handleSelectionStart = (e: React.TouchEvent | React.MouseEvent) => {
     if (!isEditMode) return;
     
-    const touch = 'touches' in e ? e.touches[0] : e;
-    const position = getCharacterPositionFromTouch(touch, divRef, text);
+    const touchEvent = 'touches' in e ? e.touches[0] : e;
+    const position = getCharacterPositionFromTouch(touchEvent, divRef, text);
     console.log('Selection started at position:', position);
     setSelectedRange({ start: position, end: position });
     setPersistedRange(null);
@@ -53,8 +53,8 @@ const EditableText = ({
   const handleSelectionMove = (e: React.TouchEvent | React.MouseEvent) => {
     if (!isEditMode || !selectedRange || !isSelecting) return;
     
-    const touch = 'touches' in e ? e.touches[0] : e;
-    const position = getCharacterPositionFromTouch(touch, divRef, text);
+    const touchEvent = 'touches' in e ? e.touches[0] : e;
+    const position = getCharacterPositionFromTouch(touchEvent, divRef, text);
     console.log('Selection moved to position:', position);
     setSelectedRange(prev => prev ? { ...prev, end: position } : null);
   };

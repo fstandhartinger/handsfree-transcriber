@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
 
 const UpdateNotification = () => {
   const [waitingWorker, setWaitingWorker] = useState<ServiceWorker | null>(null);
@@ -7,12 +8,10 @@ const UpdateNotification = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Überprüfe ob Service Worker unterstützt wird
     if (!('serviceWorker' in navigator)) {
       return;
     }
 
-    // Registriere Event Listener für Updates
     navigator.serviceWorker.ready.then(registration => {
       console.log('Service Worker bereit');
       
@@ -25,23 +24,25 @@ const UpdateNotification = () => {
           toast({
             title: "Update verfügbar",
             description: "Eine neue Version ist verfügbar. Klicke hier zum Aktualisieren.",
-            action: {
-              label: "Aktualisieren",
-              onClick: () => {
+            action: <Button 
+              onClick={() => {
                 setShowReload(false);
                 if (waitingWorker) {
                   console.log('Sende SKIP_WAITING an Service Worker');
                   waitingWorker.postMessage({ type: 'SKIP_WAITING' });
                 }
                 window.location.reload();
-              }
-            }
+              }}
+              variant="outline"
+              size="sm"
+            >
+              Aktualisieren
+            </Button>
           });
         }
       });
     });
 
-    // Überprüfe auf Updates
     const checkForUpdates = () => {
       console.log('Prüfe auf Updates...');
       if (navigator.serviceWorker.controller) {
@@ -49,14 +50,12 @@ const UpdateNotification = () => {
       }
     };
 
-    // Prüfe regelmäßig auf Updates (alle 60 Minuten)
     const interval = setInterval(checkForUpdates, 60 * 60 * 1000);
     
-    // Cleanup
     return () => clearInterval(interval);
   }, [waitingWorker]);
 
-  return null; // Komponente rendert nichts, nutzt nur Toast für Benachrichtigungen
+  return null;
 };
 
 export default UpdateNotification;
