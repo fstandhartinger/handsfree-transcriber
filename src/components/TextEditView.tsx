@@ -3,7 +3,7 @@ import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import EditableText from "@/components/EditableText";
 import TextControls from "@/components/TextControls";
-import ShareButton from "@/components/ShareButton";
+import ShareButton, { ClipboardButton } from "@/components/ShareButton";
 import InstallButton from "@/components/InstallButton";
 import RecordingModal from "@/components/RecordingModal";
 import { useToast } from "@/hooks/use-toast.tsx";
@@ -167,9 +167,9 @@ const TextEditView = ({ text: initialText, onBack }: TextEditViewProps) => {
           </div>
         )}
         
-        <div className="flex items-center gap-2">
+        <div className="flex gap-2">
+          <ClipboardButton text={text} />
           <ShareButton text={text} />
-          <InstallButton />
         </div>
       </div>
 
