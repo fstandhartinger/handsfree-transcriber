@@ -30,7 +30,7 @@ const resources = {
         editInstruction: "Speak your correction instructions...\n(e.g. \"Make this part more detailed\" or \"Remove this\")",
         markedText: "Marked text:",
         rephraseTitle: "Rephrase Text",
-        rephraseDescription: "Press the microphone button and speak how you would like the text to be rephrased.",
+        rephraseDescription: "Press the microphone button and speak how you would like the text to be rephrased. Examples:\n• Format as a letter\n• Translate to English\n• Next Thursday instead of next Wednesday",
         instructionTitle: "Edit Text",
         instructionDescription: "Press the microphone button and speak your instructions for editing the marked text.",
         selectedText: "Selected text:"
@@ -68,11 +68,10 @@ const resources = {
       },
       recording: {
         status: "Aufnahme läuft...",
-        instruction: "Erklären Sie, wie der Text umformuliert werden soll, zum Beispiel: 'kürzer und ernster' oder 'auf Französisch übersetzen'",
-        editInstruction: "Sprechen Sie Ihre Korrekturanweisungen...\n(z.B. \"Mache diesen Teil ausführlicher\" oder \"Entferne das\")",
         markedText: "Markierter Text:",
+        editInstruction: "Sprechen Sie Ihre Anweisungen zur Bearbeitung",
         rephraseTitle: "Text umformulieren",
-        rephraseDescription: "Drücken Sie auf das Mikrofon und sprechen Sie, wie der Text umformuliert werden soll.",
+        rephraseDescription: "Drücken Sie auf das Mikrofon und sprechen Sie, wie der Text umformuliert werden soll. Beispiele:\n• Formatiere wie einen Brief\n• Übersetze auf Englisch\n• Nächsten Donnerstag statt nächsten Mittwoch",
         instructionTitle: "Text bearbeiten",
         instructionDescription: "Drücken Sie auf das Mikrofon und sprechen Sie Ihre Anweisungen zur Bearbeitung des markierten Texts.",
         selectedText: "Ausgewählter Text:"

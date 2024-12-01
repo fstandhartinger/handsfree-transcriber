@@ -19,29 +19,33 @@ interface TextEditViewProps {
 const TextEditView = ({ text: initialText, onBack }: TextEditViewProps) => {
   const [text, setText] = useState(initialText);
   const [isEditMode, setIsEditMode] = useState(false);
-  const [previousText, setPreviousText] = useState<string | null>(null);
+  const [textHistory, setTextHistory] = useState<string[]>([initialText]);
+  const [currentHistoryIndex, setCurrentHistoryIndex] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedText, setSelectedText] = useState<string | null>(null);
   const [showRephraseModal, setShowRephraseModal] = useState(false);
   const [isRecordingRephrase, setIsRecordingRephrase] = useState(false);
+  const [isProcessingRephrase, setIsProcessingRephrase] = useState(false);
   const { toast } = useToast();
 
   const { isRecording, startRecording, stopRecording } = useAudioRecording();
-  const { processAudioForRephrase } = useAudioProcessing(
-    text,
-    (newText: string) => {
-      setPreviousText(text);
-      setText(newText);
-    },
-    setText
-  );
+  const { processAudioForRephrase } = useAudioProcessing(text, (newText: string) => {
+    addToHistory(newText);
+    setText(newText);
+  }, setText);
+
+  const addToHistory = (newText: string) => {
+    const newHistory = textHistory.slice(0, currentHistoryIndex + 1);
+    newHistory.push(newText);
+    setTextHistory(newHistory);
+    setCurrentHistoryIndex(newHistory.length - 1);
+  };
 
   const handleStyleChange = async (style: string) => {
     try {
       console.log(`Applying ${style} style to text...`);
       setIsProcessing(true);
-      setPreviousText(text);
-
+      
       const { data, error } = await supabase.functions.invoke('refine-text', {
         body: {
           text: text,
@@ -55,6 +59,7 @@ const TextEditView = ({ text: initialText, onBack }: TextEditViewProps) => {
       }
 
       console.log('Text successfully refined:', data);
+      addToHistory(data.text);
       setText(data.text);
       toast({
         description: `Text style updated to ${style}`,
@@ -72,10 +77,10 @@ const TextEditView = ({ text: initialText, onBack }: TextEditViewProps) => {
   };
 
   const handleUndo = () => {
-    if (previousText) {
-      console.log('Undoing text changes');
+    if (currentHistoryIndex > 0) {
+      const previousText = textHistory[currentHistoryIndex - 1];
+      setCurrentHistoryIndex(currentHistoryIndex - 1);
       setText(previousText);
-      setPreviousText(null);
       toast({
         description: "Changes undone",
         duration: 2000,
@@ -93,6 +98,7 @@ const TextEditView = ({ text: initialText, onBack }: TextEditViewProps) => {
     try {
       const audioBlob = await stopRecording();
       if (audioBlob) {
+        setIsProcessingRephrase(true);
         await processAudioForRephrase(audioBlob);
       }
     } catch (error) {
@@ -103,6 +109,7 @@ const TextEditView = ({ text: initialText, onBack }: TextEditViewProps) => {
       });
     } finally {
       setIsRecordingRephrase(false);
+      setIsProcessingRephrase(false);
       setShowRephraseModal(false);
     }
   };
@@ -113,18 +120,24 @@ const TextEditView = ({ text: initialText, onBack }: TextEditViewProps) => {
     await startRecording();
   };
 
+  const handleCancelRecording = () => {
+    setShowRephraseModal(false);
+    setIsRecordingRephrase(false);
+    setIsProcessingRephrase(false);
+  };
+
   return (
     <div className="min-h-screen flex flex-col p-4 relative">
       <Button
         onClick={onBack}
         variant="outline"
         size="icon"
-        className="fixed top-4 left-4 w-10 h-10 p-0 z-50"
+        className="fixed top-4 left-4 w-10 h-10 p-0"
       >
         <ArrowLeft className="h-4 w-4" />
       </Button>
       
-      <div className="fixed top-4 right-4 z-50">
+      <div className="fixed top-4 right-4">
         <ShareButton text={text} />
       </div>
 
@@ -141,7 +154,7 @@ const TextEditView = ({ text: initialText, onBack }: TextEditViewProps) => {
         <TextControls 
           onStyleChange={handleStyleChange}
           onUndo={handleUndo}
-          previousTextExists={!!previousText}
+          previousTextExists={currentHistoryIndex > 0}
           isProcessing={isProcessing}
           onStartInstructionRecording={() => {}}
           onStopInstructionRecording={() => {}}
@@ -163,6 +176,8 @@ const TextEditView = ({ text: initialText, onBack }: TextEditViewProps) => {
           mode="rephrase"
           isRecording={isRecordingRephrase}
           onStartRecording={handleStartRecording}
+          onCancel={handleCancelRecording}
+          isProcessing={isProcessingRephrase}
         />
       )}
     </div>
