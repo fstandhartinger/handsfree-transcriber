@@ -1,19 +1,22 @@
 import { Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
-import { useIsMobile } from "@/hooks/use-mobile";
 
-let deferredPrompt: any = null;
+interface BeforeInstallPromptEvent extends Event {
+  prompt(): Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
+}
+
+let deferredPrompt: BeforeInstallPromptEvent | null = null;
 
 const InstallButton = () => {
   const [isInstallable, setIsInstallable] = useState(false);
-  const isMobile = useIsMobile();
 
   useEffect(() => {
     console.log('Setting up install button listeners');
-    window.addEventListener('beforeinstallprompt', (e) => {
+    window.addEventListener('beforeinstallprompt', (e: Event) => {
       e.preventDefault();
-      deferredPrompt = e;
+      deferredPrompt = e as BeforeInstallPromptEvent;
       setIsInstallable(true);
       console.log('App is installable');
     });
@@ -41,7 +44,7 @@ const InstallButton = () => {
     setIsInstallable(false);
   };
 
-  if (!isMobile || !isInstallable) {
+  if (!isInstallable) {
     return null;
   }
 
@@ -50,7 +53,7 @@ const InstallButton = () => {
       onClick={handleInstallClick}
       variant="outline"
       size="icon"
-      className="fixed top-4 right-16 z-50"
+      className="w-10 h-10 p-0"
     >
       <Download className="h-4 w-4" />
     </Button>

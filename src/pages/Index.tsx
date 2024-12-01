@@ -158,19 +158,6 @@ const Index = () => {
 
   return (
     <div className="h-screen flex flex-col items-center justify-center">
-      <div className="fixed top-4 right-4 flex gap-2">
-        {!isInstalled && deferredPrompt && (
-          <Button
-            onClick={handleInstallClick}
-            variant="outline"
-            size="sm"
-            className="flex items-center gap-2"
-          >
-            <Download className="w-4 h-4" />
-            Install
-          </Button>
-        )}
-      </div>
       {isTranscribing ? (
         <div className="flex flex-col items-center gap-4">
           <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin" />
@@ -186,6 +173,21 @@ const Index = () => {
         >
           <Mic className="w-8 h-8" />
         </Button>
+      )}
+      
+      {!isInstalled && deferredPrompt && (
+        <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t flex items-center justify-between">
+          <p className="text-sm text-muted-foreground">Install app for offline use</p>
+          <Button
+            onClick={handleInstallClick}
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-2"
+          >
+            <Download className="w-4 h-4" />
+            Install
+          </Button>
+        </div>
       )}
     </div>
   );
