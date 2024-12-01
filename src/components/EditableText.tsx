@@ -90,14 +90,14 @@ const EditableText = ({
   };
 
   return (
-    <div className="relative flex flex-col h-[calc(100vh-8rem)] mt-16">
+    <div className="flex flex-col flex-1 min-h-0">
       {isEditMode && (
-        <div className="mb-4 text-sm text-muted-foreground bg-muted/50 p-3 rounded-md">
+        <div className="px-4 mb-4 text-sm text-muted-foreground bg-muted/50 p-3 rounded-md">
           {t('editMode.instruction')}
         </div>
       )}
 
-      <ScrollArea className="flex-1">
+      <ScrollArea className="flex-1 min-h-0">
         <div className="p-4">
           <div
             ref={divRef}

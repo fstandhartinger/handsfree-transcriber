@@ -14,6 +14,12 @@ const Toaster = ({ ...props }: ToasterProps) => {
       expand={false}
       closeButton={true}
       richColors={true}
+      style={{ 
+        maxWidth: '50vw',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        marginTop: '1rem'
+      }}
       toastOptions={{
         classNames: {
           toast:
@@ -24,6 +30,13 @@ const Toaster = ({ ...props }: ToasterProps) => {
           cancelButton:
             "group-[.toast]:bg-muted group-[.toast]:text-muted-foreground",
         },
+        style: {
+          background: 'var(--background)',
+          border: '1px solid var(--border)',
+          borderRadius: '0.5rem',
+          width: '100%',
+          maxWidth: '50vw'
+        }
       }}
       {...props}
     />

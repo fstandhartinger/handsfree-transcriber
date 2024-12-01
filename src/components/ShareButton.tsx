@@ -1,13 +1,8 @@
 import { Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast.tsx";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useTranslation } from "react-i18next";
 
 interface ShareButtonProps {
   text: string;
@@ -16,38 +11,39 @@ interface ShareButtonProps {
 const ShareButton = ({ text }: ShareButtonProps) => {
   const { toast } = useToast();
   const isMobile = useIsMobile();
+  const { t } = useTranslation();
 
   const handleShare = async () => {
     console.log('Attempting to share...');
-    if (isMobile) {
-      try {
-        await navigator.share({
-          text: text,
-        });
-        console.log('Content shared successfully via native share');
-      } catch (error) {
-        if ((error as Error).name !== 'AbortError') {
-          console.error('Error sharing:', error);
-          handleCopyToClipboard();
-        }
-      }
-    } else {
-      handleCopyToClipboard();
-    }
-  };
-
-  const handleCopyToClipboard = async () => {
     try {
+      // First copy to clipboard
       await navigator.clipboard.writeText(text);
-      console.log('Text copied to clipboard');
       toast({
-        description: "Text in die Zwischenablage kopiert",
+        description: t('toasts.textCopied'),
         duration: 2000,
       });
+
+      // Then try to open native share dialog
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            text: text,
+          });
+          console.log('Content shared successfully via native share');
+        } catch (error) {
+          if ((error as Error).name !== 'AbortError') {
+            console.error('Error sharing:', error);
+            toast({
+              description: t('toasts.shareFailed'),
+              variant: "destructive",
+            });
+          }
+        }
+      }
     } catch (error) {
       console.error('Error copying to clipboard:', error);
       toast({
-        description: "Fehler beim Kopieren in die Zwischenablage",
+        description: t('toasts.clipboardError'),
         variant: "destructive",
       });
     }

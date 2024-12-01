@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import EditableText from "@/components/EditableText";
@@ -6,10 +6,12 @@ import TextControls from "@/components/TextControls";
 import ShareButton from "@/components/ShareButton";
 import InstallButton from "@/components/InstallButton";
 import RecordingModal from "@/components/RecordingModal";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast.tsx";
 import { supabase } from "@/integrations/supabase/client";
 import { useAudioRecording } from "@/hooks/useAudioRecording";
 import { useAudioProcessing } from "@/hooks/useAudioProcessing";
+import { useTranslation } from "react-i18next";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 interface TextEditViewProps {
   text: string;
@@ -27,6 +29,12 @@ const TextEditView = ({ text: initialText, onBack }: TextEditViewProps) => {
   const [isRecordingRephrase, setIsRecordingRephrase] = useState(false);
   const [isProcessingRephrase, setIsProcessingRephrase] = useState(false);
   const { toast } = useToast();
+  const { t } = useTranslation();
+
+  // Debug: Log state changes
+  useEffect(() => {
+    console.log('Processing state changed:', { isProcessing });
+  }, [isProcessing]);
 
   const { isRecording, startRecording, stopRecording } = useAudioRecording();
   const { processAudioForRephrase } = useAudioProcessing(text, (newText: string) => {
@@ -43,8 +51,14 @@ const TextEditView = ({ text: initialText, onBack }: TextEditViewProps) => {
 
   const handleStyleChange = async (style: string) => {
     try {
-      console.log(`Applying ${style} style to text...`);
+      console.log('Style change started:', { style, text });
       setIsProcessing(true);
+      console.log('Processing state set to true');
+      
+      console.log('Calling Supabase function with:', {
+        text,
+        instruction: `Make this text more ${style.toLowerCase()}`
+      });
       
       const { data, error } = await supabase.functions.invoke('refine-text', {
         body: {
@@ -58,20 +72,21 @@ const TextEditView = ({ text: initialText, onBack }: TextEditViewProps) => {
         throw error;
       }
 
-      console.log('Text successfully refined:', data);
+      console.log('Supabase response:', { data });
       addToHistory(data.text);
       setText(data.text);
       toast({
-        description: `Text style updated to ${style}`,
+        description: t('toasts.styleUpdated', { style: t(`buttons.${style.toLowerCase()}`) }),
         duration: 2000,
       });
     } catch (error) {
       console.error('Error updating text style:', error);
       toast({
-        description: "Error updating text style",
+        description: t('toasts.styleUpdateError'),
         variant: "destructive",
       });
     } finally {
+      console.log('Style change completed, setting processing to false');
       setIsProcessing(false);
     }
   };
@@ -82,7 +97,7 @@ const TextEditView = ({ text: initialText, onBack }: TextEditViewProps) => {
       setCurrentHistoryIndex(currentHistoryIndex - 1);
       setText(previousText);
       toast({
-        description: "Changes undone",
+        description: t('toasts.changesUndone'),
         duration: 2000,
       });
     }
@@ -99,18 +114,18 @@ const TextEditView = ({ text: initialText, onBack }: TextEditViewProps) => {
       const audioBlob = await stopRecording();
       if (audioBlob) {
         setIsProcessingRephrase(true);
+        setIsRecordingRephrase(false);
         await processAudioForRephrase(audioBlob);
+        setShowRephraseModal(false);
       }
     } catch (error) {
       console.error('Error processing audio:', error);
       toast({
-        description: "Error processing audio",
+        description: t('toasts.audioProcessingError'),
         variant: "destructive",
       });
     } finally {
-      setIsRecordingRephrase(false);
       setIsProcessingRephrase(false);
-      setShowRephraseModal(false);
     }
   };
 
@@ -126,24 +141,39 @@ const TextEditView = ({ text: initialText, onBack }: TextEditViewProps) => {
     setIsProcessingRephrase(false);
   };
 
+  console.log('Rendering TextEditView:', { 
+    isProcessing, 
+    isProcessingRephrase,
+    isEditMode,
+    showRephraseModal 
+  });
+
   return (
-    <div className="min-h-screen flex flex-col p-4 relative">
-      <Button
-        onClick={onBack}
-        variant="outline"
-        size="icon"
-        className="fixed top-4 left-4 w-10 h-10 p-0"
-      >
-        <ArrowLeft className="h-4 w-4" />
-      </Button>
-      
-      <div className="fixed top-4 right-4">
-        <ShareButton text={text} />
+    <div className="h-screen flex flex-col overflow-hidden">
+      <div className="h-16 flex items-center justify-between px-4 relative">
+        <Button
+          onClick={onBack}
+          variant="outline"
+          size="icon"
+          className="w-10 h-10 p-0"
+        >
+          <ArrowLeft className="h-4 w-4" />
+        </Button>
+        
+        {isProcessing && (
+          <div className="absolute left-1/2 -translate-x-1/2 z-50">
+            <LoadingSpinner size="md" className="text-primary" />
+            <div className="sr-only">Loading indicator should be visible</div>
+          </div>
+        )}
+        
+        <div className="flex items-center gap-2">
+          <ShareButton text={text} />
+          <InstallButton />
+        </div>
       </div>
 
-      <InstallButton />
-
-      <div className="flex-1 mt-16">
+      <div className="flex-1 flex flex-col min-h-0">
         <EditableText 
           text={text} 
           onChange={setText} 

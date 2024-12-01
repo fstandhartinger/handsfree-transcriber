@@ -22,7 +22,8 @@ const resources = {
         stop: "Stop",
         share: "Share",
         cancel: "Cancel",
-        undo: "Undo"
+        undo: "Undo",
+        style: "Style"
       },
       recording: {
         status: "Recording",
@@ -30,15 +31,25 @@ const resources = {
         editInstruction: "Speak your correction instructions...\n(e.g. \"Make this part more detailed\" or \"Remove this\")",
         markedText: "Marked text:",
         rephraseTitle: "Rephrase Text",
-        rephraseDescription: "Press the microphone button and speak how you would like the text to be rephrased. Examples:\n• Format as a letter\n• Translate to English\n• Next Thursday instead of next Wednesday",
+        rephraseDescription: "Press the microphone button and speak how you would like the text to be rephrased.\n\n Examples:\n• 'Format as a letter'\n• 'Translate to English'\n• 'Next Thursday instead of next Wednesday'",
         instructionTitle: "Edit Text",
         instructionDescription: "Press the microphone button and speak your instructions for editing the marked text.",
-        selectedText: "Selected text:"
+        selectedText: "Selected text:",
+        processing: "Processing your request..."
       },
       toasts: {
         textCopied: "Text copied to clipboard",
         shareSuccess: "Text shared successfully",
-        shareFailed: "Failed to share text"
+        shareFailed: "Failed to share text",
+        styleUpdated: "Text style updated to {{style}}",
+        styleUpdateError: "Error updating text style",
+        changesUndone: "Changes undone",
+        audioProcessingError: "Error processing audio",
+        clipboardError: "Error copying to clipboard",
+        understood: "Understood",
+        textRephrased: "Text rephrased",
+        rephrasingError: "Error processing rephrasing. Please try again.",
+        textUpdated: "Text updated"
       },
       editMode: {
         instruction: "Select any text you want to modify. Selected text will be marked with a strikethrough."
@@ -58,28 +69,39 @@ const resources = {
         finishEdit: "Bearbeitung abschließen",
         formal: "Formell",
         concise: "Prägnant",
-        casual: "Umgangssprachlich",
+        casual: "Lässig",
         rephrase: "Umformulieren",
         copyText: "Text kopieren",
         stop: "Stopp",
         share: "Teilen",
         cancel: "Abbrechen",
-        undo: "Rückgängig"
+        undo: "Rückgängig",
+        style: "Stil"
       },
       recording: {
         status: "Aufnahme läuft...",
         markedText: "Markierter Text:",
         editInstruction: "Sprechen Sie Ihre Anweisungen zur Bearbeitung",
         rephraseTitle: "Text umformulieren",
-        rephraseDescription: "Drücken Sie auf das Mikrofon und sprechen Sie, wie der Text umformuliert werden soll. Beispiele:\n• Formatiere wie einen Brief\n• Übersetze auf Englisch\n• Nächsten Donnerstag statt nächsten Mittwoch",
+        rephraseDescription: "Drücken Sie auf das Mikrofon und sprechen Sie, wie der Text umformuliert werden soll.\n\n Beispiele:\n• 'Formatiere wie einen Brief'\n• 'Übersetze auf Englisch'\n• 'Nächsten Donnerstag statt nächsten Mittwoch'",
         instructionTitle: "Text bearbeiten",
         instructionDescription: "Drücken Sie auf das Mikrofon und sprechen Sie Ihre Anweisungen zur Bearbeitung des markierten Texts.",
-        selectedText: "Ausgewählter Text:"
+        selectedText: "Ausgewählter Text:",
+        processing: "Verarbeite Ihre Anfrage..."
       },
       toasts: {
         textCopied: "Text in die Zwischenablage kopiert",
         shareSuccess: "Text erfolgreich geteilt",
-        shareFailed: "Fehler beim Teilen des Textes"
+        shareFailed: "Fehler beim Teilen des Textes",
+        styleUpdated: "Textstil geändert zu {{style}}",
+        styleUpdateError: "Fehler beim Ändern des Textstils",
+        changesUndone: "Änderungen rückgängig gemacht",
+        audioProcessingError: "Fehler bei der Audioverarbeitung",
+        clipboardError: "Fehler beim Kopieren in die Zwischenablage",
+        understood: "Verstanden",
+        textRephrased: "Text umformuliert",
+        rephrasingError: "Fehler bei der Umformulierung. Bitte versuchen Sie es erneut.",
+        textUpdated: "Text aktualisiert"
       },
       editMode: {
         instruction: "Wählen Sie den Text aus, den Sie ändern möchten. Ausgewählter Text wird durchgestrichen dargestellt."

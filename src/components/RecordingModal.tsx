@@ -36,7 +36,9 @@ const RecordingModal = ({
           <X className="h-4 w-4" />
         </Button>
 
-        {!isRecording && !isProcessing ? (
+        {isProcessing ? (
+          <LoadingOverlay message={t('recording.processing')} />
+        ) : !isRecording ? (
           <>
             <h3 className="text-lg font-semibold mb-4">
               {mode === 'rephrase' ? t('recording.rephraseTitle') : t('recording.instructionTitle')}
@@ -65,8 +67,6 @@ const RecordingModal = ({
               </Button>
             </div>
           </>
-        ) : isProcessing ? (
-          <LoadingOverlay message={t('processing')} />
         ) : (
           <div className="space-y-6">
             <div className="flex items-center gap-3">
@@ -89,6 +89,6 @@ const RecordingModal = ({
       </div>
     </div>
   );
-};
+}
 
 export default RecordingModal;

@@ -1,6 +1,12 @@
-import { Mic, FileText, AlertCircle, Undo, Users } from "lucide-react";
+import { Mic, FileText, AlertCircle, Undo, Users, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface TextControlsProps {
   onStyleChange: (style: string) => void;
@@ -37,34 +43,41 @@ const TextControls = ({
 }: TextControlsProps) => {
   const { t } = useTranslation();
 
+  const handleStyleClick = (style: string) => {
+    console.log('Style button clicked:', { style, isProcessing });
+    onStyleChange(style);
+  };
+
   return (
     <div className="fixed bottom-4 right-4 flex flex-col-reverse gap-2">
       {!isEditMode ? (
         <>
-          <Button 
-            onClick={() => onStyleChange("Formal")} 
-            className="rounded-full shadow-lg flex items-center gap-2 px-4"
-            disabled={isProcessing}
-          >
-            <FileText className="w-5 h-5" />
-            {t('buttons.formal')}
-          </Button>
-          <Button 
-            onClick={() => onStyleChange("Concise")} 
-            className="rounded-full shadow-lg flex items-center gap-2 px-4"
-            disabled={isProcessing}
-          >
-            <AlertCircle className="w-5 h-5" />
-            {t('buttons.concise')}
-          </Button>
-          <Button 
-            onClick={() => onStyleChange("Casual")} 
-            className="rounded-full shadow-lg flex items-center gap-2 px-4"
-            disabled={isProcessing}
-          >
-            <Users className="w-5 h-5" />
-            {t('buttons.casual')}
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                className="rounded-full shadow-lg flex items-center gap-2 px-4"
+                disabled={isProcessing}
+              >
+                <FileText className="w-5 h-5" />
+                {t('buttons.style')}
+                <ChevronDown className="w-4 h-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="bg-background border border-border shadow-lg">
+              <DropdownMenuItem onClick={() => handleStyleClick("Formal")} className="hover:bg-accent">
+                <FileText className="w-4 h-4 mr-2" />
+                {t('buttons.formal')}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleStyleClick("Concise")} className="hover:bg-accent">
+                <AlertCircle className="w-4 h-4 mr-2" />
+                {t('buttons.concise')}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleStyleClick("Casual")} className="hover:bg-accent">
+                <Users className="w-4 h-4 mr-2" />
+                {t('buttons.casual')}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <Button
             onClick={isRecordingRephrase ? onStopRephraseRecording : onStartRephraseRecording}
             className="rounded-full shadow-lg flex items-center gap-2 px-4"

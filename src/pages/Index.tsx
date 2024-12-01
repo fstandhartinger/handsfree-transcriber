@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback } from "react";
 import { Mic } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast.tsx";
 import RecordingView from "@/components/RecordingView";
 import TextEditView from "@/components/TextEditView";
 import { supabase } from "@/integrations/supabase/client";
@@ -81,8 +81,7 @@ const Index = () => {
             console.error('Transcription error:', error);
             toast({
               description: "Error transcribing audio. Please try again.",
-              variant: "destructive",
-              className: "top-0 right-0 fixed mt-4 mr-4 max-w-[50vw] w-auto",
+              variant: "destructive",              
             });
           } finally {
             setIsTranscribing(false);
@@ -96,8 +95,7 @@ const Index = () => {
       setIsTranscribing(false);
       toast({
         description: "Error processing audio. Please try again.",
-        variant: "destructive",
-        className: "top-0 right-0 fixed mt-4 mr-4 max-w-[50vw] w-auto",
+        variant: "destructive",        
       });
     }
   }, [toast]);
@@ -107,7 +105,7 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4">
+    <div className="h-screen flex flex-col items-center justify-center">
       {isTranscribing ? (
         <div className="flex flex-col items-center gap-4">
           <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin" />

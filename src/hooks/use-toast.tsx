@@ -1,19 +1,17 @@
 import * as React from "react"
 
-import type {
-  ToastActionElement,
-  ToastProps,
-} from "@/components/ui/toast"
+type ToastProps = {
+  id: string
+  description?: React.ReactNode
+  variant?: "default" | "destructive"
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
+}
 
 const TOAST_LIMIT = 1
-const TOAST_REMOVE_DELAY = 1000000
+const TOAST_REMOVE_DELAY = 3000
 
-type ToasterToast = ToastProps & {
-  id: string
-  title?: React.ReactNode
-  description?: React.ReactNode
-  action?: ToastActionElement
-}
+type ToasterToast = ToastProps
 
 const actionTypes = {
   ADD_TOAST: "ADD_TOAST",
@@ -90,8 +88,6 @@ export const reducer = (state: State, action: Action): State => {
     case "DISMISS_TOAST": {
       const { toastId } = action
 
-      // ! Side effects ! - This could be extracted into a dismissToast() action,
-      // but I'll keep it here for simplicity
       if (toastId) {
         addToRemoveQueue(toastId)
       } else {
@@ -137,23 +133,23 @@ function dispatch(action: Action) {
   })
 }
 
-type Toast = Omit<ToasterToast, "id">
+interface Toast {
+  description?: string
+  duration?: number
+  variant?: "default" | "destructive"
+}
 
-function toast({ ...props }: Toast) {
+function toast({ description, duration = TOAST_REMOVE_DELAY, variant = "default" }: Toast) {
   const id = genId()
 
-  const update = (props: ToasterToast) =>
-    dispatch({
-      type: "UPDATE_TOAST",
-      toast: { ...props, id },
-    })
   const dismiss = () => dispatch({ type: "DISMISS_TOAST", toastId: id })
 
   dispatch({
     type: "ADD_TOAST",
     toast: {
-      ...props,
       id,
+      description,
+      variant,
       open: true,
       onOpenChange: (open) => {
         if (!open) dismiss()
@@ -161,10 +157,13 @@ function toast({ ...props }: Toast) {
     },
   })
 
+  if (duration > 0) {
+    setTimeout(dismiss, duration)
+  }
+
   return {
-    id: id,
+    id,
     dismiss,
-    update,
   }
 }
 
@@ -188,4 +187,4 @@ function useToast() {
   }
 }
 
-export { useToast, toast }
+export { useToast, toast, type ToastProps } 
