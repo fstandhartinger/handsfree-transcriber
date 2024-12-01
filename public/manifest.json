@@ -2,22 +2,65 @@
   "name": "Handsfree",
   "short_name": "Handsfree",
   "description": "Handsfree speech-to-text transcription with AI-powered text refinement",
-  "start_url": "/",
+  "id": "handsfree-transcriber",
+  "start_url": "/?source=pwa",
+  "scope": "/",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone"],
   "background_color": "#ffffff",
   "theme_color": "#3B82F6",
+  "orientation": "any",
+  "categories": ["productivity", "utilities"],
+  "launch_handler": {
+    "client_mode": ["navigate-existing", "auto"]
+  },
   "icons": [
     {
       "src": "mic-icon-192.png",
       "type": "image/png",
       "sizes": "192x192",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "mic-icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "maskable"
     },
     {
       "src": "mic-icon-512.png",
       "type": "image/png",
       "sizes": "512x512",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "mic-icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "maskable"
     }
-  ]
+  ],
+  "shortcuts": [
+    {
+      "name": "Start Recording",
+      "short_name": "Record",
+      "description": "Start a new voice recording",
+      "url": "/?action=record",
+      "icons": [{ "src": "mic-icon-192.png", "sizes": "192x192" }]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "screenshot.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "platform": "wide",
+      "label": "Homescreen of Handsfree"
+    }
+  ],
+  "prefer_related_applications": false,
+  "handle_links": "preferred",
+  "edge_side_panel": {
+    "preferred_width": 400
+  }
 }
