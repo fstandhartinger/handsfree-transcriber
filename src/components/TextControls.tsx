@@ -1,4 +1,4 @@
-import { Mic, FileText, AlertCircle, Undo, Users, ChevronDown } from "lucide-react";
+import { Mic, FileText, AlertCircle, Undo, Users, ChevronDown, Circle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
 import {
@@ -23,6 +23,7 @@ interface TextControlsProps {
   isEditMode: boolean;
   onEditModeChange: (isEdit: boolean) => void;
   onCancel?: () => void;
+  onNewRecording: () => void;
 }
 
 const TextControls = ({
@@ -40,6 +41,7 @@ const TextControls = ({
   isEditMode,
   onEditModeChange,
   onCancel,
+  onNewRecording,
 }: TextControlsProps) => {
   const { t } = useTranslation();
 
@@ -52,6 +54,14 @@ const TextControls = ({
     <div className="fixed bottom-4 right-4 flex flex-col-reverse gap-2">
       {!isEditMode ? (
         <>
+          <Button
+            onClick={onNewRecording}
+            className="rounded-full shadow-lg flex items-center gap-2 px-4"
+            disabled={isProcessing}
+          >
+            <Circle className="w-5 h-5 text-red-500" />
+            {t('buttons.newRecording')}
+          </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button 

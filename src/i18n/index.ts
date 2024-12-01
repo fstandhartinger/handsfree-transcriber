@@ -23,7 +23,8 @@ const resources = {
         share: "Share",
         cancel: "Cancel",
         undo: "Undo",
-        style: "Style"
+        style: "Style",
+        newRecording: "New Recording"
       },
       recording: {
         status: "Recording",
@@ -76,7 +77,8 @@ const resources = {
         share: "Teilen",
         cancel: "Abbrechen",
         undo: "Rückgängig",
-        style: "Stil"
+        style: "Stil",
+        newRecording: "Neue Aufnahme"
       },
       recording: {
         status: "Aufnahme läuft...",

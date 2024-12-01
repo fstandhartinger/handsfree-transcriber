@@ -152,8 +152,17 @@ const Index = () => {
     }
   }, [toast]);
 
+  const handleNewRecording = useCallback(() => {
+    setTranscribedText(null);
+    startRecording();
+  }, []);
+
   if (transcribedText) {
-    return <TextEditView text={transcribedText} onBack={() => setTranscribedText(null)} />;
+    return <TextEditView 
+      text={transcribedText} 
+      onBack={() => setTranscribedText(null)} 
+      onNewRecording={handleNewRecording}
+    />;
   }
 
   return (

@@ -16,9 +16,10 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner";
 interface TextEditViewProps {
   text: string;
   onBack: () => void;
+  onNewRecording: () => void;
 }
 
-const TextEditView = ({ text: initialText, onBack }: TextEditViewProps) => {
+const TextEditView = ({ text: initialText, onBack, onNewRecording }: TextEditViewProps) => {
   const [text, setText] = useState(initialText);
   const [isEditMode, setIsEditMode] = useState(false);
   const [textHistory, setTextHistory] = useState<string[]>([initialText]);
@@ -196,6 +197,7 @@ const TextEditView = ({ text: initialText, onBack }: TextEditViewProps) => {
           isEditMode={isEditMode}
           onEditModeChange={setIsEditMode}
           onCancel={() => setIsEditMode(false)}
+          onNewRecording={onNewRecording}
         />
       </div>
 
