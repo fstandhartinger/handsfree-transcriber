@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from "react";
-import { Mic, Heart } from "lucide-react";
+import { Mic } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import RecordingView from "@/components/RecordingView";
@@ -108,7 +108,6 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4">
-      <Heart className="text-red-500 w-8 h-8 mb-4" />
       {isTranscribing ? (
         <div className="flex flex-col items-center gap-4">
           <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin" />
