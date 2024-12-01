@@ -1,19 +1,71 @@
-import { useState, useRef, useCallback } from "react";
-import { Mic } from "lucide-react";
+import { useState, useRef, useCallback, useEffect } from "react";
+import { Mic, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast.tsx";
 import RecordingView from "@/components/RecordingView";
 import TextEditView from "@/components/TextEditView";
 import { supabase } from "@/integrations/supabase/client";
 
+interface BeforeInstallPromptEvent extends Event {
+  prompt(): Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
+}
+
 const Index = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [transcribedText, setTranscribedText] = useState<string | null>(null);
   const [isTranscribing, setIsTranscribing] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [isInstalled, setIsInstalled] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const { toast } = useToast();
+
+  useEffect(() => {
+    // Check if app is installed
+    const checkInstalled = () => {
+      if (window.matchMedia('(display-mode: standalone)').matches) {
+        setIsInstalled(true);
+      }
+    };
+    checkInstalled();
+
+    // Listen for beforeinstallprompt event
+    window.addEventListener('beforeinstallprompt', (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e as BeforeInstallPromptEvent);
+    });
+
+    // Check for updates if in PWA mode
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.ready.then((registration) => {
+          registration.update();
+        });
+      }
+    }
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return;
+    
+    try {
+      await deferredPrompt.prompt();
+      const result = await deferredPrompt.userChoice;
+      
+      if (result.outcome === 'accepted') {
+        setDeferredPrompt(null);
+        setIsInstalled(true);
+      }
+    } catch (error) {
+      console.error('Error installing PWA:', error);
+      toast({
+        description: "Error installing the app. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const startRecording = async () => {
     try {
@@ -106,6 +158,19 @@ const Index = () => {
 
   return (
     <div className="h-screen flex flex-col items-center justify-center">
+      <div className="fixed top-4 right-4 flex gap-2">
+        {!isInstalled && deferredPrompt && (
+          <Button
+            onClick={handleInstallClick}
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-2"
+          >
+            <Download className="w-4 h-4" />
+            Install
+          </Button>
+        )}
+      </div>
       {isTranscribing ? (
         <div className="flex flex-col items-center gap-4">
           <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin" />
