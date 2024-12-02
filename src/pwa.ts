@@ -35,11 +35,32 @@ export const registerServiceWorker = async () => {
         }
       });
 
+      // Check for updates more frequently when in standalone mode
+      const updateInterval = window.matchMedia('(display-mode: standalone)').matches
+        ? 15 * 60 * 1000  // Every 15 minutes in PWA mode
+        : 60 * 60 * 1000; // Every hour in browser mode
+
       // Check for updates periodically
-      setInterval(() => {
-        registration.update();
-        console.log('Checking for service worker updates...');
-      }, 1000 * 60 * 60); // Check every hour
+      const periodicUpdate = async () => {
+        try {
+          await registration.update();
+          console.log('Checking for service worker updates...');
+        } catch (error) {
+          console.error('Error checking for updates:', error);
+        }
+      };
+
+      setInterval(periodicUpdate, updateInterval);
+
+      // Also check for updates when the app comes back online
+      window.addEventListener('online', periodicUpdate);
+
+      // Additional check when the page becomes visible again
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+          periodicUpdate();
+        }
+      });
 
     } catch (error) {
       console.error('Service Worker registration failed:', error);
