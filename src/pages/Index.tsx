@@ -76,7 +76,7 @@ const Index = () => {
   const handleInstallClick = async () => {
     // For Windows, redirect to download page
     if (navigator.platform.includes('Win')) {
-      window.location.href = 'https://www.dropbox.com/scl/fi/41h8348e7tt79uxzt8ezn/handsfree-transcriber.exe?rlkey=mbk9f1f5dx200b8cf15jfxu5e&dl=1';
+      window.location.href = 'https://www.dropbox.com/scl/fi/k14pf9cor81mwnsysyxud/handsfree-transcriber.exe?rlkey=g73uxxtldzb8xerrf4ldo14e4&dl=1';
       return;
     }
 
