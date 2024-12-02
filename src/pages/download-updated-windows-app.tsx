@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 
 const DownloadUpdatedWindowsApp = () => {
   const { t } = useTranslation();
-  const downloadUrl = "https://www.dropbox.com/scl/fi/k14pf9cor81mwnsysyxud/handsfree-transcriber.exe?rlkey=g73uxxtldzb8xerrf4ldo14e4&dl=1";
+  const downloadUrl = "https://www.dropbox.com/scl/fi/cfins50r2tv5g7z7j8d80/handsfree-transcriber.exe?rlkey=ezwfmhzr73rhba1ls5fzkb4xt&dl=1";
 
   return (
     <div className="h-screen flex flex-col items-center justify-center p-4">
