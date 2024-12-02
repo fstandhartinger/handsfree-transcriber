@@ -1,10 +1,13 @@
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "react-i18next";
 
 interface RecordingViewProps {
   onStop: () => void;
 }
 
 const RecordingView = ({ onStop }: RecordingViewProps) => {
+  const { t } = useTranslation();
+  
   return (
     <div className="flex flex-col items-center gap-4">
       <Button
@@ -14,7 +17,7 @@ const RecordingView = ({ onStop }: RecordingViewProps) => {
       >
         <div className="w-6 h-6 bg-white rounded-none" />
       </Button>
-      <p className="text-lg">Recording...</p>
+      <p className="text-lg">{t('recording.recording')}</p>
     </div>
   );
 };

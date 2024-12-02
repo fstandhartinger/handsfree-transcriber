@@ -17,7 +17,8 @@
     "instructionTitle": "Text bearbeiten",
     "instructionDescription": "Drücken Sie auf das Mikrofon und sprechen Sie Ihre Anweisungen zur Bearbeitung des markierten Texts.",
     "selectedText": "Ausgewählter Text:",
-    "processing": "Verarbeite..."
+    "processing": "Verarbeite...",
+    "recording": "Aufzeichnung..."
   },
   "buttons": {
     "edit": "Abschnitt bearbeiten",

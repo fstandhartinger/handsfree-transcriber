@@ -37,7 +37,8 @@
     "instructionTitle": "Edit Text",
     "instructionDescription": "Press the microphone button and speak your instructions for editing the marked text.",
     "selectedText": "Selected text:",
-    "processing": "Processing..."
+    "processing": "Processing...",
+    "recording": "Recording..."
   },
   "toasts": {
     "textCopied": "Text copied to clipboard",
