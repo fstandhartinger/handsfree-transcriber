@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import EditableText from "@/components/EditableText";
 import TextControls from "@/components/TextControls";

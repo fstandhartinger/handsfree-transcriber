@@ -5,6 +5,7 @@ import { useToast } from "@/hooks/use-toast.tsx";
 import RecordingView from "@/components/RecordingView";
 import TextEditView from "@/components/TextEditView";
 import { supabase } from "@/integrations/supabase/client";
+import { useTranslation } from "react-i18next";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
@@ -12,17 +13,24 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 const Index = () => {
+  const { t } = useTranslation();
   const [isRecording, setIsRecording] = useState(false);
   const [transcribedText, setTranscribedText] = useState<string | null>(null);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstalled, setIsInstalled] = useState(false);
+  const [shouldOfferInstallation, setShouldOfferInstallation] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
+    // Check URL parameter for installation offer
+    const urlParams = new URLSearchParams(window.location.search);
+    const offerInstallation = urlParams.get('offerInstallation') === 'true';
+    setShouldOfferInstallation(offerInstallation);
+
     // Check if app is installed
     const checkInstalled = () => {
       if (window.matchMedia('(display-mode: standalone)').matches) {
@@ -170,7 +178,7 @@ const Index = () => {
       {isTranscribing ? (
         <div className="flex flex-col items-center gap-4">
           <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-          <p className="text-lg">Transcribing...</p>
+          <p className="text-lg">{t('status.transcribing')}</p>
         </div>
       ) : isRecording ? (
         <RecordingView onStop={stopRecording} />
@@ -184,17 +192,16 @@ const Index = () => {
         </Button>
       )}
       
-      {!isInstalled && deferredPrompt && (
+      {!isInstalled && deferredPrompt && !transcribedText && shouldOfferInstallation && (
         <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">Install app for offline use</p>
+          <p className="text-sm text-muted-foreground">{t('buttons.install')}</p>
           <Button
             onClick={handleInstallClick}
             variant="outline"
             size="sm"
-            className="flex items-center gap-2"
+            className="w-8 h-8 p-0"
           >
             <Download className="w-4 h-4" />
-            Install
           </Button>
         </div>
       )}

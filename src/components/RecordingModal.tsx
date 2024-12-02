@@ -24,6 +24,17 @@ const RecordingModal = ({
 }: RecordingModalProps) => {
   const { t } = useTranslation();
 
+  if (isProcessing) {
+    return (
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div className="bg-white p-4 rounded-lg flex items-center gap-2">
+          <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          <span>{t('status.transcribing')}</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded-lg max-w-md w-full mx-4 relative">
@@ -36,9 +47,7 @@ const RecordingModal = ({
           <X className="h-4 w-4" />
         </Button>
 
-        {isProcessing ? (
-          <LoadingOverlay message={t('recording.processing')} />
-        ) : !isRecording ? (
+        {!isRecording ? (
           <>
             <h3 className="text-lg font-semibold mb-4">
               {mode === 'rephrase' ? t('recording.rephraseTitle') : t('recording.instructionTitle')}

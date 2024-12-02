@@ -1,6 +1,7 @@
 import { Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
@@ -13,7 +14,12 @@ declare global {
   }
 }
 
-const InstallButton = () => {
+interface InstallButtonProps {
+  className?: string;
+}
+
+const InstallButton = ({ className = "" }: InstallButtonProps) => {
+  const { t } = useTranslation();
   const [isInstallable, setIsInstallable] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
 
@@ -163,8 +169,8 @@ const InstallButton = () => {
       onClick={handleInstallClick}
       variant="outline"
       size="icon"
-      className="w-10 h-10 p-0"
-      title="Install App"
+      className={className}
+      title={t('buttons.install')}
     >
       <Download className="h-4 w-4" />
     </Button>

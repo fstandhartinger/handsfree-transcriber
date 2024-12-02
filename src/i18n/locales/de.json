@@ -1,22 +1,56 @@
 {
   "recording": {
     "status": "Aufnahme läuft...",
-    "markedText": "Markierter Text:",
+    "instruction": "Erklären Sie, wie der Text umformuliert werden soll, zum Beispiel: 'kürzer und seriöser' oder 'auf Französisch übersetzen'",
     "editInstruction": "Sprechen Sie Ihre Anweisungen zur Bearbeitung",
+    "markedText": "Markierter Text:",
     "rephraseTitle": "Text umformulieren",
-    "rephraseDescription": "Drücken Sie auf das Mikrofon und sprechen Sie, wie der Text umformuliert werden soll.",
+    "rephraseDescription": "Drücken Sie auf das Mikrofon und sprechen Sie, wie der Text umformuliert werden soll.\n\n Beispiele:\n• 'Formatiere wie einen Brief'\n• 'Übersetze auf Englisch'\n• 'Nächsten Donnerstag statt nächsten Mittwoch'",
     "instructionTitle": "Text bearbeiten",
     "instructionDescription": "Drücken Sie auf das Mikrofon und sprechen Sie Ihre Anweisungen zur Bearbeitung des markierten Texts.",
-    "selectedText": "Ausgewählter Text:"
+    "selectedText": "Ausgewählter Text:",
+    "processing": "Verarbeite..."
   },
   "buttons": {
+    "edit": "Abschnitt bearbeiten",
+    "finishEdit": "Bearbeitung abschließen",
     "formal": "Formell",
     "concise": "Prägnant",
     "casual": "Lässig",
     "rephrase": "Umformulieren",
-    "edit": "Bearbeiten",
+    "copyText": "Text kopieren",
+    "stop": "Stopp",
+    "share": "Teilen",
+    "cancel": "Abbrechen",
     "undo": "Rückgängig",
-    "finishEdit": "Bearbeitung abschließen",
-    "cancel": "Abbrechen"
+    "style": "Stil",
+    "newRecording": "Neue Aufnahme",
+    "install": "App installieren"
+  },
+  "toasts": {
+    "textCopied": "Text in die Zwischenablage kopiert",
+    "shareSuccess": "Text erfolgreich geteilt",
+    "shareFailed": "Fehler beim Teilen des Textes",
+    "styleUpdated": "Textstil geändert zu {{style}}",
+    "styleUpdateError": "Fehler beim Ändern des Textstils",
+    "changesUndone": "Änderungen rückgängig gemacht",
+    "audioProcessingError": "Fehler bei der Audioverarbeitung",
+    "clipboardError": "Fehler beim Kopieren in die Zwischenablage",
+    "understood": "Verstanden",
+    "textRephrased": "Text umformuliert",
+    "rephrasingError": "Fehler bei der Umformulierung. Bitte versuchen Sie es erneut.",
+    "textUpdated": "Text aktualisiert"
+  },
+  "editMode": {
+    "instruction": "Wählen Sie den Text aus, den Sie ändern möchten. Ausgewählter Text wird durchgestrichen dargestellt."
+  },
+  "share": {
+    "title": "Teilen über",
+    "whatsapp": "WhatsApp",
+    "email": "E-Mail",
+    "clipboard": "In Zwischenablage kopieren"
+  },
+  "status": {
+    "transcribing": "Verarbeite..."
   }
 }
