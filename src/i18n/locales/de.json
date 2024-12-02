@@ -37,7 +37,7 @@
   },
   "settings": {
     "title": "Einstellungen",
-    "autoCopy": "Neuen Text automatisch in die Zwischenablage kopieren"
+    "autoCopy": "Text automatisch in Zwischenablage kopieren"
   },
   "toasts": {
     "textCopied": "Text in die Zwischenablage kopiert",
