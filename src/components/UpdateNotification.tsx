@@ -1,11 +1,29 @@
 import { useEffect, useState } from 'react';
-import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const UpdateNotification = () => {
   const [waitingWorker, setWaitingWorker] = useState<ServiceWorker | null>(null);
-  const [showReload, setShowReload] = useState(false);
-  const { toast } = useToast();
+  const [showUpdateDialog, setShowUpdateDialog] = useState(false);
+
+  const reloadPage = () => {
+    if (waitingWorker) {
+      // Zuerst den Service Worker aktivieren
+      waitingWorker.postMessage({ type: 'SKIP_WAITING' });
+      
+      // Listener für den statechange Event hinzufügen
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        // Seite erst neu laden, wenn der neue Service Worker die Kontrolle übernommen hat
+        window.location.reload();
+      });
+    }
+  };
 
   useEffect(() => {
     if (!('serviceWorker' in navigator)) {
@@ -15,19 +33,22 @@ const UpdateNotification = () => {
     navigator.serviceWorker.ready.then(registration => {
       console.log('Service Worker bereit');
       
-      registration.addEventListener('waiting', event => {
+      // Auf neue Version prüfen
+      const handleWaiting = () => {
         console.log('Neue Version verfügbar');
         if (registration.waiting) {
           setWaitingWorker(registration.waiting);
-          setShowReload(true);
-          
-          toast({
-            description: "Update verfügbar: Eine neue Version der App ist verfügbar.",
-            duration: 0,
-            variant: "default"
-          });
+          setShowUpdateDialog(true);
         }
-      });
+      };
+
+      // Prüfen ob bereits ein wartender Service Worker existiert
+      if (registration.waiting) {
+        handleWaiting();
+      }
+
+      // Auf zukünftige Updates hören
+      registration.addEventListener('waiting', handleWaiting);
 
       // Periodisch nach Updates suchen
       const checkForUpdates = async () => {
@@ -41,7 +62,7 @@ const UpdateNotification = () => {
 
       // Häufigere Prüfung im PWA-Modus
       const updateInterval = window.matchMedia('(display-mode: standalone)').matches
-        ? 15 * 60 * 1000  // Alle 15 Minuten im PWA-Modus
+        ? 60 * 1000     // Jede Minute im PWA-Modus
         : 60 * 60 * 1000; // Jede Stunde im Browser-Modus
 
       const interval = setInterval(checkForUpdates, updateInterval);
@@ -52,11 +73,31 @@ const UpdateNotification = () => {
       return () => {
         clearInterval(interval);
         window.removeEventListener('online', checkForUpdates);
+        registration.removeEventListener('waiting', handleWaiting);
       };
     });
-  }, [waitingWorker]);
+  }, []);
 
-  return null;
+  return (
+    <Dialog open={showUpdateDialog} onOpenChange={setShowUpdateDialog}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Update verfügbar</DialogTitle>
+          <DialogDescription>
+            Eine neue Version der App ist verfügbar. Möchten Sie jetzt aktualisieren?
+          </DialogDescription>
+        </DialogHeader>
+        <div className="flex justify-end gap-3 mt-4">
+          <Button variant="outline" onClick={() => setShowUpdateDialog(false)}>
+            Später
+          </Button>
+          <Button onClick={reloadPage}>
+            Jetzt aktualisieren
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
 };
 
 export default UpdateNotification;
