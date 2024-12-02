@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useRef, useCallback, useEffect } from "react";
 import { Mic, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,20 @@ interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
+
+// Windows app communication interface
+const transcriber = {
+  StartTranscription: () => {
+    // Will be implemented by the page
+  },
+  StopTranscription: () => {
+    // Will be implemented by the page
+  },
+  IsNewVersionNeeded: (version: number) => {
+    // Current version is 1
+    return version < 1;
+  }
+};
 
 const Index = () => {
   const { t } = useTranslation();
@@ -28,7 +43,7 @@ const Index = () => {
   useEffect(() => {
     // Check URL parameter for installation offer
     const urlParams = new URLSearchParams(window.location.search);
-    const offerInstallation = urlParams.get('offerInstallation') === 'true';
+    const offerInstallation = urlParams.get('offerInstallation') !== 'false';
     setShouldOfferInstallation(offerInstallation);
 
     // Check if app is installed
@@ -53,9 +68,18 @@ const Index = () => {
         });
       }
     }
+
+    // Make transcriber interface available globally
+    (window as any).transcriber = transcriber;
   }, []);
 
   const handleInstallClick = async () => {
+    // For Windows, redirect to download page
+    if (navigator.platform.includes('Win')) {
+      window.location.href = 'https://www.dropbox.com/scl/fi/41h8348e7tt79uxzt8ezn/handsfree-transcriber.exe?rlkey=mbk9f1f5dx200b8cf15jfxu5e&dl=1';
+      return;
+    }
+
     if (!deferredPrompt) return;
     
     try {
@@ -77,7 +101,7 @@ const Index = () => {
 
   const startRecording = async () => {
     try {
-      console.log('Starting recording...');
+      //alert('Starting recording...');
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
       const mediaRecorder = new MediaRecorder(stream);
@@ -92,6 +116,12 @@ const Index = () => {
 
       mediaRecorder.start();
       setIsRecording(true);
+
+      // Notify Windows app that recording started
+      const host = (window as any).chrome?.webview?.hostObjects?.transcriberHost;
+      if (host?.NotifyTranscriptionStarted) {
+        host.NotifyTranscriptionStarted();
+      }
       
       console.log('Recording started successfully');
     } catch (error) {
@@ -111,6 +141,12 @@ const Index = () => {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
       setIsTranscribing(true);
+
+      // Notify Windows app that recording stopped
+      const host = (window as any).chrome?.webview?.hostObjects?.transcriberHost;
+      if (host?.NotifyTranscriptionStopped) {
+        host.NotifyTranscriptionStopped();
+      }
 
       // Clean up the media stream
       if (streamRef.current) {
@@ -137,6 +173,12 @@ const Index = () => {
             if (error) throw error;
             
             setTranscribedText(data.transcription);
+
+            // Notify Windows app that text generation is complete
+            const host = (window as any).chrome?.webview?.hostObjects?.transcriberHost;
+            if (host?.NotifyTextGenerationCompleted) {
+              host.NotifyTextGenerationCompleted();
+            }
           } catch (error) {
             console.error('Transcription error:', error);
             toast({
@@ -165,6 +207,10 @@ const Index = () => {
     startRecording();
   }, []);
 
+  // Implement transcriber interface methods
+  transcriber.StartTranscription = handleNewRecording;
+  transcriber.StopTranscription = stopRecording;
+
   if (transcribedText) {
     return <TextEditView 
       text={transcribedText} 
@@ -172,6 +218,11 @@ const Index = () => {
       onNewRecording={handleNewRecording}
     />;
   }
+
+  const shouldShowInstallButton = !isInstalled && 
+    (deferredPrompt || navigator.platform.includes('Win')) && 
+    !transcribedText && 
+    shouldOfferInstallation;
 
   return (
     <div className="h-screen flex flex-col items-center justify-center">
@@ -192,7 +243,7 @@ const Index = () => {
         </Button>
       )}
       
-      {!isInstalled && deferredPrompt && !transcribedText && shouldOfferInstallation && (
+      {shouldShowInstallButton && (
         <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t flex items-center justify-between">
           <p className="text-sm text-muted-foreground">{t('buttons.install')}</p>
           <Button

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from "react";
 import { ArrowLeft, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -76,6 +77,13 @@ const TextEditView = ({ text: initialText, onBack, onNewRecording }: TextEditVie
       console.log('Supabase response:', { data });
       addToHistory(data.text);
       setText(data.text);
+
+      // Notify Windows app that text generation is complete
+      const host = (window as any).chrome?.webview?.hostObjects?.transcriberHost;
+      if (host?.NotifyTextGenerationCompleted) {
+        host.NotifyTextGenerationCompleted();
+      }
+
       toast({
         description: t('toasts.styleUpdated', { style: t(`buttons.${style.toLowerCase()}`) }),
         duration: 2000,
@@ -117,6 +125,13 @@ const TextEditView = ({ text: initialText, onBack, onNewRecording }: TextEditVie
         setIsProcessingRephrase(true);
         setIsRecordingRephrase(false);
         await processAudioForRephrase(audioBlob);
+
+        // Notify Windows app that text generation is complete
+        const host = (window as any).chrome?.webview?.hostObjects?.transcriberHost;
+        if (host?.NotifyTextGenerationCompleted) {
+          host.NotifyTextGenerationCompleted();
+        }
+
         setShowRephraseModal(false);
       }
     } catch (error) {
