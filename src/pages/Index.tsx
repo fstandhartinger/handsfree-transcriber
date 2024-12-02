@@ -271,7 +271,6 @@ const Index = () => {
           </div>
         )}
       </div>
-
       <SettingsDialog 
         open={showSettings} 
         onOpenChange={setShowSettings} 

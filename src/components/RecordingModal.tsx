@@ -1,6 +1,7 @@
-import { Square, Mic, X } from "lucide-react";
+import { Square, Mic, X, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
+import { useState } from "react";
 import LoadingOverlay from "./LoadingOverlay";
 
 interface RecordingModalProps {
@@ -23,6 +24,7 @@ const RecordingModal = ({
   isProcessing = false
 }: RecordingModalProps) => {
   const { t } = useTranslation();
+  const [isExamplesExpanded, setIsExamplesExpanded] = useState(false);
 
   if (isProcessing) {
     return (
@@ -53,12 +55,44 @@ const RecordingModal = ({
               {mode === 'rephrase' ? t('recording.rephraseTitle') : t('recording.instructionTitle')}
             </h3>
             
-            <p className="text-gray-600 mb-6 whitespace-pre-line">
-              {mode === 'rephrase' ? t('recording.rephraseDescription') : t('recording.instructionDescription')}
-            </p>
+            <div className="space-y-4">
+              <p className="text-gray-600 whitespace-pre-line">
+                {mode === 'rephrase' 
+                  ? t('recording.rephraseMainInstruction', 'Drücken Sie auf das Mikrofon und sprechen Sie, wie der Text umformuliert werden soll.')
+                  : t('recording.instructionMainInstruction')}
+              </p>
+
+              <div>
+                <button
+                  onClick={() => setIsExamplesExpanded(!isExamplesExpanded)}
+                  className="w-full flex items-center justify-center gap-1 text-sm text-gray-500 hover:text-gray-700"
+                >
+                  {isExamplesExpanded ? (
+                    <ChevronUp className="h-3 w-3" />
+                  ) : (
+                    <ChevronDown className="h-3 w-3" />
+                  )}
+                  <span>{t('recording.examples', 'Beispiele anzeigen')}</span>
+                </button>
+                
+                {isExamplesExpanded && (
+                  <div className="mt-2 pl-5 text-sm text-gray-600">
+                    {mode === 'rephrase' ? (
+                      <ul className="space-y-1">
+                        {(t('recording.rephraseExamples', { returnObjects: true }) as string[]).map((example, index) => (
+                          <li key={index} className="italic">{example}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      t('recording.instructionExamples')
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
 
             {selectedText && (
-              <div className="mb-6 space-y-2">
+              <div className="mt-6 space-y-2">
                 <p className="text-sm font-medium">{t('recording.selectedText')}</p>
                 <p className="text-sm text-gray-600 bg-gray-100 p-3 rounded line-through">
                   {selectedText}
@@ -66,7 +100,7 @@ const RecordingModal = ({
               </div>
             )}
 
-            <div className="flex justify-center">
+            <div className="flex justify-center mt-6">
               <Button
                 onClick={onStartRecording}
                 size="lg"

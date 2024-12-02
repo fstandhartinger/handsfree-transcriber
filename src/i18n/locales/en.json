@@ -25,7 +25,15 @@
     "editInstruction": "Speak your correction instructions...\n(e.g. \"Make this part more detailed\" or \"Remove this\")",
     "markedText": "Marked text:",
     "rephraseTitle": "Rephrase Text",
-    "rephraseDescription": "Press the microphone button and speak how you would like the text to be rephrased.\n\n Examples:\n• 'Format as a letter'\n• 'Translate to English'\n• 'Next Thursday instead of next Wednesday'",
+    "rephraseMainInstruction": "Press the microphone button and speak how you would like the text to be rephrased.",
+    "examples": "Show examples",
+    "rephraseExamples": [
+      "Fix obvious phrasing issues",
+      "Format as a letter",
+      "Translate to English",
+      "Next Thursday instead of next Wednesday",
+      "Convert this to a JSON object"
+    ],
     "instructionTitle": "Edit Text",
     "instructionDescription": "Press the microphone button and speak your instructions for editing the marked text.",
     "selectedText": "Selected text:",

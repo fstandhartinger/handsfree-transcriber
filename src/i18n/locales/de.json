@@ -5,7 +5,15 @@
     "editInstruction": "Sprechen Sie Ihre Anweisungen zur Bearbeitung",
     "markedText": "Markierter Text:",
     "rephraseTitle": "Text umformulieren",
-    "rephraseDescription": "Drücken Sie auf das Mikrofon und sprechen Sie, wie der Text umformuliert werden soll.\n\n Beispiele:\n• 'Formatiere wie einen Brief'\n• 'Übersetze auf Englisch'\n• 'Nächsten Donnerstag statt nächsten Mittwoch'",
+    "rephraseMainInstruction": "Drücken Sie auf das Mikrofon und sprechen Sie, wie der Text umformuliert werden soll.",
+    "examples": "Beispiele anzeigen",
+    "rephraseExamples": [
+      "Korrigiere offensichtliche Formulierungsschwächen",
+      "Formatiere wie einen Brief",
+      "Übersetze auf Englisch",
+      "Nächsten Donnerstag statt nächsten Mittwoch",
+      "Mache daraus ein JSON Objekt"
+    ],
     "instructionTitle": "Text bearbeiten",
     "instructionDescription": "Drücken Sie auf das Mikrofon und sprechen Sie Ihre Anweisungen zur Bearbeitung des markierten Texts.",
     "selectedText": "Ausgewählter Text:",
