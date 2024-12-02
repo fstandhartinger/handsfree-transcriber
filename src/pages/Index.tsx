@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useRef, useCallback, useEffect } from "react";
-import { Mic, Download } from "lucide-react";
+import { Mic, Download, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast.tsx";
 import RecordingView from "@/components/RecordingView";
 import TextEditView from "@/components/TextEditView";
+import { SettingsDialog } from "@/components/SettingsDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useTranslation } from "react-i18next";
 
@@ -35,6 +36,7 @@ const Index = () => {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstalled, setIsInstalled] = useState(false);
   const [shouldOfferInstallation, setShouldOfferInstallation] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -225,37 +227,55 @@ const Index = () => {
     shouldOfferInstallation;
 
   return (
-    <div className="h-screen flex flex-col items-center justify-center">
-      {isTranscribing ? (
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-          <p className="text-lg">{t('status.transcribing')}</p>
-        </div>
-      ) : isRecording ? (
-        <RecordingView onStop={stopRecording} />
-      ) : (
+    <div className="h-screen flex flex-col">
+      <div className="h-16 flex items-center justify-end px-4">
         <Button
-          onClick={startRecording}
-          size="lg"
-          className="w-16 h-16 rounded-full"
+          variant="outline"
+          size="icon"
+          className="w-10 h-10 p-0"
+          onClick={() => setShowSettings(true)}
         >
-          <Mic className="w-8 h-8" />
+          <Settings className="h-4 w-4" />
         </Button>
-      )}
-      
-      {shouldShowInstallButton && (
-        <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">{t('buttons.install')}</p>
+      </div>
+      <div className="flex-1 flex flex-col items-center justify-center">
+        {isTranscribing ? (
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+            <p className="text-lg">{t('status.transcribing')}</p>
+          </div>
+        ) : isRecording ? (
+          <RecordingView onStop={stopRecording} />
+        ) : (
           <Button
-            onClick={handleInstallClick}
-            variant="outline"
-            size="sm"
-            className="w-8 h-8 p-0"
+            onClick={startRecording}
+            size="lg"
+            className="w-16 h-16 rounded-full"
           >
-            <Download className="w-4 h-4" />
+            <Mic className="w-8 h-8" />
           </Button>
-        </div>
-      )}
+        )}
+        
+        {shouldShowInstallButton && (
+          <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">{t('buttons.install')}</p>
+            <Button
+              onClick={handleInstallClick}
+              variant="outline"
+              size="sm"
+              className="gap-2"
+            >
+              <Download className="w-4 h-4" />
+              {t('buttons.install')}
+            </Button>
+          </div>
+        )}
+      </div>
+
+      <SettingsDialog 
+        open={showSettings} 
+        onOpenChange={setShowSettings} 
+      />
     </div>
   );
 };

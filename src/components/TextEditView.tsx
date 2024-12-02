@@ -13,6 +13,7 @@ import { useAudioRecording } from "@/hooks/useAudioRecording";
 import { useAudioProcessing } from "@/hooks/useAudioProcessing";
 import { useTranslation } from "react-i18next";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { useAutoCopyToClipboard } from "@/components/SettingsDialog";
 
 interface TextEditViewProps {
   text: string;
@@ -32,6 +33,40 @@ const TextEditView = ({ text: initialText, onBack, onNewRecording }: TextEditVie
   const [isProcessingRephrase, setIsProcessingRephrase] = useState(false);
   const { toast } = useToast();
   const { t } = useTranslation();
+  const [autoCopy] = useAutoCopyToClipboard();
+  const [hasInitialCopyBeenTriggered, setHasInitialCopyBeenTriggered] = useState(false);
+
+  // Function to copy text to clipboard
+  const copyToClipboard = async (textToCopy: string) => {
+    try {
+      await navigator.clipboard.writeText(textToCopy);
+      toast({
+        description: t('toasts.textCopied'),
+        duration: 2000,
+      });
+    } catch (error) {
+      console.error('Error copying to clipboard:', error);
+      toast({
+        description: t('toasts.clipboardError'),
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Auto-copy when text changes
+  useEffect(() => {
+    if (autoCopy && text !== initialText) {
+      copyToClipboard(text);
+    }
+  }, [text, autoCopy, initialText]);
+
+  // Handle initial text copy
+  useEffect(() => {
+    if (autoCopy && !hasInitialCopyBeenTriggered) {
+      copyToClipboard(initialText);
+      setHasInitialCopyBeenTriggered(true);
+    }
+  }, [autoCopy, initialText, hasInitialCopyBeenTriggered]);
 
   // Debug: Log state changes
   useEffect(() => {
@@ -49,6 +84,7 @@ const TextEditView = ({ text: initialText, onBack, onNewRecording }: TextEditVie
     newHistory.push(newText);
     setTextHistory(newHistory);
     setCurrentHistoryIndex(newHistory.length - 1);
+    setText(newText);
   };
 
   const handleStyleChange = async (style: string) => {

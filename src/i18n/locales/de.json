@@ -27,6 +27,10 @@
     "newRecording": "Neue Aufnahme",
     "install": "App installieren"
   },
+  "settings": {
+    "title": "Einstellungen",
+    "autoCopy": "Neuen Text automatisch in die Zwischenablage kopieren"
+  },
   "toasts": {
     "textCopied": "Text in die Zwischenablage kopiert",
     "shareSuccess": "Text erfolgreich geteilt",
