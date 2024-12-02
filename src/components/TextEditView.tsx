@@ -184,8 +184,14 @@ const TextEditView = ({ text: initialText, onBack, onNewRecording }: TextEditVie
         )}
         
         <div className="flex gap-2">
-          <ClipboardButton text={text} />
-          <ShareButton text={text} />
+          {(window as any).chrome?.webview?.hostObjects?.transcriberHost !== undefined ? (
+            <ClipboardButton text={text} className="ml-auto" />
+          ) : (
+            <>
+              <ClipboardButton text={text} />
+              <ShareButton text={text} />
+            </>
+          )}
         </div>
       </div>
 

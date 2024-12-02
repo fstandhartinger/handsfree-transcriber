@@ -3,12 +3,14 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast.tsx";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useTranslation } from "react-i18next";
+import { cn } from "@/lib/utils";
 
 interface ShareButtonProps {
   text: string;
+  className?: string;
 }
 
-export const ClipboardButton = ({ text }: ShareButtonProps) => {
+export const ClipboardButton = ({ text, className }: ShareButtonProps) => {
   const { toast } = useToast();
   const { t } = useTranslation();
 
@@ -33,14 +35,14 @@ export const ClipboardButton = ({ text }: ShareButtonProps) => {
       onClick={handleCopy}
       variant="outline"
       size="icon"
-      className="w-10 h-10 p-0 flex items-center justify-center"
+      className={cn("w-10 h-10 p-0 flex items-center justify-center", className)}
     >
       <Clipboard className="h-4 w-4" />
     </Button>
   );
 };
 
-const ShareButton = ({ text }: ShareButtonProps) => {
+const ShareButton = ({ text, className }: ShareButtonProps) => {
   const { toast } = useToast();
   const { t } = useTranslation();
 
@@ -68,7 +70,7 @@ const ShareButton = ({ text }: ShareButtonProps) => {
       onClick={handleShare}
       variant="outline"
       size="icon"
-      className="w-10 h-10 p-0 flex items-center justify-center"
+      className={cn("w-10 h-10 p-0 flex items-center justify-center", className)}
     >
       <Share2 className="h-4 w-4" />
     </Button>
