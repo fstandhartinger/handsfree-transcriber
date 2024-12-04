@@ -1,69 +1,7 @@
 {
-  "buttons": {
-    "edit": "Edit section",
-    "finishEdit": "Finish edit section",
-    "formal": "Formal",
-    "concise": "Concise",
-    "casual": "Casual",
-    "rephrase": "Rephrase",
-    "copyText": "Copy Text",
-    "stop": "Stop",
-    "share": "Share",
-    "cancel": "Cancel",
-    "undo": "Undo",
-    "style": "Style",
-    "newRecording": "New Recording",
-    "install": "Install app"
-  },
-  "settings": {
-    "title": "Settings",
-    "autoCopy": "Automatically copy new text into clipboard"
-  },
-  "recording": {
-    "status": "Recording",
-    "instruction": "Explain how you would like the text to be rephrased, for example: 'shorter and more serious' or 'translate to french'",
-    "editInstruction": "Speak your correction instructions...\n(e.g. \"Make this part more detailed\" or \"Remove this\")",
-    "markedText": "Marked text:",
-    "rephraseTitle": "Rephrase Text",
-    "rephraseMainInstruction": "Press the microphone button and speak how you would like the text to be rephrased.",
-    "examples": "Show examples",
-    "rephraseExamples": [
-      "Fix obvious phrasing issues",
-      "Format as a letter",
-      "Translate to English",
-      "Next Thursday instead of next Wednesday",
-      "Convert this to a JSON object"
-    ],
-    "instructionTitle": "Edit Text",
-    "instructionDescription": "Press the microphone button and speak your instructions for editing the marked text.",
-    "selectedText": "Selected text:",
-    "processing": "Processing...",
-    "recording": "Recording..."
-  },
-  "toasts": {
-    "textCopied": "Text copied to clipboard",
-    "shareSuccess": "Text shared successfully",
-    "shareFailed": "Failed to share text",
-    "styleUpdated": "Text style updated to {{style}}",
-    "styleUpdateError": "Error updating text style",
-    "changesUndone": "Changes undone",
-    "audioProcessingError": "Error processing audio",
-    "clipboardError": "Error copying to clipboard",
-    "understood": "Understood",
-    "textRephrased": "Text rephrased",
-    "rephrasingError": "Error processing rephrasing. Please try again.",
-    "textUpdated": "Text updated"
-  },
-  "editMode": {
-    "instruction": "Select any text you want to modify. Selected text will be marked with a strikethrough."
-  },
-  "share": {
-    "title": "Share via",
-    "whatsapp": "WhatsApp",
-    "email": "Email",
-    "clipboard": "Copy to Clipboard"
-  },
-  "status": {
-    "transcribing": "Processing..."
+  "auth": {
+    "signOut": "Sign out",
+    "continueUsing": "Sign in to continue using the app",
+    "signIn": "Sign in"
   }
-} 
+}

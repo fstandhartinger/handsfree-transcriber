@@ -1,10 +1,10 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { Toaster } from "@/components/ui/toaster"
 import { useEffect, useState } from 'react'
 import Index from './pages/Index'
-import AuthPage from './pages/Auth'
 import UpdateNotification from './components/UpdateNotification'
 import { supabase } from './integrations/supabase/client'
+import ProfileButton from './components/ProfileButton'
 import './App.css'
 
 function App() {
@@ -48,15 +48,11 @@ function App() {
 
   return (
     <Router>
+      <div className="h-16 flex items-center justify-end px-4 fixed top-0 right-0 w-full">
+        {isAuthenticated && <ProfileButton />}
+      </div>
       <Routes>
-        <Route 
-          path="/auth" 
-          element={isAuthenticated ? <Navigate to="/" /> : <AuthPage />} 
-        />
-        <Route 
-          path="/" 
-          element={isAuthenticated ? <Index /> : <Navigate to="/auth" />} 
-        />
+        <Route path="/*" element={<Index isAuthenticated={isAuthenticated} />} />
       </Routes>
       <UpdateNotification />
       <Toaster />
