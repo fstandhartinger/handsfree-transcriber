@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import { Mic } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,6 +7,7 @@ import TextEditView from "@/components/TextEditView";
 import { SettingsDialog } from "@/components/SettingsDialog";
 import AuthDialog from "@/components/AuthDialog";
 import { useUsageCounter } from "@/hooks/useUsageCounter";
+import { supabase } from "@/integrations/supabase/client";
 
 interface IndexProps {
   isAuthenticated: boolean;
