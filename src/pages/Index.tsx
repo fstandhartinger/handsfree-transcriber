@@ -43,6 +43,9 @@ const Index = ({ isAuthenticated }: IndexProps) => {
       setIsRecording(true);
 
       mediaRecorder.onstop = async () => {
+        // Stop all tracks in the stream to clear the recording indicator
+        stream.getTracks().forEach(track => track.stop());
+        
         const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
         const reader = new FileReader();
         
@@ -51,6 +54,7 @@ const Index = ({ isAuthenticated }: IndexProps) => {
           const audioDataUri = base64Audio.split(',')[1];
           
           try {
+            setIsTranscribing(true);
             const { data, error } = await supabase.functions.invoke('transcribe', {
               body: { audioDataUri },
             });
@@ -66,6 +70,7 @@ const Index = ({ isAuthenticated }: IndexProps) => {
             });
           } finally {
             setIsTranscribing(false);
+            setIsRecording(false);
           }
         };
 
@@ -77,6 +82,7 @@ const Index = ({ isAuthenticated }: IndexProps) => {
         description: "Could not access microphone. Please check permissions.",
         variant: "destructive",
       });
+      setIsRecording(false);
     }
   };
 
