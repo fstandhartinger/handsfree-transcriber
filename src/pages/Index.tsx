@@ -19,7 +19,7 @@ const Index = ({ isAuthenticated }: IndexProps) => {
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
-  const { incrementUsage } = useUsageCounter();
+  const { usageCount, incrementUsage, maxFreeUses } = useUsageCounter();
   const { toast } = useToast();
 
   const handleStartRecording = async () => {
@@ -102,13 +102,20 @@ const Index = ({ isAuthenticated }: IndexProps) => {
             setIsTranscribing(true);
           }} />
         ) : (
-          <Button
-            onClick={handleStartRecording}
-            size="lg"
-            className="w-16 h-16 rounded-full"
-          >
-            <Mic className="w-8 h-8" />
-          </Button>
+          <div className="flex flex-col items-center gap-4">
+            {!isAuthenticated && (
+              <p className="text-sm text-muted-foreground">
+                {maxFreeUses - usageCount} free uses remaining
+              </p>
+            )}
+            <Button
+              onClick={handleStartRecording}
+              size="lg"
+              className="w-16 h-16 rounded-full"
+            >
+              <Mic className="w-8 h-8" />
+            </Button>
+          </div>
         )}
       </div>
       <SettingsDialog 
