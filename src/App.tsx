@@ -6,6 +6,8 @@ import UpdateNotification from './components/UpdateNotification'
 import { supabase } from './integrations/supabase/client'
 import ProfileButton from './components/ProfileButton'
 import { SettingsDialog } from '@/components/SettingsDialog'
+import { Settings } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import './App.css'
 
 function App() {
@@ -50,7 +52,15 @@ function App() {
 
   return (
     <Router>
-      <div className="h-16 flex items-center justify-end px-4 fixed top-0 right-0 w-full gap-2">
+      <div className="h-16 flex items-center justify-end px-4 fixed top-0 right-0 w-full gap-4 bg-background z-50">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setShowSettings(true)}
+          className="h-10 w-10 flex items-center justify-center"
+        >
+          <Settings className="h-5 w-5" />
+        </Button>
         <SettingsDialog 
           open={showSettings} 
           onOpenChange={setShowSettings} 
