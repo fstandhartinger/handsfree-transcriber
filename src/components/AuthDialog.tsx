@@ -11,6 +11,11 @@ interface AuthDialogProps {
 
 const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
   const { t } = useTranslation();
+  
+  // Ensure we use the full URL for the redirect
+  const redirectTo = `${window.location.origin}/`;
+  
+  console.log('Auth redirect URL:', redirectTo); // Debug log
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -22,7 +27,7 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
           supabaseClient={supabase}
           appearance={{ theme: ThemeSupa }}
           providers={['google']}
-          redirectTo={`${window.location.origin}/`}
+          redirectTo={redirectTo}
         />
       </DialogContent>
     </Dialog>
