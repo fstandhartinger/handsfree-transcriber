@@ -8,7 +8,7 @@ import { SettingsDialog } from "@/components/SettingsDialog";
 import AuthDialog from "@/components/AuthDialog";
 import { useUsageCounter } from "@/hooks/useUsageCounter";
 import { supabase } from "@/integrations/supabase/client";
-import { AuthError } from "@supabase/supabase-js";
+import { AuthError, Session } from "@supabase/supabase-js";
 
 interface IndexProps {
   isAuthenticated: boolean;
@@ -36,9 +36,9 @@ const Index = ({ isAuthenticated }: IndexProps) => {
       console.log('User was updated');
     }
     // Log any auth errors
-    const authError = session?.error as AuthError | undefined;
-    if (authError) {
-      console.error('Auth error:', authError);
+    const error = (session as unknown as { error?: AuthError })?.error;
+    if (error) {
+      console.error('Auth error:', error);
       toast({
         description: "Bei der Anmeldung ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.",
         variant: "destructive",
