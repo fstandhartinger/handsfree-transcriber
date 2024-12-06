@@ -28,6 +28,15 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
           appearance={{ theme: ThemeSupa }}
           providers={['google']}
           redirectTo={redirectTo}
+          view="sign_in"
+          showLinks={false}
+          onlyThirdPartyProviders={true}
+          queryParams={{
+            access_type: 'offline',
+            prompt: 'consent',
+          }}
+          socialLayout="horizontal"
+          theme="default"
         />
       </DialogContent>
     </Dialog>
