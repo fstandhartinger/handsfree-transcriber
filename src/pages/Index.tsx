@@ -36,8 +36,9 @@ const Index = ({ isAuthenticated }: IndexProps) => {
       console.log('User was updated');
     }
     // Log any auth errors
-    if (session?.error) {
-      console.error('Auth error:', session.error);
+    const authError = session?.error as AuthError | undefined;
+    if (authError) {
+      console.error('Auth error:', authError);
       toast({
         description: "Bei der Anmeldung ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.",
         variant: "destructive",
