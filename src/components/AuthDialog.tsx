@@ -13,7 +13,7 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
   const { t } = useTranslation();
   
   // Get the current URL without any hash or query parameters
-  const redirectTo = window.location.href.split('#')[0].split('?')[0];
+  const redirectTo = window.location.origin;
   
   console.log('Auth redirect URL:', redirectTo); // Debug log
 
@@ -37,7 +37,6 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
           }}
           socialLayout="horizontal"
           theme="default"
-          popupMode={true}
         />
       </DialogContent>
     </Dialog>
