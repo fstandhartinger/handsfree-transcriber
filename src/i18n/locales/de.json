@@ -45,5 +45,9 @@
     "casual": "Locker",
     "rephrase": "Umformulieren",
     "undo": "Rückgängig"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "autoCopy": "Text automatisch in Zwischenablage kopieren"
   }
 }

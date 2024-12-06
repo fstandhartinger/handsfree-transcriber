@@ -45,5 +45,9 @@
     "casual": "Casual",
     "rephrase": "Rephrase",
     "undo": "Undo"
+  },
+  "settings": {
+    "title": "Settings",
+    "autoCopy": "Automatically copy text to clipboard"
   }
 }
