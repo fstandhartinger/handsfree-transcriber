@@ -22,6 +22,29 @@ const Index = ({ isAuthenticated }: IndexProps) => {
   const { usageCount, incrementUsage, maxFreeUses } = useUsageCounter();
   const { toast } = useToast();
 
+  // Add error logging for auth state changes
+  supabase.auth.onAuthStateChange((event, session) => {
+    console.log('Auth state changed:', event, session);
+    if (event === 'SIGNED_IN') {
+      console.log('User signed in successfully');
+    }
+    if (event === 'SIGNED_OUT') {
+      console.log('User signed out');
+    }
+    if (event === 'USER_DELETED') {
+      console.log('User was deleted');
+    }
+    // Log any auth errors
+    if (event === 'USER_ERROR') {
+      console.error('Auth error:', session);
+      toast({
+        title: "Anmeldefehler",
+        description: "Bei der Anmeldung ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.",
+        variant: "destructive",
+      });
+    }
+  });
+
   const handleStartRecording = async () => {
     if (!isAuthenticated && incrementUsage()) {
       setShowAuthDialog(true);
@@ -43,43 +66,53 @@ const Index = ({ isAuthenticated }: IndexProps) => {
       setIsRecording(true);
 
       mediaRecorder.onstop = async () => {
-        // Stop all tracks in the stream to clear the recording indicator
-        stream.getTracks().forEach(track => track.stop());
-        
-        const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
-        const reader = new FileReader();
-        
-        reader.onloadend = async () => {
-          const base64Audio = reader.result as string;
-          const audioDataUri = base64Audio.split(',')[1];
+        try {
+          // Stop all tracks in the stream to clear the recording indicator
+          stream.getTracks().forEach(track => track.stop());
           
-          try {
-            setIsTranscribing(true);
-            const { data, error } = await supabase.functions.invoke('transcribe', {
-              body: { audioDataUri },
-            });
-
-            if (error) throw error;
+          const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
+          const reader = new FileReader();
+          
+          reader.onloadend = async () => {
+            const base64Audio = reader.result as string;
+            const audioDataUri = base64Audio.split(',')[1];
             
-            setTranscribedText(data.transcription);
-          } catch (error) {
-            console.error('Transcription error:', error);
-            toast({
-              description: "Error transcribing audio. Please try again.",
-              variant: "destructive",              
-            });
-          } finally {
-            setIsTranscribing(false);
-            setIsRecording(false);
-          }
-        };
+            try {
+              setIsTranscribing(true);
+              const { data, error } = await supabase.functions.invoke('transcribe', {
+                body: { audioDataUri },
+              });
 
-        reader.readAsDataURL(audioBlob);
+              if (error) throw error;
+              
+              setTranscribedText(data.transcription);
+            } catch (error) {
+              console.error('Transcription error:', error);
+              toast({
+                description: "Fehler bei der Transkription. Bitte versuchen Sie es erneut.",
+                variant: "destructive",              
+              });
+            } finally {
+              setIsTranscribing(false);
+              setIsRecording(false);
+            }
+          };
+
+          reader.readAsDataURL(audioBlob);
+        } catch (error) {
+          console.error('Error processing audio:', error);
+          toast({
+            description: "Fehler bei der Audioverarbeitung. Bitte versuchen Sie es erneut.",
+            variant: "destructive",
+          });
+          setIsTranscribing(false);
+          setIsRecording(false);
+        }
       };
     } catch (error) {
       console.error('Error starting recording:', error);
       toast({
-        description: "Could not access microphone. Please check permissions.",
+        description: "Zugriff auf das Mikrofon nicht möglich. Bitte überprüfen Sie die Berechtigungen.",
         variant: "destructive",
       });
       setIsRecording(false);
@@ -100,7 +133,7 @@ const Index = ({ isAuthenticated }: IndexProps) => {
         {isTranscribing ? (
           <div className="flex flex-col items-center gap-4">
             <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-            <p className="text-lg">Transcribing...</p>
+            <p className="text-lg">Transkribiere...</p>
           </div>
         ) : isRecording ? (
           <RecordingView onStop={async () => {
@@ -111,7 +144,7 @@ const Index = ({ isAuthenticated }: IndexProps) => {
           <div className="flex flex-col items-center gap-4">
             {!isAuthenticated && (
               <p className="text-sm text-muted-foreground">
-                {maxFreeUses - usageCount} free uses remaining
+                Noch {maxFreeUses - usageCount} kostenlose Versuche übrig
               </p>
             )}
             <Button
