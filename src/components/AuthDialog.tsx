@@ -37,6 +37,7 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
           }}
           socialLayout="horizontal"
           theme="default"
+          popupMode={true}
         />
       </DialogContent>
     </Dialog>
