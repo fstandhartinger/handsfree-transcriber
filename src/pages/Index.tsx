@@ -6,9 +6,8 @@ import RecordingView from "@/components/RecordingView";
 import TextEditView from "@/components/TextEditView";
 import { SettingsDialog } from "@/components/SettingsDialog";
 import AuthDialog from "@/components/AuthDialog";
-import { useUsageCounter } from "@/hooks/useUsageCounter";
 import { supabase } from "@/integrations/supabase/client";
-import { AuthError, Session } from "@supabase/supabase-js";
+import { AuthError } from "@supabase/supabase-js";
 
 interface IndexProps {
   isAuthenticated: boolean;
@@ -20,8 +19,9 @@ const Index = ({ isAuthenticated }: IndexProps) => {
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
-  const { usageCount, incrementUsage, maxFreeUses } = useUsageCounter();
   const { toast } = useToast();
+  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
+  const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
 
   // Add error logging for auth state changes
   supabase.auth.onAuthStateChange((event, session) => {
@@ -47,30 +47,29 @@ const Index = ({ isAuthenticated }: IndexProps) => {
   });
 
   const handleStartRecording = async () => {
-    if (!isAuthenticated && incrementUsage()) {
+    if (!isAuthenticated) {
       setShowAuthDialog(true);
       return;
     }
     
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream);
+      const recorder = new MediaRecorder(stream);
+      setMediaStream(stream);
+      setMediaRecorder(recorder);
       let audioChunks: Blob[] = [];
 
-      mediaRecorder.ondataavailable = (event) => {
+      recorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
           audioChunks.push(event.data);
         }
       };
 
-      mediaRecorder.start();
+      recorder.start();
       setIsRecording(true);
 
-      mediaRecorder.onstop = async () => {
+      recorder.onstop = async () => {
         try {
-          // Stop all tracks in the stream to clear the recording indicator
-          stream.getTracks().forEach(track => track.stop());
-          
           const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
           const reader = new FileReader();
           
@@ -120,6 +119,16 @@ const Index = ({ isAuthenticated }: IndexProps) => {
     }
   };
 
+  const handleStopRecording = () => {
+    if (mediaRecorder && mediaStream) {
+      mediaRecorder.stop();
+      mediaStream.getTracks().forEach(track => track.stop());
+      setMediaRecorder(null);
+      setMediaStream(null);
+      setIsTranscribing(true);
+    }
+  };
+
   if (transcribedText) {
     return <TextEditView 
       text={transcribedText} 
@@ -137,17 +146,9 @@ const Index = ({ isAuthenticated }: IndexProps) => {
             <p className="text-lg">Transkribiere...</p>
           </div>
         ) : isRecording ? (
-          <RecordingView onStop={async () => {
-            setIsRecording(false);
-            setIsTranscribing(true);
-          }} />
+          <RecordingView onStop={handleStopRecording} />
         ) : (
           <div className="flex flex-col items-center gap-4">
-            {!isAuthenticated && (
-              <p className="text-sm text-muted-foreground">
-                Noch {maxFreeUses - usageCount} kostenlose Versuche übrig
-              </p>
-            )}
             <Button
               onClick={handleStartRecording}
               size="lg"

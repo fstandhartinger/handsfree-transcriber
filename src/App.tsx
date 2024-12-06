@@ -5,10 +5,12 @@ import Index from './pages/Index'
 import UpdateNotification from './components/UpdateNotification'
 import { supabase } from './integrations/supabase/client'
 import ProfileButton from './components/ProfileButton'
+import { SettingsDialog } from '@/components/SettingsDialog'
 import './App.css'
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [showSettings, setShowSettings] = useState(false);
 
   useEffect(() => {
     // Check if running in PWA mode
@@ -48,7 +50,11 @@ function App() {
 
   return (
     <Router>
-      <div className="h-16 flex items-center justify-end px-4 fixed top-0 right-0 w-full">
+      <div className="h-16 flex items-center justify-end px-4 fixed top-0 right-0 w-full gap-2">
+        <SettingsDialog 
+          open={showSettings} 
+          onOpenChange={setShowSettings} 
+        />
         {isAuthenticated && <ProfileButton />}
       </div>
       <Routes>

@@ -3,5 +3,47 @@
     "signOut": "Abmelden",
     "continueUsing": "Melden Sie sich an, um die App weiter zu nutzen",
     "signIn": "Anmelden"
+  },
+  "recording": {
+    "recording": "Aufnahme läuft...",
+    "status": "Aufnahme läuft",
+    "instruction": "Sprechen Sie jetzt",
+    "rephraseTitle": "Text umformulieren",
+    "instructionTitle": "Anweisungen aufnehmen",
+    "rephraseMainInstruction": "Drücken Sie auf das Mikrofon und sprechen Sie, wie der Text umformuliert werden soll.",
+    "examples": "Beispiele anzeigen",
+    "rephraseExamples": [
+      "Mach den Text formeller",
+      "Fasse es kürzer zusammen",
+      "Schreib es einfacher"
+    ],
+    "selectedText": "Ausgewählter Text"
+  },
+  "processing": {
+    "status": "Verarbeite Audio...",
+    "instruction": "Einen Moment bitte..."
+  },
+  "status": {
+    "transcribing": "Transkribiere..."
+  },
+  "toasts": {
+    "textCopied": "Text in die Zwischenablage kopiert",
+    "clipboardError": "Fehler beim Kopieren in die Zwischenablage",
+    "understood": "Verstanden",
+    "textRephrased": "Text wurde umformuliert und in die Zwischenablage kopiert",
+    "rephrasingError": "Fehler beim Umformulieren. Bitte versuchen Sie es erneut.",
+    "styleUpdated": "Stil wurde zu {{style}} geändert",
+    "styleUpdateError": "Fehler beim Ändern des Stils",
+    "changesUndone": "Änderungen rückgängig gemacht",
+    "audioProcessingError": "Fehler bei der Audioverarbeitung"
+  },
+  "buttons": {
+    "newRecording": "Neue Aufnahme",
+    "style": "Stil",
+    "formal": "Formell",
+    "concise": "Prägnant",
+    "casual": "Locker",
+    "rephrase": "Umformulieren",
+    "undo": "Rückgängig"
   }
 }

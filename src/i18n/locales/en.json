@@ -3,5 +3,47 @@
     "signOut": "Sign out",
     "continueUsing": "Sign in to continue using the app",
     "signIn": "Sign in"
+  },
+  "recording": {
+    "recording": "Recording in progress...",
+    "status": "Recording",
+    "instruction": "Speak now",
+    "rephraseTitle": "Rephrase Text",
+    "instructionTitle": "Record Instructions",
+    "rephraseMainInstruction": "Press the microphone and speak how you want the text to be rephrased.",
+    "examples": "Show examples",
+    "rephraseExamples": [
+      "Make it more formal",
+      "Make it more concise",
+      "Simplify it"
+    ],
+    "selectedText": "Selected Text"
+  },
+  "processing": {
+    "status": "Processing audio...",
+    "instruction": "Please wait..."
+  },
+  "status": {
+    "transcribing": "Transcribing..."
+  },
+  "toasts": {
+    "textCopied": "Text copied to clipboard",
+    "clipboardError": "Error copying to clipboard",
+    "understood": "Understood",
+    "textRephrased": "Text rephrased and copied to clipboard",
+    "rephrasingError": "Error rephrasing text. Please try again.",
+    "styleUpdated": "Style updated to {{style}}",
+    "styleUpdateError": "Error updating style",
+    "changesUndone": "Changes undone",
+    "audioProcessingError": "Error processing audio"
+  },
+  "buttons": {
+    "newRecording": "New Recording",
+    "style": "Style",
+    "formal": "Formal",
+    "concise": "Concise",
+    "casual": "Casual",
+    "rephrase": "Rephrase",
+    "undo": "Undo"
   }
 }
