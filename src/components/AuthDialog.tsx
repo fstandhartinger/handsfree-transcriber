@@ -12,8 +12,8 @@ interface AuthDialogProps {
 const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
   const { t } = useTranslation();
   
-  // Ensure we use the full URL for the redirect
-  const redirectTo = `${window.location.origin}/`;
+  // Get the current URL without any hash or query parameters
+  const redirectTo = window.location.href.split('#')[0].split('?')[0];
   
   console.log('Auth redirect URL:', redirectTo); // Debug log
 
