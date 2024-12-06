@@ -13,9 +13,9 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
   const { t } = useTranslation();
   
   // Get the current URL without any hash or query parameters
-  const redirectTo = window.location.origin;
+  const siteUrl = window.location.origin;
   
-  console.log('Auth redirect URL:', redirectTo); // Debug log
+  console.log('Auth site URL:', siteUrl); // Debug log
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -27,13 +27,14 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
           supabaseClient={supabase}
           appearance={{ theme: ThemeSupa }}
           providers={['google']}
-          redirectTo={redirectTo}
+          redirectTo={siteUrl}
           view="sign_in"
           showLinks={false}
           onlyThirdPartyProviders={true}
           queryParams={{
             access_type: 'offline',
             prompt: 'consent',
+            site_url: siteUrl, // Dynamically set the site URL
           }}
           socialLayout="horizontal"
           theme="default"
