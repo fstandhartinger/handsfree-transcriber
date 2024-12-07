@@ -14,6 +14,8 @@ import { CookieBanner } from "@/components/CookieBanner";
 import UpdateNotification from "@/components/UpdateNotification";
 import ProfileButton from "@/components/ProfileButton";
 import LegalFooter from "@/components/LegalFooter";
+import FeatureCarousel from "@/components/FeatureCarousel";
+import TryArrow from "@/components/TryArrow";
 
 interface IndexProps {
   isAuthenticated: boolean;
@@ -186,9 +188,14 @@ const Index = ({ isAuthenticated }: IndexProps) => {
             </div>
 
             <div className="flex flex-col items-center min-h-[180px] justify-center mb-16">
-              <p className="text-sm font-medium text-primary/90 mb-6 animate-pulse">
-                {t('landing.tryFree')}
-              </p>
+              <div className="relative inline-flex items-start">
+                <p className="text-sm font-medium text-primary/90 mb-6 animate-pulse">
+                  {t('landing.tryFree')}
+                </p>
+                <div style={{ position: 'absolute', right: '-15px', top: '10px' }}>
+                  <TryArrow />
+                </div>
+              </div>
               <div className="h-[120px] flex items-center justify-center">
                 {isTranscribing ? (
                   <div className="flex flex-col items-center gap-4">
@@ -217,55 +224,7 @@ const Index = ({ isAuthenticated }: IndexProps) => {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 max-w-4xl mx-auto px-4">
-              {/* Fast */}
-              <div className="group relative bg-background hover:bg-muted/50 rounded-xl p-3 transition-all duration-200 border border-border/50 hover:border-primary/20 h-[100px] flex">
-                <div className="flex flex-col items-center text-center space-y-2 w-full justify-center">
-                  <span className="text-base font-medium group-hover:scale-110 transition-transform duration-200">
-                    {t('features.fast.title')}
-                  </span>
-                  <p className="text-xs text-muted-foreground/70 group-hover:text-foreground/80 transition-colors duration-200">
-                    {t('features.fast.description')}
-                  </p>
-                </div>
-              </div>
-
-              {/* Smart */}
-              <div className="group relative bg-background hover:bg-muted/50 rounded-xl p-3 transition-all duration-200 border border-border/50 hover:border-primary/20 h-[100px] flex">
-                <div className="flex flex-col items-center text-center space-y-2 w-full justify-center">
-                  <span className="text-base font-medium group-hover:scale-110 transition-transform duration-200">
-                    {t('features.ai.title')}
-                  </span>
-                  <p className="text-xs text-muted-foreground/70 group-hover:text-foreground/80 transition-colors duration-200">
-                    {t('features.ai.description')}
-                  </p>
-                </div>
-              </div>
-
-              {/* Simple */}
-              <div className="group relative bg-background hover:bg-muted/50 rounded-xl p-3 transition-all duration-200 border border-border/50 hover:border-primary/20 h-[100px] flex">
-                <div className="flex flex-col items-center text-center space-y-2 w-full justify-center">
-                  <span className="text-base font-medium group-hover:scale-110 transition-transform duration-200">
-                    {t('features.simple.title')}
-                  </span>
-                  <p className="text-xs text-muted-foreground/70 group-hover:text-foreground/80 transition-colors duration-200">
-                    {t('features.simple.description')}
-                  </p>
-                </div>
-              </div>
-
-              {/* Reliable */}
-              <div className="group relative bg-background hover:bg-muted/50 rounded-xl p-3 transition-all duration-200 border border-border/50 hover:border-primary/20 h-[100px] flex">
-                <div className="flex flex-col items-center text-center space-y-2 w-full justify-center">
-                  <span className="text-base font-medium group-hover:scale-110 transition-transform duration-200">
-                    {t('features.reliable.title')}
-                  </span>
-                  <p className="text-xs text-muted-foreground/70 group-hover:text-foreground/80 transition-colors duration-200">
-                    {t('features.reliable.description')}
-                  </p>
-                </div>
-              </div>
-            </div>
+            <FeatureCarousel />
           </div>
 
           <CookieBanner />
