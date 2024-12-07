@@ -214,8 +214,7 @@ const TextEditView = ({ text: initialText, onBack, onNewRecording, isAuthenticat
     console.log(`[${new Date().toISOString()}] Starting new recording`);
     const needsAuth = incrementUsage();
     if (needsAuth && !isAuthenticated) {
-      setShowAuthDialog(true);
-      return;
+      localStorage.setItem('needs_auth', 'true');
     }
     onNewRecording();
   };
