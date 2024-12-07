@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import EditableText from "@/components/EditableText";
@@ -13,14 +13,17 @@ import { useAudioProcessing } from "@/hooks/useAudioProcessing";
 import { useTranslation } from "react-i18next";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { useAutoCopyToClipboard } from "@/components/SettingsDialog";
+import { useUsageCounter } from "@/hooks/useUsageCounter";
+import AuthDialog from "@/components/AuthDialog";
 
 interface TextEditViewProps {
   text: string;
   onBack: () => void;
   onNewRecording: () => void;
+  isAuthenticated: boolean;
 }
 
-const TextEditView = ({ text: initialText, onBack, onNewRecording }: TextEditViewProps) => {
+const TextEditView = ({ text: initialText, onBack, onNewRecording, isAuthenticated }: TextEditViewProps) => {
   const [text, setText] = useState(initialText);
   const [isEditMode, setIsEditMode] = useState(false);
   const [textHistory, setTextHistory] = useState<string[]>([initialText]);
@@ -30,13 +33,27 @@ const TextEditView = ({ text: initialText, onBack, onNewRecording }: TextEditVie
   const [showRephraseModal, setShowRephraseModal] = useState(false);
   const [isRecordingRephrase, setIsRecordingRephrase] = useState(false);
   const [isProcessingRephrase, setIsProcessingRephrase] = useState(false);
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
   const { toast } = useToast();
   const { t } = useTranslation();
   const [autoCopy] = useAutoCopyToClipboard();
   const [hasInitialCopyBeenTriggered, setHasInitialCopyBeenTriggered] = useState(false);
+  const { incrementUsage } = useUsageCounter();
+
+  // Check for needs_auth flag when component mounts
+  useEffect(() => {
+    const needsAuth = localStorage.getItem('needs_auth');
+    if (needsAuth === 'true' && !isAuthenticated) {
+      // Small delay to ensure text is rendered
+      setTimeout(() => {
+        setShowAuthDialog(true);
+        localStorage.removeItem('needs_auth');
+      }, 100);
+    }
+  }, [isAuthenticated]);
 
   // Function to copy text to clipboard
-  const copyToClipboard = async (textToCopy: string) => {
+  const copyToClipboard = useCallback(async (textToCopy: string) => {
     try {
       await navigator.clipboard.writeText(textToCopy);
       toast({
@@ -50,22 +67,23 @@ const TextEditView = ({ text: initialText, onBack, onNewRecording }: TextEditVie
         variant: "destructive",
       });
     }
-  };
+  }, [t, toast]);
 
-  // Auto-copy when text changes
+  // Auto-copy only when authenticated
   useEffect(() => {
-    if (autoCopy && text !== initialText) {
+    console.log(`[${new Date().toISOString()}] Auto-copy check - autoCopy: ${autoCopy}, showAuthDialog: ${showAuthDialog}, isAuthenticated: ${isAuthenticated}`);
+    if (autoCopy && text !== initialText && !showAuthDialog && isAuthenticated) {
       copyToClipboard(text);
     }
-  }, [text, autoCopy, initialText]);
+  }, [text, autoCopy, initialText, copyToClipboard, showAuthDialog, isAuthenticated]);
 
-  // Handle initial text copy
+  // Handle initial text copy only when authenticated
   useEffect(() => {
-    if (autoCopy && !hasInitialCopyBeenTriggered) {
+    if (autoCopy && !hasInitialCopyBeenTriggered && !showAuthDialog && isAuthenticated) {
       copyToClipboard(initialText);
       setHasInitialCopyBeenTriggered(true);
     }
-  }, [autoCopy, initialText, hasInitialCopyBeenTriggered]);
+  }, [autoCopy, initialText, hasInitialCopyBeenTriggered, copyToClipboard, showAuthDialog, isAuthenticated]);
 
   // Debug: Log state changes
   useEffect(() => {
@@ -192,11 +210,24 @@ const TextEditView = ({ text: initialText, onBack, onNewRecording }: TextEditVie
     setIsProcessingRephrase(false);
   };
 
-  console.log('Rendering TextEditView:', { 
+  const handleNewRecording = () => {
+    console.log(`[${new Date().toISOString()}] Starting new recording`);
+    const needsAuth = incrementUsage();
+    if (needsAuth && !isAuthenticated) {
+      setShowAuthDialog(true);
+      return;
+    }
+    onNewRecording();
+  };
+
+  console.log(`[${new Date().toISOString()}] Rendering TextEditView:`, { 
     isProcessing, 
     isProcessingRephrase,
     isEditMode,
-    showRephraseModal 
+    showRephraseModal,
+    showAuthDialog,
+    textLength: text.length,
+    initialTextLength: initialText.length
   });
 
   return (
@@ -249,7 +280,7 @@ const TextEditView = ({ text: initialText, onBack, onNewRecording }: TextEditVie
           isEditMode={isEditMode}
           onEditModeChange={setIsEditMode}
           onCancel={() => setIsEditMode(false)}
-          onNewRecording={onNewRecording}
+          onNewRecording={handleNewRecording}
         />
       </div>
 
@@ -264,6 +295,8 @@ const TextEditView = ({ text: initialText, onBack, onNewRecording }: TextEditVie
           isProcessing={isProcessingRephrase}
         />
       )}
+
+      <AuthDialog open={showAuthDialog} onOpenChange={setShowAuthDialog} />
     </div>
   );
 };

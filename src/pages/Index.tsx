@@ -13,6 +13,7 @@ import { useTranslation } from "react-i18next";
 import { CookieBanner } from "@/components/CookieBanner";
 import UpdateNotification from "@/components/UpdateNotification";
 import ProfileButton from "@/components/ProfileButton";
+import LegalFooter from "@/components/LegalFooter";
 
 interface IndexProps {
   isAuthenticated: boolean;
@@ -23,7 +24,6 @@ const Index = ({ isAuthenticated }: IndexProps) => {
   const [transcribedText, setTranscribedText] = useState<string | null>(null);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const [showAuthDialog, setShowAuthDialog] = useState(false);
   const { toast } = useToast();
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
   const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
@@ -54,13 +54,6 @@ const Index = ({ isAuthenticated }: IndexProps) => {
   });
 
   const handleStartRecording = async () => {
-    const needsAuth = incrementUsage();
-    
-    if (needsAuth && !isAuthenticated) {
-      setShowAuthDialog(true);
-      return;
-    }
-    
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const recorder = new MediaRecorder(stream);
@@ -95,6 +88,11 @@ const Index = ({ isAuthenticated }: IndexProps) => {
               if (error) throw error;
               
               setTranscribedText(data.transcription);
+              const needsAuth = incrementUsage();
+              if (needsAuth && !isAuthenticated) {
+                // The auth dialog will be shown in TextEditView
+                localStorage.setItem('needs_auth', 'true');
+              }
             } catch (error) {
               console.error('Transcription error:', error);
               toast({
@@ -119,12 +117,11 @@ const Index = ({ isAuthenticated }: IndexProps) => {
         }
       };
     } catch (error) {
-      console.error('Error starting recording:', error);
+      console.error('Error accessing microphone:', error);
       toast({
         description: t('errors.microphoneAccess'),
         variant: "destructive",
       });
-      setIsRecording(false);
     }
   };
 
@@ -138,74 +135,70 @@ const Index = ({ isAuthenticated }: IndexProps) => {
     }
   };
 
-  if (transcribedText) {
-    return <TextEditView 
-      text={transcribedText} 
-      onBack={() => setTranscribedText(null)} 
-      onNewRecording={() => {
-        setTranscribedText(null);
-        handleStartRecording();
-      }}
-    />;
-  }
-
   return (
     <div className="h-screen flex flex-col">
-      <div className="h-16 flex items-center justify-between px-4 fixed top-0 w-full bg-background z-50">
-        <div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setShowSettings(true)}
-            className="h-10 w-10 flex items-center justify-center"
-          >
-            <Settings className="h-5 w-5" />
-          </Button>
-          <SettingsDialog 
-            open={showSettings} 
-            onOpenChange={setShowSettings} 
-          />
-        </div>
-        <ProfileButton />
-      </div>
-
-      <div className="flex-1 flex flex-col items-center justify-center pt-16">
-        {isTranscribing ? (
-          <div className="flex flex-col items-center gap-4">
-            <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-            <p className="text-lg">{t('status.transcribing')}</p>
-          </div>
-        ) : isRecording ? (
-          <RecordingView onStop={handleStopRecording} />
-        ) : (
-          <div className="flex flex-col items-center gap-4">
+      {transcribedText ? (
+        <TextEditView
+          text={transcribedText}
+          onBack={() => {
+            setTranscribedText(null);
+            setIsRecording(false);
+          }}
+          onNewRecording={() => {
+            setTranscribedText(null);
+            handleStartRecording();
+          }}
+          isAuthenticated={isAuthenticated}
+        />
+      ) : (
+        <>
+          <div className="flex justify-between items-center p-4">
             <Button
-              onClick={handleStartRecording}
-              size="lg"
-              className="w-16 h-16 rounded-full"
+              variant="outline"
+              size="icon"
+              onClick={() => setShowSettings(true)}
+              className="w-10 h-10 p-0"
             >
-              <Mic className="w-8 h-8" />
+              <Settings className="h-4 w-4" />
             </Button>
+            <ProfileButton />
           </div>
-        )}
-      </div>
 
-      <div className="relative z-30">
-        <UpdateNotification />
-      </div>
+          <div className="flex-1 flex flex-col items-center justify-center">
+            {isTranscribing ? (
+              <div className="flex flex-col items-center gap-4">
+                <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+                <p className="text-lg">{t('status.transcribing')}</p>
+              </div>
+            ) : isRecording ? (
+              <RecordingView
+                onStop={() => {
+                  if (mediaRecorder && mediaStream) {
+                    mediaRecorder.stop();
+                    mediaStream.getTracks().forEach(track => track.stop());
+                  }
+                }}
+              />
+            ) : (
+              <Button
+                size="lg"
+                className="rounded-full w-16 h-16"
+                onClick={handleStartRecording}
+                disabled={isTranscribing}
+              >
+                <Mic className="w-8 h-8" />
+              </Button>
+            )}
+          </div>
 
-      <div className="legal-links fixed bottom-0 left-0 w-full p-2 bg-background">
-        <div className="flex justify-center gap-6 mb-2">
-          <a href="/terms-and-conditions" target="_blank" className="text-xs text-muted-foreground hover:text-foreground transition-colors">{t('footer.terms')}</a>
-          <a href="/data-privacy" target="_blank" className="text-xs text-muted-foreground hover:text-foreground transition-colors">{t('footer.privacy')}</a>
-          <a href="/imprint" target="_blank" className="text-xs text-muted-foreground hover:text-foreground transition-colors">{t('footer.imprint')}</a>
-        </div>
-        <CookieBanner />
-      </div>
+          <CookieBanner />
+          <LegalFooter />
+        </>
+      )}
 
-      <AuthDialog
-        open={showAuthDialog}
-        onOpenChange={setShowAuthDialog}
+      <SettingsDialog
+        open={showSettings}
+        onOpenChange={setShowSettings}
       />
     </div>
   );

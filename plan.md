@@ -102,22 +102,19 @@ Wir zeigen in der oberen rechten Ecke dann das Profile Picture des Anwenders an.
 
 8. Todos und nächste Schritte:
 
-8.1. Der Dialog, mit dem der Benutzer aufgefordert wird, sich einzuloggen soll einen etwas luftigeren Rahmen haben, sodass sichergestellt ist, dass das Kreuz zum Schließen in der oberen
-rechten Ecke nicht mit dem Text überlappt. Der Button für Sign In With Google soll neben dem Google-Symbol auch den Text "Sign In with Google" enthalten (bzw die deutsche lokalisation davon), 
-so wie dieser Button üblicherweise aussieht.
-
-8.2. Optimiere die Seite hinsichtlich SEO und SEM. Füge eine Blog-Artikel-Ähnliche Seite hinzu, die die Funktionalität der Applikation erklärt und wie man sie richtig benutzt, denn Content ist 
+8.1. Optimiere die Seite hinsichtlich SEO und SEM. Füge eine Blog-Artikel-Ähnliche Seite hinzu, die die Funktionalität der Applikation erklärt und wie man sie richtig benutzt, denn Content ist 
 wichtig, um bei Suchmaschinen wie Google Ansehen zu verdienen. Verlinke auf diese Seite von der Startseite aus, plaziere diesen Link dort wo auch die anderen Links am unteren Rand der Startseite angezeigt werden. Gestalte den Text dieser neuen Seite so, dass er den Anforderungen von SEO und SEM genügt. Verwende die Erklärungen zur App aus der plan.md Datei, um zu verstehen was unsere 
 Webapp inhaltlich tut und was sie ausmacht. Falls es weitere sinnvolle Maßnahmen hinsichtlich SEO und SEM gibt, beispielsweise eine robots.txt Datei, eine sitemap.xml Datei oder andere, dann führe diese Maßnahmen auf und biete mir ihre Umsetzung an.
 
-8.3. Stelle sicher, dass der Mechanismus der Sign In With Google erzwingt, wenn die kostenlosen Verwendungen aufgebracht sind (Zähler in Local Storage, siehe oben) auch beim Verwenden des
-'Neue Aufnahme' Floating Action Buttons der Ergebnisseite greift. Nach 3 kostenlosen Verwendungen des Transkriptionsmechanismus ohne angemeldet zu sein, soll der Benutzer gezwungen werden, sich einzuloggen, andernfalls wird ihm die weitere Verwendung der App verwehrt. Öffne den Dialog, der zur Anmeldung auffordert am Ende des Transkriptionsvorgangs, also auf der Ergebnisseite, wo im Hintergrund bereits der transkribierte Text angezeigt wird. Bisher wurde dieser Dialog direkt beim Klick auf den Mikrofon-Button bereits angezeigt, aber das wollen wir jetzt ändern, er soll nun
-erst auf der Ergebnisseite, also nach erfolgreicher Transkription angezeigt werden. Der Dialog soll nicht schließbar sein (das X oben rechts entfernen). Er soll den Benutzer darauf hinweisen, dass er sich einloggen muss, um die App weiter zu verwenden. Die Plazierung an dieser Stelle ist wichtig, weil wenn der Benutzer gerade die Zeit investiert hat, einen Text einzusprechen und 
-im Hintergrund sehen kann, dass bereits das transkribierte Ergebnis angezeigt wird, er allerdings nicht darauf zugreifen kann, weil der Dialog zur Anmeldung im Weg ist, dann ist er 
-stärker motiviert, den Anmeldedialog schnell aus dem Weg zu räumen, indem er sich einloggt, um die App weiter zu verwenden zu können und auf den transkribierten Text zugreifen zu können. 
-Und so bekommen wir das, was wir wollen: dass die User sich einloggen.
+8.2. Stelle sicher, dass der Mechanismus der Sign In With Google erzwingt, wenn die kostenlosen Verwendungen aufgebracht sind (Zähler in Local Storage, siehe oben) auch beim Verwenden des
+'Neue Aufnahme' Floating Action Buttons der Ergebnisseite greift. Nach 3 kostenlosen Verwendungen des Transkriptionsmechanismus ohne angemeldet zu sein, soll der Benutzer gezwungen werden, sich einzuloggen, andernfalls wird ihm die weitere Verwendung der App verwehrt. Öffne den Dialog, der zur Anmeldung auffordert am Ende des Transkriptionsvorgangs, also auf der Ergebnisseite, wo im Hintergrund bereits der transkribierte Text angezeigt wird. Bisher wurde dieser Dialog direkt beim Klick auf den Mikrofon-Button bereits angezeigt, aber das wollen wir jetzt ändern, er soll nun erst auf der Ergebnisseite, also nach erfolgreicher Transkription angezeigt werden. Der Dialog soll nicht schließbar sein (das X oben rechts entfernen). Der Dialog soll den Benutzer darauf hinweisen, dass er sich einloggen muss, um die App weiter zu verwenden. 
+Die Plazierung an dieser Stelle im Ablauf der Anwendung ist psychologisch wichtig, denn der Benutzer hat gerade davvor die Zeit investiert, einen Text einzusprechen und kann nun im Hintergrund bereits das transkribierte Ergebnis sehen, das er haben will - wird allerdings nur noch von diesem Anmelde-Dialog von diesem Ergebnis abgehalten. Ich vermute, dass der Anwender an dieser Stelle stärker motiviert ist, den Anmeldedialog schnell 
+aus dem Weg zu räumen, indem er sich einloggt, um die App weiter zu verwenden zu können und auf den transkribierten Text zugreifen zu können. 
+Und so bekommen wir das Ziel, das wir erreichen wollen, nämlich dass die Benutzer sich anmelden.
+Wenn der Dialog mit dem Text "Melden Sie sich an, um fortzufahren" zur Anzeige kommt, soll vorher bereuts der Text im Ergebnisdialog angezeigt werden.
+Die Reihenfolge muss so sein, dass der Text bereits in der Ergebnisseite angezeigt wird, wenn wir den Dialog zur Anzeige bringen.
 
-8.4. Baue unsere Startseite so um, dass sie eine minimalistische Landing-Page eines SaaS Produktes (Speech to Text PRO) darstellt. Lasse dabei die oben beschriebe Grundstruktur der Startseite der App intakt, also sprich: 
+8.3. Baue unsere Startseite so um, dass sie eine minimalistische Landing-Page eines SaaS Produktes (Speech to Text PRO) darstellt. Lasse dabei die oben beschriebe Grundstruktur der Startseite der App intakt, also sprich: 
 - Der Mikrofon-Button in der Mitte der Startseite soll immer sichtbar und anklickbar sein.
 - Der Button für das Settings-Menü in der oberen rechten Ecke soll immer sichtbar und anklickbar sein.
 - Das Panel für die Installation der App soll sichtbar und anklickbar sein, falls die App noch nicht installiert ist.
@@ -127,7 +124,7 @@ Füge einen kurzen, markanten, marketingtauglichen Untertitel hinzu, der den Vor
 die weltweit führende Speech-To-Text KI verwendet und sie simpel, intuitiv und schnell bedienbar ist und KI Funktionen für perfekte Produktivität enthält.
 Über dem Mikrofon-Button ködere den Benutzer mit der Call-To-Action: "Try for FREE".
 
-8.5. Wir wollen eine Bezahlfunktion über Stripe integrieren. Beachte hierzu erst mal, was wir oben im Absatz "Sign In With Google" beschrieben haben und was wir beim Todo 8.3 beschrieben haben. 
+8.4. Wir wollen eine Bezahlfunktion über Stripe integrieren. Beachte hierzu erst mal, was wir oben im Absatz "Sign In With Google" beschrieben haben und was wir beim Todo 8.3 beschrieben haben. 
 Nach den 3 kostenlosen Verwendungen ohne dass erzwungen wird, dass der User sich einloggt, soll der User aufgefordert werden, eingeloggt weiter zu machen. Wenn der Benutzer dann noch mal 3 Verwendungen als eingeloggter Anwender vorgenommen hat, soll er mit einem Dialog, der an der gleichen Stelle auftaucht (also in dem Moment, wo der Ergebnistext in der Ergebnisseite angezeigt wird), aufgefordert werden, einen Bezahlaccount einzurichten, da die kostenlosen Verwendungen aufgebraucht sind. 
 Ich habe bereits einen Stripe Account eingerichtet und einen Price dort angelegt und kann dir die price id geben. 
 Wir müssen dann den stripe webhook implementieren. Ich kann dir hierfür ein code beispiel aus einem unserer anderen projekte geben welches die funktionierende Implementierung dieses Stripe webhooks in Form einer der Node ts Express Implementierung zeigt. 

@@ -9,17 +9,20 @@ interface AuthDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
+const AuthDialog = ({ open }: AuthDialogProps) => {
   const { t } = useTranslation();
   
   // Get the current URL without any hash or query parameters
   const siteUrl = window.location.origin;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md p-6">
+    <Dialog open={open} onOpenChange={() => {}} modal>
+      <DialogContent 
+        className="sm:max-w-md p-6 [&>button]:hidden" 
+        onPointerDownOutside={(e) => e.preventDefault()}
+      >
         <DialogHeader className="mb-6">
-          <DialogTitle className="text-xl">{t('auth.continueUsing')}</DialogTitle>
+          <DialogTitle className="text-xl">{t('auth.maxUsageReached')}</DialogTitle>
         </DialogHeader>
         <div className="[&_button]:flex-1 [&_button]:h-11 [&_button]:p-2.5 [&_button]:bg-[#4285f4] [&_button]:text-white [&_button:hover]:bg-[#357ae8] [&_button_img]:w-[18px] [&_button_img]:h-[18px] [&_button_img]:mr-2.5">
           <Auth

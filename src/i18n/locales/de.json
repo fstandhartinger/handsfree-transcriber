@@ -1,9 +1,8 @@
 {
   "auth": {
     "signOut": "Abmelden",
-    "continueUsing": "Melden Sie sich an, um die App weiter zu nutzen",
-    "signIn": "Anmelden",
-    "maxUsageReached": "Sie haben die maximale Anzahl kostenloser Verwendungen erreicht. Bitte melden Sie sich an, um fortzufahren."
+    "maxUsageReached": "Melden Sie sich an, um fortzufahren",
+    "signIn": "Anmelden"
   },
   "recording": {
     "recording": "Aufnahme läuft...",
