@@ -295,7 +295,11 @@ const TextEditView = ({ text: initialText, onBack, onNewRecording, isAuthenticat
         />
       )}
 
-      <AuthDialog open={showAuthDialog} onOpenChange={setShowAuthDialog} />
+      <AuthDialog 
+        open={showAuthDialog} 
+        onOpenChange={setShowAuthDialog} 
+        text={text} 
+      />
     </div>
   );
 };

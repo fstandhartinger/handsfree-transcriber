@@ -8,26 +8,22 @@ import { useEffect } from 'react';
 interface AuthDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  text?: string;
 }
 
-const AuthDialog = ({ open }: AuthDialogProps) => {
+const AuthDialog = ({ open, text }: AuthDialogProps) => {
   const { t } = useTranslation();
   
-  // Get the current URL without any hash or query parameters
   const siteUrl = window.location.origin;
 
   useEffect(() => {
-    if (open) {
-      // Save current text when dialog opens
-      const currentText = document.querySelector('textarea')?.value;
-      if (currentText) {
-        localStorage.setItem('pending_transcribed_text', currentText);
-      }
+    if (open && text) {
+      localStorage.setItem('pending_transcribed_text', text);
     }
-  }, [open]);
+  }, [open, text]);
 
   return (
-    <Dialog open={open} onOpenChange={() => {}} modal>
+    <Dialog open={open} onOpenChange={() => {  }} modal>
       <DialogContent 
         className="sm:max-w-md p-6 [&>button]:hidden" 
         onPointerDownOutside={(e) => e.preventDefault()}
