@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom'
 import { Toaster } from "@/components/ui/toaster"
 import { useEffect, useState } from 'react'
 import Index from './pages/Index'
@@ -64,6 +64,7 @@ function AppContent() {
       <main>
         <Routes>
           <Route path="/" element={<Index isAuthenticated={isAuthenticated} />} />
+          <Route path="/auth/callback" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
       <Toaster />

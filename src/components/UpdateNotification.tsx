@@ -16,14 +16,20 @@ const UpdateNotification = () => {
 
   const reloadPage = () => {
     if (waitingWorker) {
-      // Zuerst den Service Worker aktivieren
+      // First, post the SKIP_WAITING message
       waitingWorker.postMessage({ type: 'SKIP_WAITING' });
       
-      // Listener für den statechange Event hinzufügen
-      navigator.serviceWorker.addEventListener('controllerchange', () => {
-        // Seite erst neu laden, wenn der neue Service Worker die Kontrolle übernommen hat
+      // Add listener for controllerchange event
+      const onControllerChange = () => {
+        console.log('New service worker has taken control');
         window.location.reload();
-      });
+      };
+      
+      // Add the listener
+      navigator.serviceWorker.addEventListener('controllerchange', onControllerChange, { once: true });
+      
+      // Close the dialog
+      setShowUpdateDialog(false);
     }
   };
 
