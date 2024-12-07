@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Mic, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast.tsx";
@@ -29,6 +29,17 @@ const Index = ({ isAuthenticated }: IndexProps) => {
   const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
   const { usageCount, incrementUsage } = useUsageCounter();
   const { t } = useTranslation();
+
+  useEffect(() => {
+    // Check for pending transcribed text after sign-in
+    if (isAuthenticated) {
+      const pendingText = localStorage.getItem('pending_transcribed_text');
+      if (pendingText) {
+        setTranscribedText(pendingText);
+        localStorage.removeItem('pending_transcribed_text');
+      }
+    }
+  }, [isAuthenticated]);
 
   // Add error logging for auth state changes
   supabase.auth.onAuthStateChange((event, session) => {

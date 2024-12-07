@@ -3,6 +3,7 @@ import { Auth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
 import { supabase } from '@/integrations/supabase/client';
 import { useTranslation } from 'react-i18next';
+import { useEffect } from 'react';
 
 interface AuthDialogProps {
   open: boolean;
@@ -14,6 +15,16 @@ const AuthDialog = ({ open }: AuthDialogProps) => {
   
   // Get the current URL without any hash or query parameters
   const siteUrl = window.location.origin;
+
+  useEffect(() => {
+    if (open) {
+      // Save current text when dialog opens
+      const currentText = document.querySelector('textarea')?.value;
+      if (currentText) {
+        localStorage.setItem('pending_transcribed_text', currentText);
+      }
+    }
+  }, [open]);
 
   return (
     <Dialog open={open} onOpenChange={() => {}} modal>
