@@ -231,5 +231,27 @@
       "content": "DE123456789"
     },
     "copyright": "© 2024 productivity-boost.com UG & Co. KG. Alle Rechte vorbehalten."
+  },
+  "landing": {
+    "headline": "Sprechen ist das neue Tippen",
+    "tryFree": "Verwende es jetzt, kostenlos"
+  },
+  "features": {
+    "fast": {
+      "title": "⚡ Schnell",
+      "description": "3x schneller als tippen"
+    },
+    "ai": {
+      "title": "🧠 Intelligent",
+      "description": "KI-gestützte Verfeinerung"
+    },
+    "simple": {
+      "title": "✅ Einfach",
+      "description": "Klicken und sprechen"
+    },
+    "reliable": {
+      "title": "🎯 Verlässlich",
+      "description": "Führende Spracherkennung"
+    }
   }
 }

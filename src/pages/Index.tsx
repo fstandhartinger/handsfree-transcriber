@@ -175,31 +175,97 @@ const Index = ({ isAuthenticated }: IndexProps) => {
             <ProfileButton />
           </div>
 
-          <div className="flex-1 flex flex-col items-center justify-center">
-            {isTranscribing ? (
-              <div className="flex flex-col items-center gap-4">
-                <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-                <p className="text-lg">{t('status.transcribing')}</p>
+          <div className="flex-1 flex flex-col items-center justify-start px-4">
+            <div className="text-center mt-16 mb-12">
+              <h1 className="text-4xl font-bold mb-3 bg-gradient-to-r from-primary/90 to-primary/70 bg-clip-text text-transparent tracking-tight">
+                Speech to Text PRO
+              </h1>
+              <p className="text-lg font-medium text-foreground/90">
+                {t('landing.headline')}
+              </p>
+            </div>
+
+            <div className="flex flex-col items-center min-h-[180px] justify-center mb-16">
+              <p className="text-sm font-medium text-primary/90 mb-6 animate-pulse">
+                {t('landing.tryFree')}
+              </p>
+              <div className="h-[120px] flex items-center justify-center">
+                {isTranscribing ? (
+                  <div className="flex flex-col items-center gap-4">
+                    <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+                    <p className="text-sm font-medium text-muted-foreground">{t('status.transcribing')}</p>
+                  </div>
+                ) : isRecording ? (
+                  <RecordingView
+                    onStop={() => {
+                      if (mediaRecorder && mediaStream) {
+                        mediaRecorder.stop();
+                        mediaStream.getTracks().forEach(track => track.stop());
+                      }
+                    }}
+                  />
+                ) : (
+                  <Button
+                    size="lg"
+                    className="rounded-full w-16 h-16 shadow-lg hover:shadow-xl transition-all duration-300 bg-primary/90 hover:bg-primary"
+                    onClick={handleStartRecording}
+                    disabled={isTranscribing}
+                  >
+                    <Mic className="w-8 h-8" />
+                  </Button>
+                )}
               </div>
-            ) : isRecording ? (
-              <RecordingView
-                onStop={() => {
-                  if (mediaRecorder && mediaStream) {
-                    mediaRecorder.stop();
-                    mediaStream.getTracks().forEach(track => track.stop());
-                  }
-                }}
-              />
-            ) : (
-              <Button
-                size="lg"
-                className="rounded-full w-16 h-16"
-                onClick={handleStartRecording}
-                disabled={isTranscribing}
-              >
-                <Mic className="w-8 h-8" />
-              </Button>
-            )}
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 max-w-4xl mx-auto px-4">
+              {/* Fast */}
+              <div className="group relative bg-background hover:bg-muted/50 rounded-xl p-3 transition-all duration-200 border border-border/50 hover:border-primary/20 h-[100px] flex">
+                <div className="flex flex-col items-center text-center space-y-2 w-full justify-center">
+                  <span className="text-base font-medium group-hover:scale-110 transition-transform duration-200">
+                    {t('features.fast.title')}
+                  </span>
+                  <p className="text-xs text-muted-foreground/70 group-hover:text-foreground/80 transition-colors duration-200">
+                    {t('features.fast.description')}
+                  </p>
+                </div>
+              </div>
+
+              {/* Smart */}
+              <div className="group relative bg-background hover:bg-muted/50 rounded-xl p-3 transition-all duration-200 border border-border/50 hover:border-primary/20 h-[100px] flex">
+                <div className="flex flex-col items-center text-center space-y-2 w-full justify-center">
+                  <span className="text-base font-medium group-hover:scale-110 transition-transform duration-200">
+                    {t('features.ai.title')}
+                  </span>
+                  <p className="text-xs text-muted-foreground/70 group-hover:text-foreground/80 transition-colors duration-200">
+                    {t('features.ai.description')}
+                  </p>
+                </div>
+              </div>
+
+              {/* Simple */}
+              <div className="group relative bg-background hover:bg-muted/50 rounded-xl p-3 transition-all duration-200 border border-border/50 hover:border-primary/20 h-[100px] flex">
+                <div className="flex flex-col items-center text-center space-y-2 w-full justify-center">
+                  <span className="text-base font-medium group-hover:scale-110 transition-transform duration-200">
+                    {t('features.simple.title')}
+                  </span>
+                  <p className="text-xs text-muted-foreground/70 group-hover:text-foreground/80 transition-colors duration-200">
+                    {t('features.simple.description')}
+                  </p>
+                </div>
+              </div>
+
+              {/* Reliable */}
+              <div className="group relative bg-background hover:bg-muted/50 rounded-xl p-3 transition-all duration-200 border border-border/50 hover:border-primary/20 h-[100px] flex">
+                <div className="flex flex-col items-center text-center space-y-2 w-full justify-center">
+                  <span className="text-base font-medium group-hover:scale-110 transition-transform duration-200">
+                    {t('features.reliable.title')}
+                  </span>
+                  <p className="text-xs text-muted-foreground/70 group-hover:text-foreground/80 transition-colors duration-200">
+                    {t('features.reliable.description')}
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
 
           <CookieBanner />

@@ -231,5 +231,27 @@
       "content": "DE123456789"
     },
     "copyright": "© 2024 productivity-boost.com UG & Co. KG. All rights reserved."
+  },
+  "landing": {
+    "headline": "Speaking is the new typing",
+    "tryFree": "Use it now, for free"
+  },
+  "features": {
+    "fast": {
+      "title": "⚡ Fast",
+      "description": "3x faster than typing"
+    },
+    "ai": {
+      "title": "🧠 Smart",
+      "description": "AI-powered refinement"
+    },
+    "simple": {
+      "title": "✅ Simple",
+      "description": "Just click and speak"
+    },
+    "reliable": {
+      "title": "🎯 Reliable",
+      "description": "leading speech recognition"
+    }
   }
 }
