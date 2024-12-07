@@ -142,7 +142,10 @@ const Index = ({ isAuthenticated }: IndexProps) => {
     return <TextEditView 
       text={transcribedText} 
       onBack={() => setTranscribedText(null)} 
-      onNewRecording={() => setTranscribedText(null)}
+      onNewRecording={() => {
+        setTranscribedText(null);
+        handleStartRecording();
+      }}
     />;
   }
 
@@ -193,9 +196,9 @@ const Index = ({ isAuthenticated }: IndexProps) => {
 
       <div className="legal-links fixed bottom-0 left-0 w-full p-2 bg-background">
         <div className="flex justify-center gap-6 mb-2">
-          <a href="/terms-and-conditions" target="_blank" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Terms & Conditions</a>
-          <a href="/data-privacy" target="_blank" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Data Privacy</a>
-          <a href="/imprint" target="_blank" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Imprint</a>
+          <a href="/terms-and-conditions" target="_blank" className="text-xs text-muted-foreground hover:text-foreground transition-colors">{t('footer.terms')}</a>
+          <a href="/data-privacy" target="_blank" className="text-xs text-muted-foreground hover:text-foreground transition-colors">{t('footer.privacy')}</a>
+          <a href="/imprint" target="_blank" className="text-xs text-muted-foreground hover:text-foreground transition-colors">{t('footer.imprint')}</a>
         </div>
         <CookieBanner />
       </div>

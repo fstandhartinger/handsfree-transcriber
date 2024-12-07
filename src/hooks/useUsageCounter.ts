@@ -8,8 +8,16 @@ export const useUsageCounter = () => {
 
   useEffect(() => {
     const storedCount = localStorage.getItem(USAGE_KEY);
-    if (storedCount) {
-      setUsageCount(parseInt(storedCount, 3));
+    if (!storedCount) {
+      localStorage.setItem(USAGE_KEY, '0');
+    } else {
+      const parsedCount = parseInt(storedCount, 10);
+      if (isNaN(parsedCount)) {
+        localStorage.setItem(USAGE_KEY, '0');
+        setUsageCount(0);
+      } else {
+        setUsageCount(parsedCount);
+      }
     }
   }, []);
 

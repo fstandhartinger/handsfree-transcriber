@@ -14,31 +14,41 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
   
   // Get the current URL without any hash or query parameters
   const siteUrl = window.location.origin;
-  
-  console.log('Auth site URL:', siteUrl); // Debug log
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>{t('auth.continueUsing')}</DialogTitle>
+      <DialogContent className="sm:max-w-md p-6">
+        <DialogHeader className="mb-6">
+          <DialogTitle className="text-xl">{t('auth.continueUsing')}</DialogTitle>
         </DialogHeader>
-        <Auth
-          supabaseClient={supabase}
-          appearance={{ theme: ThemeSupa }}
-          providers={['google']}
-          redirectTo={siteUrl}
-          view="sign_in"
-          showLinks={false}
-          onlyThirdPartyProviders={true}
-          queryParams={{
-            access_type: 'offline',
-            prompt: 'consent',
-            site_url: siteUrl, // Dynamically set the site URL
-          }}
-          socialLayout="horizontal"
-          theme="default"
-        />
+        <div className="[&_button]:flex-1 [&_button]:h-11 [&_button]:p-2.5 [&_button]:bg-[#4285f4] [&_button]:text-white [&_button:hover]:bg-[#357ae8] [&_button_img]:w-[18px] [&_button_img]:h-[18px] [&_button_img]:mr-2.5">
+          <Auth
+            supabaseClient={supabase}
+            appearance={{ 
+              theme: ThemeSupa,
+              variables: {
+                default: {
+                  colors: {
+                    brand: '#4285f4',
+                    brandAccent: '#357ae8'
+                  }
+                }
+              }
+            }}
+            providers={['google']}
+            redirectTo={siteUrl}
+            view="sign_in"
+            showLinks={false}
+            onlyThirdPartyProviders={true}
+            queryParams={{
+              access_type: 'offline',
+              prompt: 'consent',
+              site_url: siteUrl,
+            }}
+            socialLayout="horizontal"
+            theme="default"
+          />
+        </div>
       </DialogContent>
     </Dialog>
   );
