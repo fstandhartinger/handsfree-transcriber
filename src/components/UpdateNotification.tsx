@@ -70,8 +70,8 @@ const UpdateNotification = () => {
 
       // Häufigere Prüfung im PWA-Modus
       const updateInterval = window.matchMedia('(display-mode: standalone)').matches
-        ? 60 * 1000     // Jede Minute im PWA-Modus
-        : 60 * 60 * 1000; // Jede Stunde im Browser-Modus
+        ? 1 * 60 * 1000
+        : 1 * 60 * 1000;
 
       const interval = setInterval(checkForUpdates, updateInterval);
       

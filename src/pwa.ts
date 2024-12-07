@@ -37,8 +37,8 @@ export const registerServiceWorker = async () => {
 
       // Check for updates more frequently when in standalone mode
       const updateInterval = window.matchMedia('(display-mode: standalone)').matches
-        ? 15 * 60 * 1000  // Every 15 minutes in PWA mode
-        : 60 * 60 * 1000; // Every hour in browser mode
+        ? 1 * 60 * 1000
+        : 1 * 60 * 1000;
 
       // Check for updates periodically
       const periodicUpdate = async () => {
