@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 
 const USAGE_KEY = 'app_usage_count';
-const MAX_FREE_USES = 5;
+const MAX_FREE_USES = 3;
 
 export const useUsageCounter = () => {
   const [usageCount, setUsageCount] = useState(0);
@@ -9,7 +9,7 @@ export const useUsageCounter = () => {
   useEffect(() => {
     const storedCount = localStorage.getItem(USAGE_KEY);
     if (storedCount) {
-      setUsageCount(parseInt(storedCount, 10));
+      setUsageCount(parseInt(storedCount, 3));
     }
   }, []);
 

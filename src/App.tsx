@@ -1,18 +1,17 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
 import { Toaster } from "@/components/ui/toaster"
 import { useEffect, useState } from 'react'
 import Index from './pages/Index'
-import UpdateNotification from './components/UpdateNotification'
+import TermsAndConditions from './pages/TermsAndConditions'
+import DataPrivacy from './pages/DataPrivacy'
+import Imprint from './pages/Imprint'
 import { supabase } from './integrations/supabase/client'
-import ProfileButton from './components/ProfileButton'
-import { SettingsDialog } from '@/components/SettingsDialog'
-import { Settings } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import './App.css'
 
-function App() {
+function AppContent() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-  const [showSettings, setShowSettings] = useState(false);
+  const location = useLocation();
+  const isLegalPage = ['/terms-and-conditions', '/data-privacy', '/imprint'].includes(location.pathname);
 
   useEffect(() => {
     // Check if running in PWA mode
@@ -50,30 +49,34 @@ function App() {
     </div>;
   }
 
+  if (isLegalPage) {
+    return (
+      <Routes>
+        <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+        <Route path="/data-privacy" element={<DataPrivacy />} />
+        <Route path="/imprint" element={<Imprint />} />
+      </Routes>
+    );
+  }
+
+  return (
+    <div className="app-container">
+      <main>
+        <Routes>
+          <Route path="/" element={<Index isAuthenticated={isAuthenticated} />} />
+        </Routes>
+      </main>
+      <Toaster />
+    </div>
+  );
+}
+
+function App() {
   return (
     <Router>
-      <div className="h-16 flex items-center justify-end px-4 fixed top-0 right-0 w-full gap-4 bg-background z-50">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setShowSettings(true)}
-          className="h-10 w-10 flex items-center justify-center"
-        >
-          <Settings className="h-5 w-5" />
-        </Button>
-        <SettingsDialog 
-          open={showSettings} 
-          onOpenChange={setShowSettings} 
-        />
-        {isAuthenticated && <ProfileButton />}
-      </div>
-      <Routes>
-        <Route path="/*" element={<Index isAuthenticated={isAuthenticated} />} />
-      </Routes>
-      <UpdateNotification />
-      <Toaster />
+      <AppContent />
     </Router>
-  )
+  );
 }
 
 export default App

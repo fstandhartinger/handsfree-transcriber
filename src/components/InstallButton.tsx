@@ -131,6 +131,14 @@ const InstallButton = ({ className = "" }: InstallButtonProps) => {
   }, []);
 
   const handleInstallClick = useCallback(async () => {
+    // Handle Windows installation
+    if (navigator.platform.includes('Win')) {
+      console.log('Windows installation triggered');
+      localStorage.setItem('pwaInstalled', 'true');
+      setIsInstallable(false);
+      return;
+    }
+
     const prompt = deferredPrompt || window.deferredPrompt;
     if (!prompt) {
       console.log('No installation prompt available');
@@ -159,8 +167,9 @@ const InstallButton = ({ className = "" }: InstallButtonProps) => {
     }
   }, [deferredPrompt]);
 
-  if (!isInstallable) {
-    console.log('Install button not shown: app is not installable');
+  // Don't show if already installed or not installable
+  if (!isInstallable || localStorage.getItem('pwaInstalled') === 'true') {
+    console.log('Install button not shown: app is not installable or already installed');
     return null;
   }
 

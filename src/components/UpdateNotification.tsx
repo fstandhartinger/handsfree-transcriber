@@ -7,10 +7,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useTranslation } from "react-i18next";
 
 const UpdateNotification = () => {
   const [waitingWorker, setWaitingWorker] = useState<ServiceWorker | null>(null);
   const [showUpdateDialog, setShowUpdateDialog] = useState(false);
+  const { t } = useTranslation();
 
   const reloadPage = () => {
     if (waitingWorker) {
@@ -82,17 +84,17 @@ const UpdateNotification = () => {
     <Dialog open={showUpdateDialog} onOpenChange={setShowUpdateDialog}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Update verfügbar</DialogTitle>
+          <DialogTitle>{t('update.title')}</DialogTitle>
           <DialogDescription>
-            Eine neue Version der App ist verfügbar. Möchten Sie jetzt aktualisieren?
+            {t('update.description')}
           </DialogDescription>
         </DialogHeader>
         <div className="flex justify-end gap-3 mt-4">
           <Button variant="outline" onClick={() => setShowUpdateDialog(false)}>
-            Später
+            {t('buttons.later')}
           </Button>
           <Button onClick={reloadPage}>
-            Jetzt aktualisieren
+            {t('buttons.updateNow')}
           </Button>
         </div>
       </DialogContent>

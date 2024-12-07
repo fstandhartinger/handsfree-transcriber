@@ -1,11 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from "react";
-import { ArrowLeft, Download } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import EditableText from "@/components/EditableText";
 import TextControls from "@/components/TextControls";
 import ShareButton, { ClipboardButton } from "@/components/ShareButton";
-import InstallButton from "@/components/InstallButton";
 import RecordingModal from "@/components/RecordingModal";
 import { useToast } from "@/hooks/use-toast.tsx";
 import { supabase } from "@/integrations/supabase/client";
@@ -201,8 +200,8 @@ const TextEditView = ({ text: initialText, onBack, onNewRecording }: TextEditVie
   });
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden">
-      <div className="h-16 flex items-center justify-between px-4 relative">
+    <div className="h-screen flex flex-col">
+      <div className="flex items-center justify-between px-4 h-14 bg-background">
         <Button
           onClick={onBack}
           variant="outline"
@@ -213,25 +212,21 @@ const TextEditView = ({ text: initialText, onBack, onNewRecording }: TextEditVie
         </Button>
         
         {isProcessing && (
-          <div className="absolute left-1/2 -translate-x-1/2 z-50">
+          <div className="absolute left-1/2 -translate-x-1/2">
             <LoadingSpinner size="md" className="text-primary" />
             <div className="sr-only">Loading indicator should be visible</div>
           </div>
         )}
         
         <div className="flex gap-2">
-          {(window as any).chrome?.webview?.hostObjects?.transcriberHost !== undefined ? (
-            <ClipboardButton text={text} className="ml-auto" />
-          ) : (
-            <>
-              <ClipboardButton text={text} />
-              <ShareButton text={text} />
-            </>
+          <ClipboardButton text={text} />
+          {!(window as any).chrome?.webview?.hostObjects?.transcriberHost && (
+            <ShareButton text={text} />
           )}
         </div>
       </div>
 
-      <div className="flex-1 flex flex-col min-h-0">
+      <div className="flex-1 flex flex-col overflow-hidden">
         <EditableText 
           text={text} 
           onChange={setText} 

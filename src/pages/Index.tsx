@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Mic } from "lucide-react";
+import { Mic, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast.tsx";
 import RecordingView from "@/components/RecordingView";
@@ -8,6 +8,11 @@ import { SettingsDialog } from "@/components/SettingsDialog";
 import AuthDialog from "@/components/AuthDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthError } from "@supabase/supabase-js";
+import { useUsageCounter } from "@/hooks/useUsageCounter";
+import { useTranslation } from "react-i18next";
+import { CookieBanner } from "@/components/CookieBanner";
+import UpdateNotification from "@/components/UpdateNotification";
+import ProfileButton from "@/components/ProfileButton";
 
 interface IndexProps {
   isAuthenticated: boolean;
@@ -22,6 +27,8 @@ const Index = ({ isAuthenticated }: IndexProps) => {
   const { toast } = useToast();
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
   const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
+  const { usageCount, incrementUsage } = useUsageCounter();
+  const { t } = useTranslation();
 
   // Add error logging for auth state changes
   supabase.auth.onAuthStateChange((event, session) => {
@@ -47,7 +54,9 @@ const Index = ({ isAuthenticated }: IndexProps) => {
   });
 
   const handleStartRecording = async () => {
-    if (!isAuthenticated) {
+    const needsAuth = incrementUsage();
+    
+    if (needsAuth && !isAuthenticated) {
       setShowAuthDialog(true);
       return;
     }
@@ -57,7 +66,7 @@ const Index = ({ isAuthenticated }: IndexProps) => {
       const recorder = new MediaRecorder(stream);
       setMediaStream(stream);
       setMediaRecorder(recorder);
-      let audioChunks: Blob[] = [];
+      const audioChunks: Blob[] = [];
 
       recorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
@@ -89,7 +98,7 @@ const Index = ({ isAuthenticated }: IndexProps) => {
             } catch (error) {
               console.error('Transcription error:', error);
               toast({
-                description: "Fehler bei der Transkription. Bitte versuchen Sie es erneut.",
+                description: t('errors.transcription'),
                 variant: "destructive",              
               });
             } finally {
@@ -102,7 +111,7 @@ const Index = ({ isAuthenticated }: IndexProps) => {
         } catch (error) {
           console.error('Error processing audio:', error);
           toast({
-            description: "Fehler bei der Audioverarbeitung. Bitte versuchen Sie es erneut.",
+            description: t('errors.audioProcessing'),
             variant: "destructive",
           });
           setIsTranscribing(false);
@@ -112,7 +121,7 @@ const Index = ({ isAuthenticated }: IndexProps) => {
     } catch (error) {
       console.error('Error starting recording:', error);
       toast({
-        description: "Zugriff auf das Mikrofon nicht möglich. Bitte überprüfen Sie die Berechtigungen.",
+        description: t('errors.microphoneAccess'),
         variant: "destructive",
       });
       setIsRecording(false);
@@ -139,11 +148,27 @@ const Index = ({ isAuthenticated }: IndexProps) => {
 
   return (
     <div className="h-screen flex flex-col">
-      <div className="flex-1 flex flex-col items-center justify-center">
+      <div className="h-16 flex items-center justify-end px-4 fixed top-0 right-0 w-full gap-4 bg-background z-50">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setShowSettings(true)}
+          className="h-10 w-10 flex items-center justify-center"
+        >
+          <Settings className="h-5 w-5" />
+        </Button>
+        <SettingsDialog 
+          open={showSettings} 
+          onOpenChange={setShowSettings} 
+        />
+        {isAuthenticated && <ProfileButton />}
+      </div>
+
+      <div className="flex-1 flex flex-col items-center justify-center pt-16">
         {isTranscribing ? (
           <div className="flex flex-col items-center gap-4">
             <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-            <p className="text-lg">Transkribiere...</p>
+            <p className="text-lg">{t('status.transcribing')}</p>
           </div>
         ) : isRecording ? (
           <RecordingView onStop={handleStopRecording} />
@@ -159,10 +184,20 @@ const Index = ({ isAuthenticated }: IndexProps) => {
           </div>
         )}
       </div>
-      <SettingsDialog 
-        open={showSettings} 
-        onOpenChange={setShowSettings} 
-      />
+
+      <div className="relative z-30">
+        <UpdateNotification />
+      </div>
+
+      <div className="legal-links fixed bottom-0 left-0 w-full p-4 bg-background">
+        <div className="flex justify-center gap-4 mb-4">
+          <a href="/terms-and-conditions" target="_blank">Terms & Conditions</a>
+          <a href="/data-privacy" target="_blank">Data Privacy</a>
+          <a href="/imprint" target="_blank">Imprint</a>
+        </div>
+        <CookieBanner />
+      </div>
+
       <AuthDialog
         open={showAuthDialog}
         onOpenChange={setShowAuthDialog}

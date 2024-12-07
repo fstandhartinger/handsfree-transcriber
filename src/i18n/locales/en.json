@@ -2,7 +2,8 @@
   "auth": {
     "signOut": "Sign out",
     "continueUsing": "Sign in to continue using the app",
-    "signIn": "Sign in"
+    "signIn": "Sign in",
+    "maxUsageReached": "You have reached the maximum number of free uses. Please sign in to continue."
   },
   "recording": {
     "recording": "Recording in progress...",
@@ -26,6 +27,12 @@
   "status": {
     "transcribing": "Transcribing..."
   },
+  "errors": {
+    "transcription": "Transcription error. Please try again.",
+    "audioProcessing": "Error processing audio. Please try again.",
+    "microphoneAccess": "Could not access microphone. Please check permissions.",
+    "auth": "An error occurred during authentication. Please try again later."
+  },
   "toasts": {
     "textCopied": "Text copied to clipboard",
     "clipboardError": "Error copying to clipboard",
@@ -35,7 +42,8 @@
     "styleUpdated": "Style updated to {{style}}",
     "styleUpdateError": "Error updating style",
     "changesUndone": "Changes undone",
-    "audioProcessingError": "Error processing audio"
+    "audioProcessingError": "Error processing audio",
+    "shareFailed": "Error sharing text"
   },
   "buttons": {
     "newRecording": "New Recording",
@@ -44,10 +52,185 @@
     "concise": "Concise",
     "casual": "Casual",
     "rephrase": "Rephrase",
-    "undo": "Undo"
+    "undo": "Undo",
+    "later": "Later",
+    "updateNow": "Update now"
   },
   "settings": {
     "title": "Settings",
     "autoCopy": "Automatically copy text to clipboard"
+  },
+  "update": {
+    "title": "Update available",
+    "description": "A new version of the app is available. Would you like to update now?"
+  },
+  "download": {
+    "newVersionAvailable": "New version available",
+    "updateDescription": "A new version of the Windows app is available for download. Please download the updated version to get the latest features and improvements.",
+    "button": "Download Windows App"
+  },
+  "footer": {
+    "terms": "Terms & Conditions",
+    "privacy": "Privacy Policy",
+    "imprint": "Imprint"
+  },
+  "terms": {
+    "title": "Terms and Conditions",
+    "lastUpdated": "Last updated: {{date}}",
+    "acceptance": {
+      "title": "Acceptance of Terms",
+      "content": "By accessing and using speech-to-text.pro, you acknowledge that you have read, understood, and agree to be bound by these Terms and Conditions. These terms apply to all users of the service, including the use of services provided by:"
+    },
+    "service": {
+      "title": "Service Description",
+      "content": "speech-to-text.pro provides speech-to-text transcription and text processing services using artificial intelligence technologies."
+    },
+    "usage": {
+      "title": "Usage Terms",
+      "content": "Users must comply with the following terms when using the service:",
+      "list": {
+        "risk": "Use of the service is at your own risk",
+        "misuse": "Do not misuse or attempt to manipulate the service",
+        "security": "Maintain the security of your account credentials",
+        "compliance": "Comply with all applicable laws and regulations"
+      }
+    },
+    "ip": {
+      "title": "Intellectual Property",
+      "content": "All intellectual property rights related to the service remain the property of productivity-boost.com UG & Co. KG."
+    },
+    "disclaimer": {
+      "title": "Disclaimer",
+      "content": "The service is provided 'as is' without any warranties, express or implied."
+    },
+    "liability": {
+      "title": "Limitation of Liability",
+      "content": "We shall not be liable for any damages arising from:",
+      "list": {
+        "direct": "Direct or indirect damages",
+        "data": "Loss of data or privacy breaches",
+        "interruption": "Service interruptions",
+        "accuracy": "Accuracy of transcriptions"
+      }
+    },
+    "indemnification": {
+      "title": "Indemnification",
+      "content": "You agree to indemnify and hold harmless productivity-boost.com UG & Co. KG from any claims arising from your use of the service."
+    },
+    "modifications": {
+      "title": "Modifications to Terms",
+      "content": "We reserve the right to modify these terms at any time. Continued use of the service constitutes acceptance of modified terms."
+    },
+    "law": {
+      "title": "Governing Law",
+      "content": "These terms are governed by the laws of Germany."
+    },
+    "contact": {
+      "title": "Contact Information",
+      "content": "For any questions regarding these terms, please contact us at legal@productivity-boost.com"
+    },
+    "availability": {
+      "title": "Service Availability",
+      "content": "We strive to maintain service availability but do not guarantee uninterrupted access."
+    },
+    "ai": {
+      "title": "AI Services",
+      "content": "Our service utilizes AI technologies from OpenAI, Replicate.com, and Groq.com. Their respective terms of service also apply to your use of our service."
+    }
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "lastUpdated": "Last updated: {{date}}",
+    "intro": {
+      "title": "Introduction",
+      "content": "This Privacy Policy explains how speech-to-text.pro collects, uses, and protects your personal information."
+    },
+    "collection": {
+      "title": "Information Collection",
+      "content": "We collect the following types of information:",
+      "list": {
+        "account": "Account information",
+        "usage": "Usage data",
+        "audio": "Audio recordings",
+        "transcripts": "Generated transcripts"
+      }
+    },
+    "usage": {
+      "title": "Use of Information",
+      "content": "We use your information for:",
+      "list": {
+        "service": "Providing our services",
+        "improve": "Improving our services",
+        "communicate": "Communication with users",
+        "legal": "Legal compliance"
+      }
+    },
+    "cookies": {
+      "title": "Cookies and Tracking",
+      "content": "We use cookies and similar technologies for:",
+      "list": {
+        "session": "Session management",
+        "preferences": "User preferences",
+        "analytics": "Analytics"
+      }
+    },
+    "analytics": {
+      "title": "Analytics",
+      "content": "We use Google Analytics to understand how our service is used."
+    },
+    "security": {
+      "title": "Data Security",
+      "content": "We implement appropriate security measures to protect your information."
+    },
+    "thirdParty": {
+      "title": "Third-Party Services",
+      "content": "We use services from the following third-party providers:"
+    },
+    "rights": {
+      "title": "Your Rights",
+      "content": "You have the right to access, correct, or delete your personal information."
+    },
+    "ai": {
+      "title": "AI Processing",
+      "content": "Your data may be processed by AI services from OpenAI, Replicate.com, and Groq.com."
+    },
+    "changes": {
+      "title": "Changes to Privacy Policy",
+      "content": "We may update this privacy policy from time to time."
+    },
+    "contact": {
+      "title": "Contact Us",
+      "content": "For privacy-related inquiries, please contact privacy@productivity-boost.com"
+    }
+  },
+  "imprint": {
+    "title": "Imprint",
+    "info": {
+      "title": "Company Information",
+      "address": {
+        "street": "Musterstraße 123",
+        "city": "12345 Berlin",
+        "country": "Germany"
+      }
+    },
+    "representative": {
+      "title": "Authorized Representative",
+      "name": "Florian Standhartinger"
+    },
+    "contact": {
+      "title": "Contact Information",
+      "email": "Email: contact@productivity-boost.com",
+      "phone": "Phone: +49 123 456789"
+    },
+    "register": {
+      "title": "Commercial Register",
+      "court": "District Court Berlin",
+      "number": "Registration Number: HRB 123456"
+    },
+    "vat": {
+      "title": "VAT ID",
+      "content": "DE123456789"
+    },
+    "copyright": "© 2024 productivity-boost.com UG & Co. KG. All rights reserved."
   }
 }

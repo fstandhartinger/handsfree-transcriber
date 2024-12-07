@@ -90,14 +90,14 @@ const EditableText = ({
   };
 
   return (
-    <div className="flex flex-col flex-1 min-h-0">
+    <div className="flex flex-col flex-1 overflow-hidden">
       {isEditMode && (
-        <div className="px-4 mb-4 text-sm text-muted-foreground bg-muted/50 p-3 rounded-md">
+        <div className="px-4 py-2 text-sm text-muted-foreground bg-muted/50">
           {t('editMode.instruction')}
         </div>
       )}
 
-      <ScrollArea className="flex-1 min-h-0">
+      <ScrollArea className="flex-1">
         <div className="p-4">
           <div
             ref={divRef}
