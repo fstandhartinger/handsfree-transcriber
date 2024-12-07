@@ -3,11 +3,11 @@ Es handelt sich um eine minimalistische, moderne Speech-to-Text-Transkriptionsso
 
 # Grundsätzlicher Aufbau der App:
 
-Die App besteht aus einer Startseite (Index.tsx), einer Ergebnisseite (TextEditView.tsx).
+Die App besteht aus einer Startseite (Index.tsx) und einer Ergebnisseite (TextEditView.tsx). Die Startseite enthält eine Kopfzeile mit einem Settings-Button in der linken oberen Ecke und einem Profilbild-Button in der rechten oberen Ecke. Über den Profilbild-Button kann man sich mit seinem Google-Account einloggen. Wenn man eingeloggt ist, wird dort das Google-Profilbild angezeigt, ansonsten ein Platzhalter-Icon.
 
 # Erläuterung der Funktion der App:
 
-Die Startseite ist die Seite, die erscheint wenn man die Web App initial öffnet. Auf der Startseite befindet sich ein Mikrofon-Bbutton, 
+Die Startseite ist die Seite, die erscheint wenn man die Web App initial öffnet. Auf der Startseite befindet sich ein Mikrofon-Button, 
 über den man die Aufzeichnung eines Audiostreams über das Gerätemikrofon starten kann.
 Sobald man das getan hat, erscheint statt dem Mikrofon-Button ein Stop-Button. Wenn man den anklickt, wird die Aufzeichnung mittels eines marktführenden 
 Speech-to-Text-KI-Modells namens Whisper transkribiert, also in Text umgewandelt.
@@ -101,8 +101,8 @@ Wir zeigen in der oberen rechten Ecke dann das Profile Picture des Anwenders an.
 2. Der Dialog, mit dem der Benutzer aufgefordert wird, sich einzuloggen soll einen etwas luftigeren Rahmen haben, sodass sichergestellt ist, dass das Kreuz zum Schließen in der oberen
 rechten Ecke nicht mit dem Text überlappt. Der Button für Sign In With Google soll neben dem Google-Symbol uach den Text "Sign In with Google" enthalten (bzw die deutsche lokalisation davon), 
 so wie dieser Button üblicherweise aussieht.
-3. Die Startseite braucht ganz subtil am unteren Rand angezeigt einen ganz minimalistischen Cookie-Banner, so subtil wie möglich aber dennoch rechtlich ausreichend. Er soll oberhalb des Installations-Panels angezeigt werden, sofern dieses angezeigt wird, und falls nicht, dann einfach am unteren Rand.
-4. Die Startseite braucht unten links auf die rechtlich verbindlichen Seiten, terms-and-conditions und privacy-policy, sowie einen Link zum Impressum. All diese Seiten werden in einem neuen Tab geöffnet. Diese Links sollen oberhalb des Installations-Panels und oberhalb des Cookie-Banners angezeigt werden, sofern diese agezeigt werden, und falls nicht, dann einfach am unteren Rand.
+3. [IMPLEMENTIERT] Die Startseite braucht ganz subtil am unteren Rand angezeigt einen ganz minimalistischen Cookie-Banner, so subtil wie möglich aber dennoch rechtlich ausreichend. Er soll oberhalb des Installations-Panels angezeigt werden, sofern dieses angezeigt wird, und falls nicht, dann einfach am unteren Rand.
+4. [IMPLEMENTIERT] Die Startseite braucht unten links auf die rechtlich verbindlichen Seiten, terms-and-conditions und privacy-policy, sowie einen Link zum Impressum. All diese Seiten werden in einem neuen Tab geöffnet. Diese Links sollen oberhalb des Installations-Panels und oberhalb des Cookie-Banners angezeigt werden, sofern diese agezeigt werden, und falls nicht, dann einfach am unteren Rand.
 Diese neuen Seiten sollen erreichbar sein unter /data-privacy und /terms-and-conditions und /imprint.
 Sie sollen inhaltlich so aufgebaut sein, dass sie den Anforderungen des Gesetzgebers an die rechtlich verbindlichen Seiten genügen und uns von allen Verantwortungen befreien und rechtlich
 unbelangbar machen. Wir verwenden in diesem Projekt Services von OpenAI und replicate.com und groq.com, sodass implizit auch deren Bedingungen und Konditionen für die Verwendung gelten.

@@ -148,20 +148,22 @@ const Index = ({ isAuthenticated }: IndexProps) => {
 
   return (
     <div className="h-screen flex flex-col">
-      <div className="h-16 flex items-center justify-end px-4 fixed top-0 right-0 w-full gap-4 bg-background z-50">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setShowSettings(true)}
-          className="h-10 w-10 flex items-center justify-center"
-        >
-          <Settings className="h-5 w-5" />
-        </Button>
-        <SettingsDialog 
-          open={showSettings} 
-          onOpenChange={setShowSettings} 
-        />
-        {isAuthenticated && <ProfileButton />}
+      <div className="h-16 flex items-center justify-between px-4 fixed top-0 w-full bg-background z-50">
+        <div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setShowSettings(true)}
+            className="h-10 w-10 flex items-center justify-center"
+          >
+            <Settings className="h-5 w-5" />
+          </Button>
+          <SettingsDialog 
+            open={showSettings} 
+            onOpenChange={setShowSettings} 
+          />
+        </div>
+        <ProfileButton />
       </div>
 
       <div className="flex-1 flex flex-col items-center justify-center pt-16">
@@ -189,11 +191,11 @@ const Index = ({ isAuthenticated }: IndexProps) => {
         <UpdateNotification />
       </div>
 
-      <div className="legal-links fixed bottom-0 left-0 w-full p-4 bg-background">
-        <div className="flex justify-center gap-4 mb-4">
-          <a href="/terms-and-conditions" target="_blank">Terms & Conditions</a>
-          <a href="/data-privacy" target="_blank">Data Privacy</a>
-          <a href="/imprint" target="_blank">Imprint</a>
+      <div className="legal-links fixed bottom-0 left-0 w-full p-2 bg-background">
+        <div className="flex justify-center gap-6 mb-2">
+          <a href="/terms-and-conditions" target="_blank" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Terms & Conditions</a>
+          <a href="/data-privacy" target="_blank" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Data Privacy</a>
+          <a href="/imprint" target="_blank" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Imprint</a>
         </div>
         <CookieBanner />
       </div>
