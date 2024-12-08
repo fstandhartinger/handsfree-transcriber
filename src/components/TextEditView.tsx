@@ -7,7 +7,6 @@ import EditableText from "@/components/EditableText";
 import LoadingOverlay from "@/components/LoadingOverlay";
 import AuthDialog from "@/components/AuthDialog";
 import { useToast } from "@/hooks/use-toast";
-import { useSettings } from "@/hooks/useSettings";
 import ProfileButton from "@/components/ProfileButton";
 
 interface TextEditViewProps {
@@ -31,7 +30,6 @@ const TextEditView = ({
   const [showRephraseModal, setShowRephraseModal] = useState(false);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const { toast } = useToast();
-  const { settings } = useSettings();
 
   useEffect(() => {
     console.log("[" + new Date().toISOString() + "] Rendering TextEditView:", {
@@ -43,20 +41,6 @@ const TextEditView = ({
       text: text.substring(0, 50) + "...",
     });
   }, [isProcessing, isProcessingRephrase, isEditMode, showRephraseModal, showAuthDialog, text]);
-
-  useEffect(() => {
-    console.log(
-      "[" + new Date().toISOString() + "] Auto-copy check - autoCopy:",
-      settings.autoCopy,
-      "showAuthDialog:",
-      showAuthDialog,
-      "isAuthenticated:",
-      isAuthenticated
-    );
-    if (settings.autoCopy && !showAuthDialog) {
-      navigator.clipboard.writeText(text).catch(console.error);
-    }
-  }, [text, settings.autoCopy, showAuthDialog, isAuthenticated]);
 
   const handleProcessingStateChange = (state: { isProcessing: boolean }) => {
     console.log("Processing state changed:", state);
@@ -92,26 +76,29 @@ const TextEditView = ({
       <div className="flex-1 relative">
         <EditableText
           text={text}
+          onChange={handleTextChange}
           isEditMode={isEditMode}
-          onTextChange={(newText) => setText(newText)}
+          onEditModeChange={setIsEditMode}
         />
 
         {(isProcessing || isProcessingRephrase) && <LoadingOverlay />}
       </div>
 
       <TextControls
-        text={text}
-        onTextChange={handleTextChange}
-        onProcessingStateChange={handleProcessingStateChange}
-        onRephraseModalChange={setShowRephraseModal}
-        showRephraseModal={showRephraseModal}
-        isProcessingRephrase={isProcessingRephrase}
-        setIsProcessingRephrase={setIsProcessingRephrase}
-        onNewRecording={onNewRecording}
-        previousTextsCount={previousTexts.length}
+        onStyleChange={() => {}}
         onUndo={handleUndo}
-        setShowAuthDialog={setShowAuthDialog}
-        isAuthenticated={isAuthenticated}
+        previousTextExists={previousTexts.length > 1}
+        isProcessing={isProcessing}
+        onStartInstructionRecording={() => {}}
+        onStopInstructionRecording={() => {}}
+        isRecordingInstruction={false}
+        selectedText={null}
+        onStartRephraseRecording={() => {}}
+        onStopRephraseRecording={() => {}}
+        isRecordingRephrase={isProcessingRephrase}
+        isEditMode={isEditMode}
+        onEditModeChange={setIsEditMode}
+        onNewRecording={onNewRecording}
       />
 
       <AuthDialog
