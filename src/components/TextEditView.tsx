@@ -3,6 +3,9 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from 'react-router-dom';
+import { useUsageCounter } from "@/hooks/useUsageCounter";
+import AuthDialog from "@/components/AuthDialog";
+import RephraseModal from "@/components/RephraseModal";
 
 interface TextEditViewProps {
   text: string;
@@ -17,6 +20,7 @@ const TextEditView = ({ text, onBack, onNewRecording, isAuthenticated }: TextEdi
   const { toast } = useToast();
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { incrementUsage } = useUsageCounter();
 
   const handleNewRecording = async () => {
     const needsUpgrade = await incrementUsage();
@@ -62,8 +66,13 @@ const TextEditView = ({ text, onBack, onNewRecording, isAuthenticated }: TextEdi
       <p>{text}</p>
       <Button onClick={handleNewRecording}>New Recording</Button>
       <Button onClick={handleRephrase}>Rephrase</Button>
-      {showAuthDialog && <AuthDialog onClose={() => setShowAuthDialog(false)} />}
-      {showRephraseModal && <RephraseModal onClose={() => setShowRephraseModal(false)} />}
+      {showAuthDialog && <AuthDialog open={showAuthDialog} onOpenChange={setShowAuthDialog} />}
+      {showRephraseModal && (
+        <RephraseModal 
+          onStop={() => setShowRephraseModal(false)} 
+          status="recording"
+        />
+      )}
     </div>
   );
 };
