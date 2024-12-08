@@ -21,7 +21,6 @@ serve(async (req) => {
   console.log('Webhook received:', new Date().toISOString());
   console.log('Request headers:', JSON.stringify(Object.fromEntries(req.headers.entries()), null, 2));
 
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     console.log('Handling CORS preflight request');
     return new Response(null, { headers: corsHeaders });
@@ -47,32 +46,25 @@ serve(async (req) => {
     switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data.object;
+        console.log('Processing checkout.session.completed:', session);
+        
         const userId = session.client_reference_id;
         const subscriptionId = session.subscription as string;
         const customerId = session.customer as string;
 
-        console.log('Processing checkout.session.completed:', {
-          userId,
-          subscriptionId,
-          customerId
-        });
-
-        // Update customer metadata
-        console.log('Updating Stripe customer metadata...');
+        console.log('Updating customer metadata with user_id:', userId);
         await stripe.customers.update(customerId, {
           metadata: { user_id: userId }
         });
-        console.log('Stripe customer metadata updated successfully');
 
-        // Update user profile
         console.log('Updating user profile in Supabase...');
-        const { data, error } = await supabase
+        const { error } = await supabase
           .from('profiles')
           .update({ 
-            plan_id: 2,  // Pro plan
+            plan_id: 2,
             stripe_customer_id: customerId,
             stripe_subscription_id: subscriptionId,
-            authenticated_usage_count: 0,  // Reset usage count for new subscription
+            authenticated_usage_count: 0,
             updated_at: new Date().toISOString()
           })
           .eq('id', userId);
@@ -81,7 +73,7 @@ serve(async (req) => {
           console.error('Error updating user profile:', error);
           throw error;
         }
-        console.log('User profile updated successfully:', data);
+        console.log('User profile updated successfully');
 
         // Add payment history
         console.log('Adding payment history...');
@@ -102,7 +94,6 @@ serve(async (req) => {
           throw paymentError;
         }
         console.log('Payment history added successfully');
-
         break;
       }
 
@@ -150,7 +141,7 @@ serve(async (req) => {
           const { error } = await supabase
             .from('profiles')
             .update({ 
-              plan_id: 1,  // Free plan
+              plan_id: 1,
               stripe_subscription_id: null,
               updated_at: new Date().toISOString()
             })
