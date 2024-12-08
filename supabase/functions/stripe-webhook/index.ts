@@ -12,20 +12,9 @@ const supabase = createClient(
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 )
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
-
 serve(async (req) => {
   console.log('Webhook received:', new Date().toISOString());
   console.log('Request headers:', JSON.stringify(Object.fromEntries(req.headers.entries()), null, 2));
-
-  // Handle CORS preflight requests
-  if (req.method === 'OPTIONS') {
-    console.log('Handling CORS preflight request');
-    return new Response(null, { headers: corsHeaders });
-  }
 
   try {
     const signature = req.headers.get('stripe-signature')!;
@@ -46,73 +35,57 @@ serve(async (req) => {
 
     switch (event.type) {
       case 'checkout.session.completed': {
+        console.log('Processing checkout.session.completed...');
         const session = event.data.object;
+        console.log('Checkout session:', session);
+        
         const userId = session.client_reference_id;
         const subscriptionId = session.subscription as string;
-        const customerId = session.customer as string;
-
-        console.log('Processing checkout.session.completed:', {
+        const stripeCustomerId = session.customer as string;
+        
+        console.log('Updating customer metadata:', {
           userId,
           subscriptionId,
-          customerId
+          stripeCustomerId
         });
 
-        // Update customer metadata
-        console.log('Updating Stripe customer metadata...');
-        await stripe.customers.update(customerId, {
+        // Update customer metadata with user_id
+        await stripe.customers.update(stripeCustomerId, {
           metadata: { user_id: userId }
         });
-        console.log('Stripe customer metadata updated successfully');
+        console.log('Customer metadata updated successfully');
 
         // Update user profile
         console.log('Updating user profile in Supabase...');
-        const { data, error } = await supabase
+        const { error: profileError } = await supabase
           .from('profiles')
           .update({ 
             plan_id: 2,  // Pro plan
-            stripe_customer_id: customerId,
+            stripe_customer_id: stripeCustomerId,
             stripe_subscription_id: subscriptionId,
-            authenticated_usage_count: 0,  // Reset usage count for new subscription
+            authenticated_usage_count: 0,
             updated_at: new Date().toISOString()
           })
           .eq('id', userId);
 
-        if (error) {
-          console.error('Error updating user profile:', error);
-          throw error;
+        if (profileError) {
+          console.error('Error updating user profile:', profileError);
+          throw profileError;
         }
-        console.log('User profile updated successfully:', data);
-
-        // Add payment history
-        console.log('Adding payment history...');
-        const { error: paymentError } = await supabase
-          .from('payment_history')
-          .insert({
-            user_id: userId,
-            stripe_payment_id: session.payment_intent as string,
-            amount: session.amount_total! / 100,
-            currency: session.currency,
-            token_credits_added: 0,
-            status: 'completed',
-            completed_at: new Date().toISOString()
-          });
-
-        if (paymentError) {
-          console.error('Error adding payment history:', paymentError);
-          throw paymentError;
-        }
-        console.log('Payment history added successfully');
+        console.log('User profile updated successfully');
 
         break;
       }
 
       case 'invoice.paid': {
+        console.log('Processing invoice.paid...');
         const invoice = event.data.object;
-        console.log('Processing invoice.paid:', invoice);
+        console.log('Invoice:', invoice);
 
         const customer = await stripe.customers.retrieve(invoice.customer as string);
         console.log('Retrieved Stripe customer:', customer);
 
+        // Get user_id from customer metadata
         const userId = (customer as Stripe.Customer).metadata.user_id;
         console.log('User ID from metadata:', userId);
 
@@ -131,13 +104,16 @@ serve(async (req) => {
             throw error;
           }
           console.log('Usage count reset successfully');
+        } else {
+          console.error('No user_id found in customer metadata');
         }
         break;
       }
 
       case 'customer.subscription.deleted': {
+        console.log('Processing subscription deletion...');
         const subscription = event.data.object;
-        console.log('Processing subscription deletion:', subscription);
+        console.log('Subscription:', subscription);
 
         const customer = await stripe.customers.retrieve(subscription.customer as string);
         console.log('Retrieved Stripe customer:', customer);
@@ -161,6 +137,8 @@ serve(async (req) => {
             throw error;
           }
           console.log('User downgraded successfully');
+        } else {
+          console.error('No user_id found in customer metadata');
         }
         break;
       }
@@ -171,7 +149,7 @@ serve(async (req) => {
 
     console.log('Webhook processed successfully');
     return new Response(JSON.stringify({ received: true }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json' },
       status: 200,
     });
   } catch (err) {
@@ -179,7 +157,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ error: err.message }),
       { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json' },
         status: 400,
       }
     );
