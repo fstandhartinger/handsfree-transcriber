@@ -69,6 +69,24 @@ export const useUsageCounter = () => {
       
       if (user) {
         console.log('Incrementing authenticated user usage');
+        // First check if user has pro plan
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('plan_id')
+          .eq('id', user.id)
+          .single();
+
+        if (profileError) {
+          console.error('Error fetching profile:', profileError);
+          return false;
+        }
+
+        // If user has pro plan (plan_id = 2), don't count usage
+        if (profileData.plan_id === 2) {
+          console.log('User has pro plan, not counting usage');
+          return false;
+        }
+
         const { data: usageData, error: fetchError } = await supabase
           .from('usage_tracking')
           .select('authenticated_usage_count')
@@ -94,14 +112,18 @@ export const useUsageCounter = () => {
         }
 
         setUsageCount(newCount);
-        return newCount > MAX_FREE_USES;
+        const shouldUpgrade = newCount > MAX_FREE_USES;
+        console.log('Should show upgrade dialog:', shouldUpgrade);
+        return shouldUpgrade;
       } else {
         console.log('Incrementing anonymous user usage');
         const newCount = usageCount + 1;
         setUsageCount(newCount);
         localStorage.setItem(USAGE_KEY, newCount.toString());
         console.log('New anonymous usage count:', newCount);
-        return newCount > MAX_FREE_USES;
+        const shouldUpgrade = newCount > MAX_FREE_USES;
+        console.log('Should show upgrade dialog:', shouldUpgrade);
+        return shouldUpgrade;
       }
     } catch (error) {
       console.error('Error in incrementUsage:', error);
@@ -109,10 +131,16 @@ export const useUsageCounter = () => {
     }
   };
 
+  const shouldShowUpgradeDialog = () => {
+    console.log('Checking if should show upgrade dialog. Current count:', usageCount);
+    return usageCount > MAX_FREE_USES;
+  };
+
   return {
     usageCount,
     incrementUsage,
     maxFreeUses: MAX_FREE_USES,
-    isLoading
+    isLoading,
+    shouldShowUpgradeDialog
   };
 };
