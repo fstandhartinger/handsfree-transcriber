@@ -7,7 +7,6 @@ const MAX_FREE_USES = 3;
 export const useUsageCounter = () => {
   const [usageCount, setUsageCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  const [planId, setPlanId] = useState<number>(1); // Default to free plan
 
   useEffect(() => {
     const checkUsage = async () => {
@@ -16,17 +15,6 @@ export const useUsageCounter = () => {
         
         if (user) {
           console.log('Checking authenticated user usage');
-          // Get user's plan and usage data
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('plan_id')
-            .eq('id', user.id)
-            .single();
-
-          if (profile) {
-            setPlanId(profile.plan_id);
-          }
-
           const { data: usageData, error } = await supabase
             .from('usage_tracking')
             .select('authenticated_usage_count')
@@ -77,24 +65,13 @@ export const useUsageCounter = () => {
 
   const incrementUsage = async () => {
     try {
+
       console.log('incrementUsage called');
+
       const { data: { user } } = await supabase.auth.getUser();
       
       if (user) {
         console.log('Incrementing authenticated user usage');
-        // Get user's plan
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('plan_id')
-          .eq('id', user.id)
-          .single();
-
-        // If user is on free plan and has reached limit, return true to trigger upgrade prompt
-        if (profile?.plan_id === 1 && usageCount >= MAX_FREE_USES) {
-          console.log('Free plan user reached usage limit');
-          return true;
-        }
-
         const { data: usageData, error: fetchError } = await supabase
           .from('usage_tracking')
           .select('authenticated_usage_count')
@@ -120,7 +97,7 @@ export const useUsageCounter = () => {
         }
 
         setUsageCount(newCount);
-        return profile?.plan_id === 1 && newCount > MAX_FREE_USES;
+        return newCount > MAX_FREE_USES;
       } else {
         console.log('Incrementing anonymous user usage');
         const newCount = usageCount + 1;
@@ -139,7 +116,6 @@ export const useUsageCounter = () => {
     usageCount,
     incrementUsage,
     maxFreeUses: MAX_FREE_USES,
-    isLoading,
-    planId
+    isLoading
   };
 };
