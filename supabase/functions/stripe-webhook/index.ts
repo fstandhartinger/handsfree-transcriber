@@ -45,7 +45,7 @@ serve(async (req) => {
             plan_id: 2,  // Pro plan
             stripe_customer_id: customerId,
             stripe_subscription_id: subscriptionId,
-            remaining_token_credits: 100000,  // Reset credits for new subscription
+            authenticated_usage_count: 0,  // Reset usage count for new subscription
             updated_at: new Date().toISOString()
           })
           .eq('id', userId)
@@ -60,7 +60,7 @@ serve(async (req) => {
             stripe_payment_id: session.payment_intent as string,
             amount: session.amount_total! / 100,
             currency: session.currency,
-            token_credits_added: 100000,
+            token_credits_added: 0,
             status: 'completed',
             completed_at: new Date().toISOString()
           })
@@ -74,11 +74,11 @@ serve(async (req) => {
         const userId = (customer as Stripe.Customer).metadata.user_id
 
         if (userId) {
-          // Renew credits
+          // Reset usage count for the new billing period
           const { error } = await supabase
             .from('profiles')
             .update({ 
-              remaining_token_credits: 100000,
+              authenticated_usage_count: 0,
               updated_at: new Date().toISOString()
             })
             .eq('id', userId)

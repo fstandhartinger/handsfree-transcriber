@@ -8,6 +8,9 @@ import DataPrivacy from './pages/DataPrivacy'
 import Imprint from './pages/Imprint'
 import { supabase } from './integrations/supabase/client'
 import './App.css'
+import AuthPage from '@/pages/Auth'
+import Success from '@/pages/Success'
+import Edit from '@/pages/Edit'
 
 function AppContent() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
@@ -50,6 +53,7 @@ function AppContent() {
     </div>;
   }
 
+
   if (isLegalPage) {
     return (
       <Routes>
@@ -67,6 +71,12 @@ function AppContent() {
           <Route path="/" element={<Index isAuthenticated={isAuthenticated} />} />
           <Route path="/plans" element={<Plans />} />
           <Route path="/auth/callback" element={<Navigate to="/" replace />} />
+
+          <Route path="/edit" element={<Edit isAuthenticated={isAuthenticated} />} />
+          <Route path="/auth" element={<AuthPage />} />
+          <Route path="/success" element={<Success />} />
+          <Route path="/cancel" element={<Index isAuthenticated={isAuthenticated} />} />
+
         </Routes>
       </main>
       <Toaster />

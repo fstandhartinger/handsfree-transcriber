@@ -31,7 +31,8 @@
     "audioProcessing": "Error processing audio. Please try again.",
     "microphoneAccess": "Could not access microphone. Please check permissions.",
     "auth": "An error occurred during authentication. Please try again later.",
-    "checkoutError": "Error creating checkout session. Please try again."
+    "checkoutError": "Error creating checkout session. Please try again.",
+    "notAuthenticated": "Please sign in to continue"
   },
   "toasts": {
     "textCopied": "Text copied to clipboard",
@@ -55,7 +56,8 @@
     "rephrase": "Rephrase",
     "undo": "Undo",
     "later": "Later",
-    "updateNow": "Update now"
+    "updateNow": "Update now",
+    "processing": "Processing..."
   },
   "settings": {
     "title": "Settings",
@@ -89,12 +91,28 @@
       "title": "Professional Plan",
       "description": "For users who need more transcriptions",
       "features": {
-        "unlimited": "1000 transcriptions per month"
+        "unlimited": "1000 transcriptions per month",
+        "priority": "Priority processing",
+        "support": "Customer support"
       }
     },
-    "upgradeToPro": "Upgrade to Pro",
+    "upgradeToPro": "Upgrade to Professional",
     "termsNotice": "By signing up for Professional plan you accept the terms & conditions",
     "changePlan": "Change Plan",
-    "currentPlan": "Current Plan:"
+    "currentPlan": "Current Plan:",
+    "proRequired": "Professional Plan Required",
+    "proRequiredDescription": "You've reached the limit of your free plan. Upgrade to Professional to continue using the service with 1000 transcriptions per month.",
+    "proFeatures": {
+      "title": "Professional Plan Features",
+      "unlimited": "1000 transcriptions per month",
+      "priority": "Priority processing",
+      "support": "Customer support"
+    },
+    "upgrade": "Upgrade Now"
+  },
+  "success": {
+    "title": "Welcome to Professional!",
+    "description": "Your upgrade was successful. You now have access to 1000 transcriptions per month.",
+    "continue": "Continue"
   }
 }

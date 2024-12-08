@@ -13,6 +13,7 @@ import { useAutoCopyToClipboard } from "@/components/SettingsDialog";
 import { useUsageCounter } from "@/hooks/useUsageCounter";
 import AuthDialog from "@/components/AuthDialog";
 import HeaderControls from "@/components/text-edit/HeaderControls";
+import ProUpgradeDialog from "@/components/ProUpgradeDialog";
 
 interface TextEditViewProps {
   text: string;
@@ -40,6 +41,7 @@ const TextEditView = ({ text: initialText, onBack, isAuthenticated }: TextEditVi
   const [autoCopy] = useAutoCopyToClipboard();
   const [hasInitialCopyBeenTriggered, setHasInitialCopyBeenTriggered] = useState(false);
   const { incrementUsage } = useUsageCounter();
+  const [showProUpgradeDialog, setShowProUpgradeDialog] = useState(false);
 
   useEffect(() => {
     const needsAuth = localStorage.getItem('needs_auth');
@@ -231,12 +233,8 @@ const TextEditView = ({ text: initialText, onBack, isAuthenticated }: TextEditVi
           localStorage.setItem('needs_auth', 'true');
           setShowAuthDialog(true);
         } else if (usageResult.needsPro && isAuthenticated) {
-          toast({            
-            description: t('toasts.proPlanRequired.description'),
-            variant: "destructive",
-            duration: 5000,
-          });
-          // TODO: Add your pro plan upgrade dialog/link here
+          localStorage.setItem('pending_transcribed_text', text);
+          setShowProUpgradeDialog(true);
         }
       }
     } catch (error) {
@@ -319,6 +317,12 @@ const TextEditView = ({ text: initialText, onBack, isAuthenticated }: TextEditVi
         open={showAuthDialog} 
         onOpenChange={setShowAuthDialog} 
         text={text} 
+      />
+
+      <ProUpgradeDialog
+        open={showProUpgradeDialog}
+        onOpenChange={setShowProUpgradeDialog}
+        text={text}
       />
     </div>
   );

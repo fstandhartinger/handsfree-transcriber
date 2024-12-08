@@ -16,18 +16,18 @@ export const useUsageCounter = () => {
         
         if (user) {
           console.log('Checking authenticated user usage');
-          const { data: usageData, error } = await supabase
+          const { data: profileData, error: profileError } = await supabase
             .from('usage_tracking')
             .select('authenticated_usage_count')
             .eq('user_id', user.id)
             .single();
 
-          if (error) {
-            console.error('Error fetching usage data:', error);
+          if (profileError) {
+            console.error('Error fetching usage data:', profileError);
             setUsageCount(0);
           } else {
-            console.log('Retrieved authenticated usage count:', usageData.authenticated_usage_count);
-            setUsageCount(usageData.authenticated_usage_count);
+            console.log('Retrieved authenticated usage count:', profileData.authenticated_usage_count);
+            setUsageCount(profileData.authenticated_usage_count);
           }
         } else {
           console.log('Checking anonymous user usage');
@@ -66,14 +66,11 @@ export const useUsageCounter = () => {
 
   const incrementUsage = async () => {
     try {
-
-      console.log('incrementUsage called');
-
       const { data: { user } } = await supabase.auth.getUser();
       
       if (user) {
         console.log('Incrementing authenticated user usage');
-        const { data: usageData, error: fetchError } = await supabase
+        const { data: profileData, error: fetchError } = await supabase
           .from('usage_tracking')
           .select('authenticated_usage_count')
           .eq('user_id', user.id)
@@ -84,7 +81,7 @@ export const useUsageCounter = () => {
           return { needsAuth: false, needsPro: false };
         }
 
-        const newCount = (usageData.authenticated_usage_count || 0) + 1;
+        const newCount = (profileData.authenticated_usage_count || 0) + 1;
         console.log('New authenticated usage count:', newCount);
 
         const { error: updateError } = await supabase
@@ -97,8 +94,23 @@ export const useUsageCounter = () => {
           return { needsAuth: false, needsPro: false };
         }
 
+        const { data: userData, error: userFetchError } = await supabase
+          .from('profiles')
+          .select('plan_id')
+          .eq('id', user.id)
+          .single();
+
+          if (userFetchError) {
+            console.error('Error retrieving user plan info:', userFetchError);
+            return { needsAuth: false, needsPro: false };
+          }
+  
+
         setUsageCount(newCount);
-        return { needsAuth: false, needsPro: newCount > MAX_AUTHENTICATED_USES };
+        return { 
+          needsAuth: false, 
+          needsPro: userData.plan_id === 1 && newCount > MAX_AUTHENTICATED_USES 
+        };
       } else {
         console.log('Incrementing anonymous user usage');
         const currentCount = parseInt(localStorage.getItem(USAGE_KEY) || '0', 10);

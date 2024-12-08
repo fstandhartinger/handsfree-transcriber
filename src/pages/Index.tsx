@@ -16,6 +16,7 @@ import ProfileButton from "@/components/ProfileButton";
 import LegalFooter from "@/components/LegalFooter";
 import FeatureCarousel from "@/components/FeatureCarousel";
 import TryArrow from "@/components/TryArrow";
+import ProUpgradeDialog from "@/components/ProUpgradeDialog";
 
 interface IndexProps {
   isAuthenticated: boolean;
@@ -26,6 +27,8 @@ const Index = ({ isAuthenticated }: IndexProps) => {
   const [transcribedText, setTranscribedText] = useState<string | null>(null);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
+  const [showProUpgradeDialog, setShowProUpgradeDialog] = useState(false);
   const { toast } = useToast();
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
   const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
@@ -110,22 +113,25 @@ const Index = ({ isAuthenticated }: IndexProps) => {
                 localStorage.setItem('pending_transcribed_text', data.transcription);
                 localStorage.setItem('needs_auth', 'true');
               } else if (usageResult.needsPro && isAuthenticated) {
-                toast({
-                  description: t('toasts.proPlanRequired.description'),
-                  variant: "destructive",
-                  duration: 5000,
-                });
-                // TODO: Add your pro plan upgrade dialog/link here
+                localStorage.setItem('pending_transcribed_text', data.transcription);
+                setShowProUpgradeDialog(true);
               }
             } catch (error) {
-              console.error('Transcription error:', error);
+              console.error('Error processing audio:', error);
               toast({
-                description: t('errors.transcription'),
-                variant: "destructive",              
+                description: t('toasts.audioProcessingError'),
+                variant: "destructive",
               });
             } finally {
               setIsTranscribing(false);
               setIsRecording(false);
+              if (mediaStream) {
+                mediaStream.getTracks().forEach(track => track.stop());
+                setMediaStream(null);
+              }
+              if (mediaRecorder) {
+                setMediaRecorder(null);
+              }
             }
           };
 
@@ -133,7 +139,7 @@ const Index = ({ isAuthenticated }: IndexProps) => {
         } catch (error) {
           console.error('Error processing audio:', error);
           toast({
-            description: t('errors.audioProcessing'),
+            description: t('toasts.audioProcessingError'),
             variant: "destructive",
           });
           setIsTranscribing(false);
@@ -246,6 +252,18 @@ const Index = ({ isAuthenticated }: IndexProps) => {
       <SettingsDialog
         open={showSettings}
         onOpenChange={setShowSettings}
+      />
+
+      <AuthDialog 
+        open={showAuthDialog} 
+        onOpenChange={setShowAuthDialog} 
+        text={transcribedText || ''} 
+      />
+
+      <ProUpgradeDialog
+        open={showProUpgradeDialog}
+        onOpenChange={setShowProUpgradeDialog}
+        text={transcribedText || ''}
       />
     </div>
   );

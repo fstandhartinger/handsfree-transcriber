@@ -31,7 +31,8 @@
     "audioProcessing": "Fehler bei der Audioverarbeitung. Bitte versuchen Sie es erneut.",
     "microphoneAccess": "Zugriff auf das Mikrofon nicht möglich. Bitte überprüfen Sie die Berechtigungen.",
     "auth": "Bei der Anmeldung ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.",
-    "checkoutError": "Fehler beim Erstellen der Checkout-Session. Bitte versuchen Sie es erneut."
+    "checkoutError": "Fehler beim Erstellen der Checkout-Session. Bitte versuchen Sie es erneut.",
+    "notAuthenticated": "Bitte melden Sie sich an, um fortzufahren"
   },
   "toasts": {
     "textCopied": "Text in die Zwischenablage kopiert",
@@ -55,7 +56,8 @@
     "rephrase": "Umformulieren",
     "undo": "Rückgängig",
     "later": "Später",
-    "updateNow": "Jetzt aktualisieren"
+    "updateNow": "Jetzt aktualisieren",
+    "processing": "Verarbeitung..."
   },
   "settings": {
     "title": "Einstellungen",
@@ -270,12 +272,28 @@
       "title": "Professional Plan",
       "description": "Für Benutzer, die mehr Transkriptionen benötigen",
       "features": {
-        "unlimited": "1000 Transkriptionen pro Monat"
+        "unlimited": "1000 Transkriptionen pro Monat",
+        "priority": "Vorrangige Verarbeitung",
+        "support": "Wenden Sie sich an den Support"
       }
     },
-    "upgradeToPro": "Auf Pro upgraden",
-    "termsNotice": "Mit der Anmeldung f��r den Professional Plan akzeptieren Sie die Allgemeinen Geschäftsbedingungen",
+    "upgradeToPro": "Auf Professional upgraden",
+    "termsNotice": "Mit der Anmeldung für den Professional Plan akzeptieren Sie die Allgemeinen Geschäftsbedingungen",
     "changePlan": "Plan ändern",
-    "currentPlan": "Aktueller Plan:"
+    "currentPlan": "Aktueller Plan:",
+    "proRequired": "Professional Plan erforderlich",
+    "proRequiredDescription": "Sie haben das Limit Ihres kostenlosen Plans erreicht. Upgraden Sie auf Professional, um den Service mit 1000 Transkriptionen pro Monat weiter zu nutzen.",
+    "proFeatures": {
+      "title": "Professional Plan Funktionen",
+      "unlimited": "1000 Transkriptionen pro Monat",
+      "priority": "Vorrangige Verarbeitung",
+      "support": "Kundensupport"
+    },
+    "upgrade": "Jetzt upgraden"
+  },
+  "success": {
+    "title": "Willkommen bei Professional!",
+    "description": "Ihr Upgrade war erfolgreich. Sie haben jetzt Zugriff auf 1000 Transkriptionen pro Monat.",
+    "continue": "Fortfahren"
   }
 }
