@@ -114,11 +114,10 @@ export const useUsageCounter = () => {
     }
   };
 
-  const shouldShowUpgradeDialog = async () => {
-    console.log('[useUsageCounter] Checking if should show upgrade dialog...');
-    const { data: { session } } = await supabase.auth.getSession();
+  const shouldShowUpgradeDialog = () => {
+    const { data: { user } } = supabase.auth.getSession();
     const count = usageCount;
-    const shouldShow = session?.user ? count > FREE_AUTHENTICATED_LIMIT : count > FREE_ANONYMOUS_LIMIT;
+    const shouldShow = user ? count > FREE_AUTHENTICATED_LIMIT : count > FREE_ANONYMOUS_LIMIT;
     console.log('[useUsageCounter] Should show upgrade dialog:', { count, shouldShow });
     return shouldShow;
   };
