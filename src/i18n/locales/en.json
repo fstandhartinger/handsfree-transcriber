@@ -95,8 +95,5 @@
     "termsNotice": "By signing up for Professional plan you accept the terms & conditions",
     "changePlan": "Change Plan",
     "currentPlan": "Current Plan:"
-  },
-  "placeholder": { 
-    "enterText": "Use 'New Recording' to create a new text"
-  }  
+  }
 }

@@ -1,258 +1,305 @@
-import { useEffect, useState } from 'react';
-import { Copy, ArrowLeft, Mic, Share, FileText, ChevronDown, Briefcase, Scissors, Coffee, Circle } from 'lucide-react';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useState, useEffect, useCallback } from "react";
+import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
+import EditableText from "@/components/EditableText";
+import TextControls from "@/components/TextControls";
+import ShareButton, { ClipboardButton } from "@/components/ShareButton";
+import RecordingModal from "@/components/RecordingModal";
+import { useToast } from "@/hooks/use-toast.tsx";
+import { supabase } from "@/integrations/supabase/client";
+import { useAudioRecording } from "@/hooks/useAudioRecording";
+import { useAudioProcessing } from "@/hooks/useAudioProcessing";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from 'react-router-dom';
-import AuthDialog from './AuthDialog';
-import RecordingModal from './RecordingModal';
-import { useAudioRecording } from '@/hooks/useAudioRecording';
-import { useAudioProcessing } from '@/hooks/useAudioProcessing';
-import { useUsageCounter } from '@/hooks/useUsageCounter';
-import ProfileButton from './ProfileButton';
-import ShareButton from './ShareButton';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { useAutoCopyToClipboard } from "@/components/SettingsDialog";
+import { useUsageCounter } from "@/hooks/useUsageCounter";
+import AuthDialog from "@/components/AuthDialog";
 
 interface TextEditViewProps {
-  text: string | null;
+  text: string;
   onBack: () => void;
   onNewRecording: () => void;
   isAuthenticated: boolean;
 }
 
-const TextEditView = ({ text, onBack, onNewRecording, isAuthenticated }: TextEditViewProps) => {
-  const [currentText, setCurrentText] = useState(text);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [isProcessingRephrase, setIsProcessingRephrase] = useState(false);
+const TextEditView = ({ text: initialText, onBack, onNewRecording, isAuthenticated }: TextEditViewProps) => {
+  const [text, setText] = useState(initialText);
   const [isEditMode, setIsEditMode] = useState(false);
-  const [showRecordingModal, setShowRecordingModal] = useState(false);
+  const [textHistory, setTextHistory] = useState<string[]>([initialText]);
+  const [currentHistoryIndex, setCurrentHistoryIndex] = useState(0);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [selectedText, setSelectedText] = useState<string | null>(null);
+  const [showRephraseModal, setShowRephraseModal] = useState(false);
+  const [isRecordingRephrase, setIsRecordingRephrase] = useState(false);
+  const [isProcessingRephrase, setIsProcessingRephrase] = useState(false);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
-  const [history, setHistory] = useState<string[]>([text || '']);
-  
   const { toast } = useToast();
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  const [autoCopy] = useAutoCopyToClipboard();
+  const [hasInitialCopyBeenTriggered, setHasInitialCopyBeenTriggered] = useState(false);
+  const { incrementUsage } = useUsageCounter();
+
+  // Check for needs_auth flag when component mounts
+  useEffect(() => {
+    const needsAuth = localStorage.getItem('needs_auth');
+    if (needsAuth === 'true' && !isAuthenticated) {
+      // Small delay to ensure text is rendered
+      setTimeout(() => {
+        setShowAuthDialog(true);
+        localStorage.removeItem('needs_auth');
+      }, 100);
+    }
+  }, [isAuthenticated]);
+
+  // Function to copy text to clipboard
+  const copyToClipboard = useCallback(async (textToCopy: string) => {
+    try {
+      await navigator.clipboard.writeText(textToCopy);
+      toast({
+        description: t('toasts.textCopied'),
+        duration: 2000,
+      });
+    } catch (error) {
+      console.error('Error copying to clipboard:', error);
+      toast({
+        description: t('toasts.clipboardError'),
+        variant: "destructive",
+      });
+    }
+  }, [t, toast]);
+
+  // Auto-copy only when authenticated
+  useEffect(() => {
+    console.log(`[${new Date().toISOString()}] Auto-copy check - autoCopy: ${autoCopy}, showAuthDialog: ${showAuthDialog}, isAuthenticated: ${isAuthenticated}`);
+    if (autoCopy && text !== initialText && !showAuthDialog && isAuthenticated) {
+      copyToClipboard(text);
+    }
+  }, [text, autoCopy, initialText, copyToClipboard, showAuthDialog, isAuthenticated]);
+
+  // Handle initial text copy only when authenticated
+  useEffect(() => {
+    if (autoCopy && !hasInitialCopyBeenTriggered && !showAuthDialog && isAuthenticated) {
+      copyToClipboard(initialText);
+      setHasInitialCopyBeenTriggered(true);
+    }
+  }, [autoCopy, initialText, hasInitialCopyBeenTriggered, copyToClipboard, showAuthDialog, isAuthenticated]);
+
+  // Debug: Log state changes
+  useEffect(() => {
+    console.log('Processing state changed:', { isProcessing });
+  }, [isProcessing]);
+
   const { isRecording, startRecording, stopRecording } = useAudioRecording();
-  const { incrementUsage, shouldShowUpgradeDialog } = useUsageCounter();
+  const { processAudioForRephrase } = useAudioProcessing(text, (newText: string) => {
+    addToHistory(newText);
+    setText(newText);
+  }, setText);
 
   const addToHistory = (newText: string) => {
-    setHistory(prev => [...prev, newText]);
+    const newHistory = textHistory.slice(0, currentHistoryIndex + 1);
+    newHistory.push(newText);
+    setTextHistory(newHistory);
+    setCurrentHistoryIndex(newHistory.length - 1);
+    setText(newText);
   };
 
-  const { processAudioForRephrase } = useAudioProcessing(currentText || '', addToHistory, setCurrentText);
-
-  useEffect(() => {
-    const checkUsageAndShowDialog = async () => {
-      try {
-        if (currentText) {
-          const needsUpgrade = await incrementUsage();
-          const shouldUpgrade = shouldShowUpgradeDialog();
-          
-          if (needsUpgrade && !isAuthenticated) {
-            setShowAuthDialog(true);
-          }
-        }
-      } catch (error) {
-        console.error('[TextEditView] Error checking usage:', error);
-      }
-    };
-    
-    checkUsageAndShowDialog();
-  }, [currentText]);
-
-  const handleCopy = async () => {
+  const handleStyleChange = async (style: string) => {
     try {
-      await navigator.clipboard.writeText(currentText || '');
-      toast({
-        description: t('toasts.copied'),
+      console.log('Style change started:', { style, text });
+      setIsProcessing(true);
+      console.log('Processing state set to true');
+      
+      console.log('Calling Supabase function with:', {
+        text,
+        instruction: `Make this text more ${style.toLowerCase()}`
       });
-    } catch (err) {
-      console.error('[TextEditView] Failed to copy text:', err);
-      toast({
-        description: t('errors.copyFailed'),
+      
+      const { data, error } = await supabase.functions.invoke('refine-text', {
+        body: {
+          text: text,
+          instruction: `Make this text more ${style.toLowerCase()}`,
+        },
       });
-    }
-  };
 
-  const handleNewRecording = () => {
-    setShowRecordingModal(true);
-    startRecording();
-  };
-
-  const handleStopRecording = async () => {
-    if (isRecording) {
-      try {
-        setIsProcessingRephrase(true);
-        const audioBlob = await stopRecording();
-        if (audioBlob) {
-          await processAudioForRephrase(audioBlob);
-        }
-      } catch (error) {
-        console.error('[TextEditView] Error processing recording:', error);
-        toast({
-          description: t('errors.recording'),
-          variant: "destructive",
-        });
-      } finally {
-        setIsProcessingRephrase(false);
-        setShowRecordingModal(false);
+      if (error) {
+        console.error('Supabase function error:', error);
+        throw error;
       }
+
+      console.log('Supabase response:', { data });
+      addToHistory(data.text);
+      setText(data.text);
+
+      // Notify Windows app that text generation is complete
+      const host = (window as any).chrome?.webview?.hostObjects?.transcriberHost;
+      if (host?.NotifyTextGenerationCompleted) {
+        host.NotifyTextGenerationCompleted();
+      }
+
+      toast({
+        description: t('toasts.styleUpdated', { style: t(`buttons.${style.toLowerCase()}`) }),
+        duration: 2000,
+      });
+    } catch (error) {
+      console.error('Error updating text style:', error);
+      toast({
+        description: t('toasts.styleUpdateError'),
+        variant: "destructive",
+      });
+    } finally {
+      console.log('Style change completed, setting processing to false');
+      setIsProcessing(false);
     }
   };
 
-  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setCurrentText(e.target.value);
-    if (!isEditMode) setIsEditMode(true);
+  const handleUndo = () => {
+    if (currentHistoryIndex > 0) {
+      const previousText = textHistory[currentHistoryIndex - 1];
+      setCurrentHistoryIndex(currentHistoryIndex - 1);
+      setText(previousText);
+      toast({
+        description: t('toasts.changesUndone'),
+        duration: 2000,
+      });
+    }
   };
 
-  const handleStyleClick = (style: string) => {
-    // Handle style click
+  const handleStartRephraseRecording = () => {
+    console.log('Starting rephrase recording');
+    setShowRephraseModal(true);
   };
 
-  const handleStartRephrase = async () => {
-    setIsProcessingRephrase(true);
+  const handleStopRephraseRecording = async () => {
+    console.log('Stopping rephrase recording');
     try {
       const audioBlob = await stopRecording();
       if (audioBlob) {
+        setIsProcessingRephrase(true);
+        setIsRecordingRephrase(false);
         await processAudioForRephrase(audioBlob);
+
+        // Notify Windows app that text generation is complete
+        const host = (window as any).chrome?.webview?.hostObjects?.transcriberHost;
+        if (host?.NotifyTextGenerationCompleted) {
+          host.NotifyTextGenerationCompleted();
+        }
+
+        setShowRephraseModal(false);
       }
     } catch (error) {
-      console.error('[TextEditView] Error processing recording:', error);
+      console.error('Error processing audio:', error);
       toast({
-        description: t('errors.recording'),
+        description: t('toasts.audioProcessingError'),
         variant: "destructive",
       });
     } finally {
       setIsProcessingRephrase(false);
-      setShowRecordingModal(false);
     }
   };
 
+  const handleStartRecording = async () => {
+    console.log('Starting actual recording');
+    setIsRecordingRephrase(true);
+    await startRecording();
+  };
+
+  const handleCancelRecording = () => {
+    setShowRephraseModal(false);
+    setIsRecordingRephrase(false);
+    setIsProcessingRephrase(false);
+  };
+
+  const handleNewRecording = () => {
+    console.log(`[${new Date().toISOString()}] Starting new recording`);
+    const needsAuth = incrementUsage();
+    if (needsAuth && !isAuthenticated) {
+      localStorage.setItem('needs_auth', 'true');
+    }
+    onNewRecording();
+  };
+
+  console.log(`[${new Date().toISOString()}] Rendering TextEditView:`, { 
+    isProcessing, 
+    isProcessingRephrase,
+    isEditMode,
+    showRephraseModal,
+    showAuthDialog,
+    textLength: text.length,
+    initialTextLength: initialText.length
+  });
+
   return (
-    <div className="relative min-h-screen">
-      <div className="fixed top-0 left-0 right-0 bg-background z-10">
-        <div className="flex justify-between items-center p-4">
-          <Button
-            onClick={onBack}
-            variant="ghost"
-            size="icon"
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <div className="flex gap-2 items-center">
-            {currentText && (
-              <>
-                <Button
-                  onClick={handleCopy}
-                  variant="outline"
-                  size="icon"
-                >
-                  <Copy className="h-4 w-4" />
-                </Button>
-                <ShareButton text={currentText || ''} />
-              </>
-            )}
-            <ProfileButton />
+    <div className="h-screen flex flex-col">
+      <div className="flex items-center justify-between px-4 h-14 bg-background">
+        <Button
+          onClick={onBack}
+          variant="outline"
+          size="icon"
+          className="w-10 h-10 p-0"
+        >
+          <ArrowLeft className="h-4 w-4" />
+        </Button>
+        
+        {isProcessing && (
+          <div className="absolute left-1/2 -translate-x-1/2">
+            <LoadingSpinner size="md" className="text-primary" />
+            <div className="sr-only">Loading indicator should be visible</div>
           </div>
+        )}
+        
+        <div className="flex gap-2">
+          <ClipboardButton text={text} />
+          {!(window as any).chrome?.webview?.hostObjects?.transcriberHost && (
+            <ShareButton text={text} />
+          )}
         </div>
       </div>
 
-      <div className="container mx-auto px-4 pt-20 pb-8 max-w-3xl">
-        <Textarea
-          value={currentText || ''}
-          onChange={handleTextChange}
-          className="min-h-[200px] text-xl md:text-2xl border-0 focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 resize-none bg-transparent"
-          placeholder={t('placeholder.enterText')}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <EditableText 
+          text={text} 
+          onChange={setText} 
+          onTextSelect={setSelectedText}
+          isEditMode={isEditMode}
+          onEditModeChange={setIsEditMode}
+        />
+        <TextControls 
+          onStyleChange={handleStyleChange}
+          onUndo={handleUndo}
+          previousTextExists={currentHistoryIndex > 0}
+          isProcessing={isProcessing}
+          onStartInstructionRecording={() => {}}
+          onStopInstructionRecording={() => {}}
+          isRecordingInstruction={false}
+          selectedText={selectedText}
+          onStartRephraseRecording={handleStartRephraseRecording}
+          onStopRephraseRecording={handleStopRephraseRecording}
+          isRecordingRephrase={isRecordingRephrase}
+          isEditMode={isEditMode}
+          onEditModeChange={setIsEditMode}
+          onCancel={() => setIsEditMode(false)}
+          onNewRecording={handleNewRecording}
         />
       </div>
 
-      {showRecordingModal && (
+      {showRephraseModal && (
         <RecordingModal
-          onStop={handleStopRecording}
-          mode="instruction"
-          isRecording={isRecording}
-          onStartRecording={startRecording}
-          onCancel={() => {
-            setShowRecordingModal(false);
-            if (isRecording) {
-              stopRecording();
-            }
-          }}
+          onStop={handleStopRephraseRecording}
+          selectedText={selectedText}
+          mode="rephrase"
+          isRecording={isRecordingRephrase}
+          onStartRecording={handleStartRecording}
+          onCancel={handleCancelRecording}
           isProcessing={isProcessingRephrase}
         />
       )}
 
-      {showAuthDialog && (
-        <AuthDialog
-          open={showAuthDialog}
-          onOpenChange={setShowAuthDialog}
-        />
-      )}
-
-      <div className="fixed bottom-4 right-4 flex flex-col-reverse gap-2">
-        {currentText && (
-          <>
-            <Button
-              onClick={onNewRecording}
-              className="rounded-full shadow-lg flex items-center gap-2 px-4 bg-red-500 hover:bg-red-600"
-            >
-              <Circle className="h-5 w-5 fill-current" />
-              {t('buttons.newRecording')}
-            </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button 
-                  className="rounded-full shadow-lg flex items-center gap-2 px-4"
-                >
-                  <FileText className="w-5 h-5" />
-                  {t('buttons.style')}
-                  <ChevronDown className="w-4 h-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent 
-                className="bg-background border border-border shadow-lg" 
-                side="top"
-                align="end"
-              >
-                <DropdownMenuItem onClick={() => handleStyleClick("Formal")} className="hover:bg-accent">
-                  <Briefcase className="w-4 h-4 mr-2" />
-                  {t('buttons.formal')}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleStyleClick("Concise")} className="hover:bg-accent">
-                  <Scissors className="w-4 h-4 mr-2" />
-                  {t('buttons.concise')}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleStyleClick("Casual")} className="hover:bg-accent">
-                  <Coffee className="w-4 h-4 mr-2" />
-                  {t('buttons.casual')}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <Button
-              onClick={handleStartRephrase}
-              className="rounded-full shadow-lg flex items-center gap-2 px-4"
-            >
-              <Mic className="h-5 w-5" />
-              {t('buttons.rephrase')}
-            </Button>
-          </>
-        )}
-        {!currentText && (
-          <Button
-            onClick={handleNewRecording}
-            className="rounded-full shadow-lg flex items-center gap-2 px-4 bg-red-500 hover:bg-red-600"
-          >
-            <Circle className="h-5 w-5 fill-current" />
-            {t('buttons.newRecording')}
-          </Button>
-        )}
-      </div>
+      <AuthDialog 
+        open={showAuthDialog} 
+        onOpenChange={setShowAuthDialog} 
+        text={text} 
+      />
     </div>
   );
 };

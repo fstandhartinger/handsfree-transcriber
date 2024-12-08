@@ -15,13 +15,25 @@ function AppContent() {
   const isLegalPage = ['/terms-and-conditions', '/data-privacy', '/imprint'].includes(location.pathname);
 
   useEffect(() => {
-    // Remove service worker if it exists
+    // Check if running in PWA mode
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+      console.log('Running in PWA mode');
+    } else {
+      console.log('Running in browser mode');
+    }
+
+    // Check service worker support
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then(registrations => {
-        for (const registration of registrations) {
-          registration.unregister();
-        }
+      console.log('Service Worker is supported');
+      
+      // Check if service worker is active
+      navigator.serviceWorker.ready.then((registration) => {
+        console.log('Service Worker is active with scope:', registration.scope);
+      }).catch(error => {
+        console.error('Service Worker ready error:', error);
       });
+    } else {
+      console.log('Service Worker is not supported');
     }
 
     // Check authentication status
