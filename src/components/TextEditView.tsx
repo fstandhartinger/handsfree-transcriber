@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect, useCallback } from "react";
 import EditableText from "@/components/EditableText";
 import TextControls from "@/components/TextControls";
@@ -224,11 +225,18 @@ const TextEditView = ({ text: initialText, onBack, isAuthenticated }: TextEditVi
         }
 
         // Check usage count after successful transcription
-        const needsAuth = await incrementUsage();
-        if (needsAuth && !isAuthenticated) {
+        const usageResult = await incrementUsage();
+        if (usageResult.needsAuth && !isAuthenticated) {
           console.log('Setting needs_auth in localStorage in handleStopNewRecording');
           localStorage.setItem('needs_auth', 'true');
           setShowAuthDialog(true);
+        } else if (usageResult.needsPro && isAuthenticated) {
+          toast({            
+            description: t('toasts.proPlanRequired.description'),
+            variant: "destructive",
+            duration: 5000,
+          });
+          // TODO: Add your pro plan upgrade dialog/link here
         }
       }
     } catch (error) {

@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 const USAGE_KEY = 'app_usage_count';
 const MAX_FREE_USES = 3;
+const MAX_AUTHENTICATED_USES = 3;
 
 export const useUsageCounter = () => {
   const [usageCount, setUsageCount] = useState(0);
@@ -80,7 +81,7 @@ export const useUsageCounter = () => {
 
         if (fetchError) {
           console.error('Error fetching usage data:', fetchError);
-          return false;
+          return { needsAuth: false, needsPro: false };
         }
 
         const newCount = (usageData.authenticated_usage_count || 0) + 1;
@@ -93,22 +94,22 @@ export const useUsageCounter = () => {
 
         if (updateError) {
           console.error('Error updating usage count:', updateError);
-          return false;
+          return { needsAuth: false, needsPro: false };
         }
 
         setUsageCount(newCount);
-        return newCount > MAX_FREE_USES;
+        return { needsAuth: false, needsPro: newCount > MAX_AUTHENTICATED_USES };
       } else {
         console.log('Incrementing anonymous user usage');
-        const newCount = usageCount + 1;
-        setUsageCount(newCount);
+        const currentCount = parseInt(localStorage.getItem(USAGE_KEY) || '0', 10);
+        const newCount = currentCount + 1;
         localStorage.setItem(USAGE_KEY, newCount.toString());
-        console.log('New anonymous usage count:', newCount);
-        return newCount > MAX_FREE_USES;
+        setUsageCount(newCount);
+        return { needsAuth: newCount > MAX_FREE_USES, needsPro: false };
       }
     } catch (error) {
       console.error('Error in incrementUsage:', error);
-      return false;
+      return { needsAuth: false, needsPro: false };
     }
   };
 
