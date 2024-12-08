@@ -102,13 +102,20 @@ const Index = ({ isAuthenticated }: IndexProps) => {
               
               setTranscribedText(data.transcription);
               console.log('calling incrementUsage in recording.onstop');
-              const needsAuth = await incrementUsage();
-              console.log('needsAuth:', needsAuth);
+              const usageResult = await incrementUsage();
+              console.log('usageResult:', usageResult);
               console.log('isAuthenticated:', isAuthenticated);              
-              if (needsAuth && !isAuthenticated) {
+              if (usageResult.needsAuth && !isAuthenticated) {
                 console.log('Needs auth flag found, setting needs_auth in localStorage in recording.onstop');
-                // The auth dialog will be shown in TextEditView
+                localStorage.setItem('pending_transcribed_text', data.transcription);
                 localStorage.setItem('needs_auth', 'true');
+              } else if (usageResult.needsPro && isAuthenticated) {
+                toast({
+                  description: t('toasts.proPlanRequired.description'),
+                  variant: "destructive",
+                  duration: 5000,
+                });
+                // TODO: Add your pro plan upgrade dialog/link here
               }
             } catch (error) {
               console.error('Transcription error:', error);
