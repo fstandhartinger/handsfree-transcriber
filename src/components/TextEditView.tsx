@@ -86,7 +86,7 @@ const TextEditView = ({ text: initialText, onBack, isAuthenticated }: TextEditVi
   }, [isProcessing]);
 
   const { isRecording, startRecording, stopRecording } = useAudioRecording();
-  const { processAudioForRephrase } = useAudioProcessing(text, (newText: string) => {
+  const { processAudioForRephrase, processNewRecording } = useAudioProcessing(text, (newText: string) => {
     addToHistory(newText);
     setText(newText);
   }, setText);
@@ -205,13 +205,6 @@ const TextEditView = ({ text: initialText, onBack, isAuthenticated }: TextEditVi
 
   const handleNewRecording = async () => {
     console.log(`[${new Date().toISOString()}] Starting new recording`);
-    const needsAuth = await incrementUsage();
-    if (needsAuth && !isAuthenticated) {
-      console.log('Needs auth flag found, setting needs_auth in localStorage in handleNewRecording');
-      localStorage.setItem('needs_auth', 'true');
-      setShowAuthDialog(true);
-      return;
-    }
     setShowNewRecordingDialog(true);
     setIsRecordingNew(true);
     await startRecording();
@@ -223,11 +216,19 @@ const TextEditView = ({ text: initialText, onBack, isAuthenticated }: TextEditVi
       if (audioBlob) {
         setIsRecordingNew(false);
         setIsProcessingNew(true);
-        await processAudioForRephrase(audioBlob);
+        await processNewRecording(audioBlob);
 
         const host = (window as any).chrome?.webview?.hostObjects?.transcriberHost;
         if (host?.NotifyTextGenerationCompleted) {
           host.NotifyTextGenerationCompleted();
+        }
+
+        // Check usage count after successful transcription
+        const needsAuth = await incrementUsage();
+        if (needsAuth && !isAuthenticated) {
+          console.log('Setting needs_auth in localStorage in handleStopNewRecording');
+          localStorage.setItem('needs_auth', 'true');
+          setShowAuthDialog(true);
         }
       }
     } catch (error) {

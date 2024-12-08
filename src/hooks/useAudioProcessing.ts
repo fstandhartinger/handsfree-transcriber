@@ -67,7 +67,45 @@ export const useAudioProcessing = (
     });
   };
 
+  const processNewRecording = async (audioBlob: Blob) => {
+    return new Promise<void>((resolve, reject) => {
+      const reader = new FileReader();
+      
+      reader.onloadend = async () => {
+        const base64Audio = reader.result as string;
+        const audioDataUri = base64Audio.split(',')[1];
+        
+        try {
+          const { data: transcriptionData, error: transcriptionError } = 
+            await supabase.functions.invoke('transcribe', {
+              body: { audioDataUri },
+            });
+
+          if (transcriptionError) throw transcriptionError;
+
+          addToHistory(transcriptionData.transcription);
+          setCurrentText(transcriptionData.transcription);
+          resolve();
+        } catch (error) {
+          console.error('Transcription error:', error);
+          toast({
+            description: t('toasts.transcriptionError'),
+            variant: "destructive",
+          });
+          reject(error);
+        }
+      };
+
+      reader.onerror = () => {
+        reject(reader.error);
+      };
+
+      reader.readAsDataURL(audioBlob);
+    });
+  };
+
   return {
-    processAudioForRephrase
+    processAudioForRephrase,
+    processNewRecording
   };
 };
