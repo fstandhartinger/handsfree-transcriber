@@ -2,7 +2,9 @@
   "auth": {
     "signOut": "Sign out",
     "maxUsageReached": "Sign in to continue",
-    "signIn": "Sign in"
+    "signIn": "Sign in",
+    "upgradeRequired": "Upgrade Required",
+    "upgradeMessage": "You've reached the limit for the free plan. Please upgrade to the Professional plan to continue."
   },
   "recording": {
     "recording": "Recording in progress...",

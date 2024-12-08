@@ -65,13 +65,31 @@ export const useUsageCounter = () => {
 
   const incrementUsage = async () => {
     try {
-
       console.log('incrementUsage called');
 
       const { data: { user } } = await supabase.auth.getUser();
       
       if (user) {
         console.log('Incrementing authenticated user usage');
+        
+        // First check if user is on pro plan
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('plan_id')
+          .eq('id', user.id)
+          .single();
+
+        if (profileError) {
+          console.error('Error fetching profile:', profileError);
+          return false;
+        }
+
+        // If user is on pro plan (plan_id > 1), don't enforce limits
+        if (profileData.plan_id > 1) {
+          console.log('User is on pro plan, no usage limits');
+          return false;
+        }
+
         const { data: usageData, error: fetchError } = await supabase
           .from('usage_tracking')
           .select('authenticated_usage_count')

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import EditableText from "@/components/EditableText";
 import TextControls from "@/components/TextControls";
 import RecordingModal from "@/components/RecordingModal";
@@ -21,6 +22,7 @@ interface TextEditViewProps {
 }
 
 const TextEditView = ({ text: initialText, onBack, isAuthenticated }: TextEditViewProps) => {
+  const navigate = useNavigate();
   const [text, setText] = useState(initialText);
   const [isEditMode, setIsEditMode] = useState(false);
   const [textHistory, setTextHistory] = useState<string[]>([initialText]);
@@ -41,15 +43,41 @@ const TextEditView = ({ text: initialText, onBack, isAuthenticated }: TextEditVi
   const { incrementUsage } = useUsageCounter();
 
   useEffect(() => {
-    const needsAuth = localStorage.getItem('needs_auth');
-    if (needsAuth === 'true' && !isAuthenticated) {
-      console.log('Needs auth flag found, showing auth dialog');
-      setTimeout(() => {
-        setShowAuthDialog(true);
-        localStorage.removeItem('needs_auth');
-      }, 100);
-    }
-  }, [isAuthenticated]);
+    const checkAuthNeeds = async () => {
+      const needsAuth = localStorage.getItem('needs_auth');
+      if (needsAuth === 'true' && !isAuthenticated) {
+        console.log('Needs auth flag found, showing auth dialog');
+        setTimeout(() => {
+          setShowAuthDialog(true);
+          localStorage.removeItem('needs_auth');
+        }, 100);
+      }
+
+      // Check if user needs to upgrade
+      if (isAuthenticated) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('plan_id')
+            .eq('id', user.id)
+            .single();
+
+          const { data: usageData } = await supabase
+            .from('usage_tracking')
+            .select('authenticated_usage_count')
+            .eq('user_id', user.id)
+            .single();
+
+          if (profileData?.plan_id === 1 && usageData?.authenticated_usage_count > 3) {
+            navigate('/plans');
+          }
+        }
+      }
+    };
+
+    checkAuthNeeds();
+  }, [isAuthenticated, navigate]);
 
   const copyToClipboard = useCallback(async (textToCopy: string) => {
     try {
@@ -224,11 +252,13 @@ const TextEditView = ({ text: initialText, onBack, isAuthenticated }: TextEditVi
         }
 
         // Check usage count after successful transcription
-        const needsAuth = await incrementUsage();
-        if (needsAuth && !isAuthenticated) {
+        const needsUpgrade = await incrementUsage();
+        if (!isAuthenticated) {
           console.log('Setting needs_auth in localStorage in handleStopNewRecording');
           localStorage.setItem('needs_auth', 'true');
           setShowAuthDialog(true);
+        } else if (needsUpgrade) {
+          navigate('/plans');
         }
       }
     } catch (error) {
