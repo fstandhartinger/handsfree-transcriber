@@ -211,9 +211,9 @@ const TextEditView = ({ text: initialText, onBack, onNewRecording, isAuthenticat
     setIsProcessingRephrase(false);
   };
 
-  const handleNewRecording = () => {
+  const handleNewRecording = async () => {
     console.log(`[${new Date().toISOString()}] Starting new recording`);
-    const needsAuth = incrementUsage();
+    const needsAuth = await incrementUsage();
     if (needsAuth && !isAuthenticated) {
       console.log('Needs auth flag found, setting needs_auth in localStorage in handleNewRecording');
       localStorage.setItem('needs_auth', 'true');

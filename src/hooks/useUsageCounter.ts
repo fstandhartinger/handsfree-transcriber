@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 const USAGE_KEY = 'app_usage_count';
-const MAX_FREE_USES = 7;
+const MAX_FREE_USES = 3;
 
 export const useUsageCounter = () => {
   const [usageCount, setUsageCount] = useState(0);
