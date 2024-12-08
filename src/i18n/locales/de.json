@@ -38,6 +38,7 @@
     "clipboardError": "Fehler beim Kopieren in die Zwischenablage",
     "understood": "Verstanden",
     "textRephrased": "Text wurde umformuliert und in die Zwischenablage kopiert",
+    "textRephrasedOnly": "Text wurde umformuliert",
     "rephrasingError": "Fehler beim Umformulieren. Bitte versuchen Sie es erneut.",
     "styleUpdated": "Stil wurde zu {{style}} geändert",
     "styleUpdateError": "Fehler beim Ändern des Stils",
@@ -273,7 +274,7 @@
       }
     },
     "upgradeToPro": "Auf Pro upgraden",
-    "termsNotice": "Mit der Anmeldung für den Professional Plan akzeptieren Sie die Allgemeinen Geschäftsbedingungen",
+    "termsNotice": "Mit der Anmeldung f��r den Professional Plan akzeptieren Sie die Allgemeinen Geschäftsbedingungen",
     "changePlan": "Plan ändern",
     "currentPlan": "Aktueller Plan:"
   }

@@ -17,7 +17,7 @@ serve(async (req) => {
     const { text, style, instruction, selectedText } = await req.json();
     console.log('Received request:', { text, style, instruction, selectedText });
 
-    let systemPrompt = "You are a helpful assistant that refines and improves text while maintaining its core meaning. Always respond in the same language as the input text. Provide your response in JSON format.";
+    let systemPrompt = "You are a helpful assistant that refines and improves text. Always respond in the same language as the input text. Provide your response in JSON format.";
     let userPrompt = "";
     let responseFormat = {
       text: "The refined text goes here"

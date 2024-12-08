@@ -38,6 +38,7 @@
     "clipboardError": "Error copying to clipboard",
     "understood": "Understood",
     "textRephrased": "Text rephrased and copied to clipboard",
+    "textRephrasedOnly": "Text rephrased",
     "rephrasingError": "Error rephrasing text. Please try again.",
     "styleUpdated": "Style updated to {{style}}",
     "styleUpdateError": "Error updating style",

@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useAutoCopyToClipboard } from "@/components/SettingsDialog";
+import { useTranslation } from "react-i18next";
 
 export const useAudioProcessing = (
   currentText: string, 
@@ -9,6 +11,8 @@ export const useAudioProcessing = (
 ) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
+  const [autoCopy] = useAutoCopyToClipboard();
+  const { t } = useTranslation();
 
   const processAudioForRephrase = async (audioBlob: Blob) => {
     try {
@@ -44,11 +48,20 @@ export const useAudioProcessing = (
 
           addToHistory(refinementData.text);
           setCurrentText(refinementData.text);
-          navigator.clipboard.writeText(refinementData.text);
-          toast({
-            description: "Text rephrased and copied to clipboard",
-            duration: 2000,
-          });
+          if (refinementData.text) {
+            if (autoCopy) {
+              await navigator.clipboard.writeText(refinementData.text);
+              toast({
+                description: t('toasts.textRephrased'),
+                duration: 2000
+              });
+            } else {
+              toast({
+                description: t('toasts.textRephrasedOnly'),
+                duration: 2000
+              });
+            }
+          }
         } catch (error) {
           console.error('Text rephrasing error:', error);
           toast({
@@ -101,11 +114,20 @@ export const useAudioProcessing = (
 
           addToHistory(refinementData.text);
           setCurrentText(refinementData.text);
-          navigator.clipboard.writeText(refinementData.text);
-          toast({
-            description: "Text updated and copied to clipboard",
-            duration: 2000,
-          });
+          if (refinementData.text) {
+            if (autoCopy) {
+              await navigator.clipboard.writeText(refinementData.text);
+              toast({
+                description: t('toasts.textRephrased'),
+                duration: 2000
+              });
+            } else {
+              toast({
+                description: t('toasts.textRephrasedOnly'),
+                duration: 2000
+              });
+            }
+          }
         } catch (error) {
           console.error('Text refinement error:', error);
           toast({
