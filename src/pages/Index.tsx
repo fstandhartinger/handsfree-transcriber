@@ -102,7 +102,7 @@ const Index = ({ isAuthenticated }: IndexProps) => {
               
               setTranscribedText(data.transcription);
               console.log('calling incrementUsage in recording.onstop');
-              const needsAuth = incrementUsage();
+              const needsAuth = await incrementUsage();
               console.log('needsAuth:', needsAuth);
               console.log('isAuthenticated:', isAuthenticated);              
               if (needsAuth && !isAuthenticated) {
