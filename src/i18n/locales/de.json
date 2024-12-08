@@ -1,7 +1,7 @@
 {
   "auth": {
     "signOut": "Abmelden",
-    "maxUsageReached": "Bitte upgraden Sie auf den Professional Plan, um fortzufahren",
+    "maxUsageReached": "Melden Sie sich an, um fortzufahren",
     "signIn": "Anmelden"
   },
   "recording": {
@@ -274,7 +274,7 @@
       }
     },
     "upgradeToPro": "Auf Pro upgraden",
-    "termsNotice": "Mit der Anmeldung für den Professional Plan akzeptieren Sie die Allgemeinen Geschäftsbedingungen",
+    "termsNotice": "Mit der Anmeldung f��r den Professional Plan akzeptieren Sie die Allgemeinen Geschäftsbedingungen",
     "changePlan": "Plan ändern",
     "currentPlan": "Aktueller Plan:"
   }
