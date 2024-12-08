@@ -50,13 +50,13 @@ serve(async (req) => {
         },
       ],
       mode: 'subscription',
-      success_url: `${req.headers.get('origin')}/success`,
+      success_url: `${req.headers.get('origin')}/`,
       cancel_url: `${req.headers.get('origin')}/cancel`,
       client_reference_id: user.id,
     })
 
     return new Response(
-      JSON.stringify({ sessionId: session.id }),
+      JSON.stringify({ url: session.url }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,

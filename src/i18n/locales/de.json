@@ -4,6 +4,11 @@
     "maxUsageReached": "Melden Sie sich an, um fortzufahren",
     "signIn": "Anmelden"
   },
+  "upgrade": {
+    "title": "Zum Professional Plan upgraden",
+    "description": "Sie haben das Limit des kostenlosen Plans erreicht. Upgraden Sie auf den Professional Plan, um alle Funktionen weiter zu nutzen.",
+    "upgradeNow": "Jetzt upgraden"
+  },
   "recording": {
     "recording": "Aufnahme läuft...",
     "status": "Aufnahme läuft",
