@@ -1,5 +1,5 @@
 const CACHE_NAME = 'handsfree-cache-v1';
-const ASSETS_TO_CACHE = [
+const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/manifest.json'
@@ -10,15 +10,16 @@ const log = (...args) => {
   console.log('[Service Worker]', ...args);
 };
 
-// Install event - cache core assets only
+// Install event - cache core assets
 self.addEventListener('install', (event) => {
   log('Installing...');
+  // Don't skipWaiting here to prevent abrupt page takeovers
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
-        log('Caching core assets...');
+        log('Caching static assets...');
         return Promise.allSettled(
-          ASSETS_TO_CACHE.map(asset => 
+          STATIC_ASSETS.map(asset => 
             cache.add(asset).catch(err => {
               log(`Failed to cache ${asset}:`, err);
               return null;
@@ -26,7 +27,6 @@ self.addEventListener('install', (event) => {
           )
         );
       })
-      .then(() => self.skipWaiting())
   );
 });
 
@@ -46,21 +46,19 @@ self.addEventListener('activate', (event) => {
         );
       })
       .then(() => {
-        log('Claiming clients...');
-        return self.clients.claim();
-      })
-      .then(() => {
-        log('Service Worker activated and controlling the page');
+        // Only claim clients when necessary
+        if (self.registration.active) {
+          log('Claiming clients...');
+          return self.clients.claim();
+        }
       })
   );
 });
 
-// Fetch event - network first, falling back to cache
+// Fetch event - cache first for static assets, network first for everything else
 self.addEventListener('fetch', (event) => {
   // Skip non-GET requests
-  if (event.request.method !== 'GET') {
-    return;
-  }
+  if (event.request.method !== 'GET') return;
 
   // Skip certain URLs
   if (event.request.url.includes('/api/') || 
@@ -69,31 +67,29 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  const url = new URL(event.request.url);
+  const isStaticAsset = STATIC_ASSETS.includes(url.pathname);
+
   event.respondWith(
-    fetch(event.request)
-      .then(response => {
-        // Only cache successful responses
+    (async () => {
+      // Cache-first for static assets
+      if (isStaticAsset) {
+        const cachedResponse = await caches.match(event.request);
+        if (cachedResponse) return cachedResponse;
+      }
+
+      try {
+        const response = await fetch(event.request);
         if (response.status === 200) {
-          const responseClone = response.clone();
-          caches.open(CACHE_NAME)
-            .then(cache => cache.put(event.request, responseClone))
-            .catch(() => {/* Ignore cache errors */});
+          const cache = await caches.open(CACHE_NAME);
+          cache.put(event.request, response.clone());
         }
         return response;
-      })
-      .catch(() => {
-        return caches.match(event.request)
-          .then(response => {
-            if (response) {
-              return response;
-            }
-            // For navigation requests, try the root
-            if (event.request.mode === 'navigate') {
-              return caches.match('/') || fetch(event.request);
-            }
-            // Let the browser handle the error naturally
-            return fetch(event.request);
-          });
-      })
+      } catch (error) {
+        const cachedResponse = await caches.match(event.request);
+        if (cachedResponse) return cachedResponse;
+        throw error;
+      }
+    })()
   );
 }); 
