@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import EditableText from "@/components/EditableText";
 import TextControls from "@/components/TextControls";
 import RecordingModal from "@/components/RecordingModal";
+import NewRecordingDialog from "@/components/NewRecordingDialog";
 import { useToast } from "@/hooks/use-toast.tsx";
 import { supabase } from "@/integrations/supabase/client";
 import { useAudioRecording } from "@/hooks/useAudioRecording";
@@ -19,7 +20,7 @@ interface TextEditViewProps {
   isAuthenticated: boolean;
 }
 
-const TextEditView = ({ text: initialText, onBack, onNewRecording, isAuthenticated }: TextEditViewProps) => {
+const TextEditView = ({ text: initialText, onBack, isAuthenticated }: TextEditViewProps) => {
   const [text, setText] = useState(initialText);
   const [isEditMode, setIsEditMode] = useState(false);
   const [textHistory, setTextHistory] = useState<string[]>([initialText]);
@@ -30,6 +31,9 @@ const TextEditView = ({ text: initialText, onBack, onNewRecording, isAuthenticat
   const [isRecordingRephrase, setIsRecordingRephrase] = useState(false);
   const [isProcessingRephrase, setIsProcessingRephrase] = useState(false);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
+  const [showNewRecordingDialog, setShowNewRecordingDialog] = useState(false);
+  const [isRecordingNew, setIsRecordingNew] = useState(false);
+  const [isProcessingNew, setIsProcessingNew] = useState(false);
   const { toast } = useToast();
   const { t } = useTranslation();
   const [autoCopy] = useAutoCopyToClipboard();
@@ -40,7 +44,6 @@ const TextEditView = ({ text: initialText, onBack, onNewRecording, isAuthenticat
     const needsAuth = localStorage.getItem('needs_auth');
     if (needsAuth === 'true' && !isAuthenticated) {
       console.log('Needs auth flag found, showing auth dialog');
-      // Small delay to ensure text is rendered
       setTimeout(() => {
         setShowAuthDialog(true);
         localStorage.removeItem('needs_auth');
@@ -48,7 +51,6 @@ const TextEditView = ({ text: initialText, onBack, onNewRecording, isAuthenticat
     }
   }, [isAuthenticated]);
 
-  // Function to copy text to clipboard
   const copyToClipboard = useCallback(async (textToCopy: string) => {
     try {
       await navigator.clipboard.writeText(textToCopy);
@@ -65,7 +67,6 @@ const TextEditView = ({ text: initialText, onBack, onNewRecording, isAuthenticat
     }
   }, [t, toast]);
 
-  // Auto-copy only when authenticated
   useEffect(() => {
     console.log(`[${new Date().toISOString()}] Auto-copy check - autoCopy: ${autoCopy}, showAuthDialog: ${showAuthDialog}, isAuthenticated: ${isAuthenticated}`);
     if (autoCopy && text !== initialText && !showAuthDialog && isAuthenticated) {
@@ -73,7 +74,6 @@ const TextEditView = ({ text: initialText, onBack, onNewRecording, isAuthenticat
     }
   }, [text, autoCopy, initialText, copyToClipboard, showAuthDialog, isAuthenticated]);
 
-  // Handle initial text copy only when authenticated
   useEffect(() => {
     if (autoCopy && !hasInitialCopyBeenTriggered && !showAuthDialog && isAuthenticated) {
       copyToClipboard(initialText);
@@ -81,7 +81,6 @@ const TextEditView = ({ text: initialText, onBack, onNewRecording, isAuthenticat
     }
   }, [autoCopy, initialText, hasInitialCopyBeenTriggered, copyToClipboard, showAuthDialog, isAuthenticated]);
 
-  // Debug: Log state changes
   useEffect(() => {
     console.log('Processing state changed:', { isProcessing });
   }, [isProcessing]);
@@ -127,7 +126,6 @@ const TextEditView = ({ text: initialText, onBack, onNewRecording, isAuthenticat
       addToHistory(data.text);
       setText(data.text);
 
-      // Notify Windows app that text generation is complete
       const host = (window as any).chrome?.webview?.hostObjects?.transcriberHost;
       if (host?.NotifyTextGenerationCompleted) {
         host.NotifyTextGenerationCompleted();
@@ -175,7 +173,6 @@ const TextEditView = ({ text: initialText, onBack, onNewRecording, isAuthenticat
         setIsRecordingRephrase(false);
         await processAudioForRephrase(audioBlob);
 
-        // Notify Windows app that text generation is complete
         const host = (window as any).chrome?.webview?.hostObjects?.transcriberHost;
         if (host?.NotifyTextGenerationCompleted) {
           host.NotifyTextGenerationCompleted();
@@ -212,8 +209,37 @@ const TextEditView = ({ text: initialText, onBack, onNewRecording, isAuthenticat
     if (needsAuth && !isAuthenticated) {
       console.log('Needs auth flag found, setting needs_auth in localStorage in handleNewRecording');
       localStorage.setItem('needs_auth', 'true');
+      setShowAuthDialog(true);
+      return;
     }
-    onNewRecording();
+    setShowNewRecordingDialog(true);
+    setIsRecordingNew(true);
+    await startRecording();
+  };
+
+  const handleStopNewRecording = async () => {
+    try {
+      const audioBlob = await stopRecording();
+      if (audioBlob) {
+        setIsRecordingNew(false);
+        setIsProcessingNew(true);
+        await processAudioForRephrase(audioBlob);
+
+        const host = (window as any).chrome?.webview?.hostObjects?.transcriberHost;
+        if (host?.NotifyTextGenerationCompleted) {
+          host.NotifyTextGenerationCompleted();
+        }
+      }
+    } catch (error) {
+      console.error('Error processing audio:', error);
+      toast({
+        description: t('toasts.audioProcessingError'),
+        variant: "destructive",
+      });
+    } finally {
+      setIsProcessingNew(false);
+      setShowNewRecordingDialog(false);
+    }
   };
 
   console.log(`[${new Date().toISOString()}] Rendering TextEditView:`, { 
@@ -272,6 +298,13 @@ const TextEditView = ({ text: initialText, onBack, onNewRecording, isAuthenticat
           isProcessing={isProcessingRephrase}
         />
       )}
+
+      <NewRecordingDialog 
+        open={showNewRecordingDialog}
+        onOpenChange={setShowNewRecordingDialog}
+        onStop={handleStopNewRecording}
+        isProcessing={isProcessingNew}
+      />
 
       <AuthDialog 
         open={showAuthDialog} 
