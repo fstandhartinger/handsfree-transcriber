@@ -30,7 +30,8 @@
     "transcription": "Fehler bei der Transkription. Bitte versuchen Sie es erneut.",
     "audioProcessing": "Fehler bei der Audioverarbeitung. Bitte versuchen Sie es erneut.",
     "microphoneAccess": "Zugriff auf das Mikrofon nicht möglich. Bitte überprüfen Sie die Berechtigungen.",
-    "auth": "Bei der Anmeldung ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut."
+    "auth": "Bei der Anmeldung ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.",
+    "checkoutError": "Fehler beim Erstellen der Checkout-Session. Bitte versuchen Sie es erneut."
   },
   "toasts": {
     "textCopied": "Text in die Zwischenablage kopiert",
@@ -253,5 +254,27 @@
       "title": "🎯 Verlässlich",
       "description": "Führende Spracherkennung"
     }
+  },
+  "plans": {
+    "title": "Wählen Sie Ihren Plan",
+    "freePlan": {
+      "title": "Kostenloser Plan",
+      "description": "Perfekt zum Ausprobieren des Services",
+      "features": {
+        "limited": "Begrenzte kostenlose Transkriptionen inklusive"
+      },
+      "price": "Kostenlos"
+    },
+    "proPlan": {
+      "title": "Professional Plan",
+      "description": "Für Benutzer, die mehr Transkriptionen benötigen",
+      "features": {
+        "unlimited": "1000 Transkriptionen pro Monat"
+      }
+    },
+    "upgradeToPro": "Auf Pro upgraden",
+    "termsNotice": "Mit der Anmeldung für den Professional Plan akzeptieren Sie die Allgemeinen Geschäftsbedingungen",
+    "changePlan": "Plan ändern",
+    "currentPlan": "Aktueller Plan:"
   }
 }
