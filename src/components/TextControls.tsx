@@ -59,21 +59,34 @@ const TextControls = ({
             className="rounded-full shadow-lg flex items-center gap-2 px-4"
             disabled={isProcessing}
           >
-            <Circle className="w-5 h-5 text-red-500" />
+            <Circle className="w-5 h-5 fill-red-500 text-red-500" />
             {t('buttons.newRecording')}
+          </Button>
+          <Button 
+            className="rounded-full shadow-lg flex items-center gap-2 px-4"
+            disabled={isProcessing}
+            onClick={() => {
+              const dropdownTrigger = document.querySelector('[data-trigger-style]');
+              if (dropdownTrigger) {
+                (dropdownTrigger as HTMLButtonElement).click();
+              }
+            }}
+          >
+            <FileText className="w-5 h-5" />
+            {t('buttons.style')}
+            <ChevronDown className="w-4 h-4" />
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button 
-                className="rounded-full shadow-lg flex items-center gap-2 px-4"
+                className="hidden"
+                data-trigger-style
                 disabled={isProcessing}
               >
-                <FileText className="w-5 h-5" />
-                {t('buttons.style')}
-                <ChevronDown className="w-4 h-4" />
+                <span className="sr-only">Style menu</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="bg-background border border-border shadow-lg">
+            <DropdownMenuContent className="bg-background border border-border shadow-lg" side="top">
               <DropdownMenuItem onClick={() => handleStyleClick("Formal")} className="hover:bg-accent">
                 <FileText className="w-4 h-4 mr-2" />
                 {t('buttons.formal')}
