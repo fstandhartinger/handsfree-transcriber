@@ -3,6 +3,7 @@ import EditableText from "@/components/EditableText";
 import TextControls from "@/components/TextControls";
 import RecordingModal from "@/components/RecordingModal";
 import NewRecordingDialog from "@/components/NewRecordingDialog";
+import UpgradeDialog from "@/components/UpgradeDialog";
 import { useToast } from "@/hooks/use-toast.tsx";
 import { supabase } from "@/integrations/supabase/client";
 import { useAudioRecording } from "@/hooks/useAudioRecording";
@@ -31,6 +32,7 @@ const TextEditView = ({ text: initialText, onBack, isAuthenticated }: TextEditVi
   const [isRecordingRephrase, setIsRecordingRephrase] = useState(false);
   const [isProcessingRephrase, setIsProcessingRephrase] = useState(false);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const [showNewRecordingDialog, setShowNewRecordingDialog] = useState(false);
   const [isRecordingNew, setIsRecordingNew] = useState(false);
   const [isProcessingNew, setIsProcessingNew] = useState(false);
@@ -224,11 +226,16 @@ const TextEditView = ({ text: initialText, onBack, isAuthenticated }: TextEditVi
         }
 
         // Check usage count after successful transcription
-        const needsAuth = await incrementUsage();
-        if (needsAuth && !isAuthenticated) {
-          console.log('Setting needs_auth in localStorage in handleStopNewRecording');
-          localStorage.setItem('needs_auth', 'true');
-          setShowAuthDialog(true);
+        const needsUpgrade = await incrementUsage();
+        if (!isAuthenticated) {
+          if (needsUpgrade) {
+            console.log('Setting needs_auth in localStorage in handleStopNewRecording');
+            localStorage.setItem('needs_auth', 'true');
+            setShowAuthDialog(true);
+          }
+        } else if (needsUpgrade) {
+          console.log('User needs to upgrade to pro plan');
+          setShowUpgradeDialog(true);
         }
       }
     } catch (error) {
@@ -311,6 +318,12 @@ const TextEditView = ({ text: initialText, onBack, isAuthenticated }: TextEditVi
         open={showAuthDialog} 
         onOpenChange={setShowAuthDialog} 
         text={text} 
+      />
+
+      <UpgradeDialog
+        open={showUpgradeDialog}
+        onOpenChange={setShowUpgradeDialog}
+        text={text}
       />
     </div>
   );

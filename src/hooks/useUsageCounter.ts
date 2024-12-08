@@ -7,6 +7,7 @@ const MAX_FREE_USES = 3;
 export const useUsageCounter = () => {
   const [usageCount, setUsageCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [userPlan, setUserPlan] = useState<number>(1); // Default to free plan (1)
 
   useEffect(() => {
     const checkUsage = async () => {
@@ -15,6 +16,18 @@ export const useUsageCounter = () => {
         
         if (user) {
           console.log('Checking authenticated user usage');
+          // Get user profile to check plan
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('plan_id, id')
+            .eq('id', user.id)
+            .single();
+
+          if (profileData) {
+            setUserPlan(profileData.plan_id);
+            console.log('User plan:', profileData.plan_id);
+          }
+
           const { data: usageData, error } = await supabase
             .from('usage_tracking')
             .select('authenticated_usage_count')
@@ -65,13 +78,25 @@ export const useUsageCounter = () => {
 
   const incrementUsage = async () => {
     try {
-
       console.log('incrementUsage called');
 
       const { data: { user } } = await supabase.auth.getUser();
       
       if (user) {
         console.log('Incrementing authenticated user usage');
+        
+        // Get user profile to check plan
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('plan_id')
+          .eq('id', user.id)
+          .single();
+
+        if (profileData?.plan_id > 1) {
+          console.log('User has pro plan, no need to check usage');
+          return false;
+        }
+
         const { data: usageData, error: fetchError } = await supabase
           .from('usage_tracking')
           .select('authenticated_usage_count')
@@ -116,6 +141,7 @@ export const useUsageCounter = () => {
     usageCount,
     incrementUsage,
     maxFreeUses: MAX_FREE_USES,
-    isLoading
+    isLoading,
+    userPlan
   };
 };
