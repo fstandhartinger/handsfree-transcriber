@@ -19,6 +19,8 @@ interface TextEditViewProps {
 }
 
 const TextEditView = ({ text, onBack, onNewRecording, isAuthenticated }: TextEditViewProps) => {
+  console.log('[TextEditView] Initializing with props:', { text, isAuthenticated });
+  
   const [currentText, setCurrentText] = useState(text);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isProcessingRephrase, setIsProcessingRephrase] = useState(false);
@@ -26,19 +28,34 @@ const TextEditView = ({ text, onBack, onNewRecording, isAuthenticated }: TextEdi
   const [showRephraseModal, setShowRephraseModal] = useState(false);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const [history, setHistory] = useState<string[]>([text]);
+  
   const { toast } = useToast();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { isRecording, startRecording, stopRecording } = useAudioRecording();
-  const { processAudioForRephrase } = useAudioProcessing(currentText, addToHistory, setCurrentText);
   const { incrementUsage, shouldShowUpgradeDialog } = useUsageCounter();
 
+  const addToHistory = (newText: string) => {
+    console.log('[TextEditView] Adding to history:', newText);
+    setHistory(prev => [...prev, newText]);
+  };
+
+  const { processAudioForRephrase } = useAudioProcessing(currentText, addToHistory, setCurrentText);
+
   useEffect(() => {
+    console.log('[TextEditView] Component mounted, checking usage...');
     const checkUsageAndShowDialog = async () => {
-      const needsUpgrade = await incrementUsage();
-      console.log('Needs upgrade:', needsUpgrade);
-      if (needsUpgrade || shouldShowUpgradeDialog()) {
-        setShowAuthDialog(true);
+      try {
+        const needsUpgrade = await incrementUsage();
+        const shouldUpgrade = shouldShowUpgradeDialog();
+        console.log('[TextEditView] Usage check results:', { needsUpgrade, shouldUpgrade });
+        
+        if (needsUpgrade || shouldUpgrade) {
+          console.log('[TextEditView] Showing auth dialog');
+          setShowAuthDialog(true);
+        }
+      } catch (error) {
+        console.error('[TextEditView] Error checking usage:', error);
       }
     };
     
@@ -46,7 +63,7 @@ const TextEditView = ({ text, onBack, onNewRecording, isAuthenticated }: TextEdi
   }, []);
 
   useEffect(() => {
-    console.log('[%s] Rendering TextEditView:', new Date().toISOString(), {
+    console.log('[TextEditView] State update:', {
       isProcessing,
       isProcessingRephrase,
       isEditMode,
@@ -57,10 +74,6 @@ const TextEditView = ({ text, onBack, onNewRecording, isAuthenticated }: TextEdi
     });
   }, [isProcessing, isProcessingRephrase, isEditMode, showRephraseModal, showAuthDialog, currentText, history]);
 
-  const addToHistory = (newText: string) => {
-    setHistory(prev => [...prev, newText]);
-  };
-
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(currentText);
@@ -68,7 +81,7 @@ const TextEditView = ({ text, onBack, onNewRecording, isAuthenticated }: TextEdi
         description: t('toasts.copied'),
       });
     } catch (err) {
-      console.error('Failed to copy text:', err);
+      console.error('[TextEditView] Failed to copy text:', err);
       toast({
         description: t('errors.copyFailed'),
         variant: "destructive",
@@ -77,6 +90,7 @@ const TextEditView = ({ text, onBack, onNewRecording, isAuthenticated }: TextEdi
   };
 
   const handleStartRephrase = async () => {
+    console.log('[TextEditView] Starting rephrase, authenticated:', isAuthenticated);
     if (!isAuthenticated) {
       setShowAuthDialog(true);
       return;
@@ -85,6 +99,7 @@ const TextEditView = ({ text, onBack, onNewRecording, isAuthenticated }: TextEdi
   };
 
   const handleRephrase = async () => {
+    console.log('[TextEditView] Handling rephrase, recording:', isRecording);
     if (isRecording) {
       try {
         setIsProcessingRephrase(true);
@@ -93,7 +108,7 @@ const TextEditView = ({ text, onBack, onNewRecording, isAuthenticated }: TextEdi
           await processAudioForRephrase(audioBlob);
         }
       } catch (error) {
-        console.error('Error processing rephrase:', error);
+        console.error('[TextEditView] Error processing rephrase:', error);
         toast({
           description: t('errors.rephrasing'),
           variant: "destructive",
@@ -149,20 +164,19 @@ const TextEditView = ({ text, onBack, onNewRecording, isAuthenticated }: TextEdi
         />
       </div>
 
-      <RephraseModal
-        open={showRephraseModal}
-        onOpenChange={setShowRephraseModal}
-        isRecording={isRecording}
-        isProcessing={isProcessingRephrase}
-        onStartRecording={startRecording}
-        onStopRecording={handleRephrase}
-      />
+      {showRephraseModal && (
+        <RephraseModal
+          onStop={handleRephrase}
+          status={isProcessingRephrase ? 'processing' : 'recording'}
+        />
+      )}
 
-      <AuthDialog
-        open={showAuthDialog}
-        onOpenChange={setShowAuthDialog}
-        onUpgrade={() => navigate('/plans')}
-      />
+      {showAuthDialog && (
+        <AuthDialog
+          open={showAuthDialog}
+          onOpenChange={setShowAuthDialog}
+        />
+      )}
     </div>
   );
 };

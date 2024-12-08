@@ -1,105 +1,86 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
-const USAGE_KEY = 'app_usage_count';
-const MAX_FREE_USES = 3;
+const FREE_ANONYMOUS_LIMIT = 3;
+const FREE_AUTHENTICATED_LIMIT = 5;
 
 export const useUsageCounter = () => {
-  const [usageCount, setUsageCount] = useState(0);
+  const [usageCount, setUsageCount] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const checkUsage = async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        
-        if (user) {
-          console.log('Checking authenticated user usage');
-          const { data: usageData, error } = await supabase
-            .from('usage_tracking')
-            .select('authenticated_usage_count')
-            .eq('user_id', user.id)
-            .single();
+  const getAnonymousUsageCount = () => {
+    const count = parseInt(localStorage.getItem('anonymousUsageCount') || '0');
+    console.log('[useUsageCounter] Retrieved anonymous usage count:', count);
+    return count;
+  };
 
-          if (error) {
-            console.error('Error fetching usage data:', error);
-            setUsageCount(0);
-          } else {
-            console.log('Retrieved authenticated usage count:', usageData.authenticated_usage_count);
-            setUsageCount(usageData.authenticated_usage_count);
-          }
-        } else {
-          console.log('Checking anonymous user usage');
-          const storedCount = localStorage.getItem(USAGE_KEY);
-          if (!storedCount) {
-            localStorage.setItem(USAGE_KEY, '0');
-            setUsageCount(0);
-          } else {
-            const parsedCount = parseInt(storedCount, 10);
-            if (isNaN(parsedCount)) {
-              localStorage.setItem(USAGE_KEY, '0');
-              setUsageCount(0);
-            } else {
-              console.log('Retrieved anonymous usage count:', parsedCount);
-              setUsageCount(parsedCount);
-            }
-          }
-        }
-        setIsLoading(false);
-      } catch (error) {
-        console.error('Error in checkUsage:', error);
-        setIsLoading(false);
-      }
-    };
+  const incrementAnonymousUsage = () => {
+    const currentCount = getAnonymousUsageCount();
+    const newCount = currentCount + 1;
+    console.log('[useUsageCounter] Incrementing anonymous usage to:', newCount);
+    localStorage.setItem('anonymousUsageCount', newCount.toString());
+    return newCount > FREE_ANONYMOUS_LIMIT;
+  };
 
-    checkUsage();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
-      checkUsage();
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
-
-  const incrementUsage = async () => {
+  const getAuthenticatedUsageCount = async () => {
     try {
+      console.log('[useUsageCounter] Fetching authenticated usage count...');
       const { data: { user } } = await supabase.auth.getUser();
       
-      if (user) {
-        console.log('Incrementing authenticated user usage');
-        // First check if user has pro plan
-        const { data: profileData, error: profileError } = await supabase
-          .from('profiles')
-          .select('plan_id')
-          .eq('id', user.id)
-          .single();
+      if (!user) {
+        console.log('[useUsageCounter] No authenticated user found');
+        return 0;
+      }
 
-        if (profileError) {
-          console.error('Error fetching profile:', profileError);
-          return false;
-        }
+      const { data: usageData, error } = await supabase
+        .from('usage_tracking')
+        .select('authenticated_usage_count')
+        .eq('user_id', user.id)
+        .single();
 
-        // If user has pro plan (plan_id = 2), don't count usage
-        if (profileData.plan_id === 2) {
-          console.log('User has pro plan, not counting usage');
-          return false;
-        }
+      if (error) {
+        console.error('[useUsageCounter] Error fetching usage:', error);
+        return 0;
+      }
 
-        const { data: usageData, error: fetchError } = await supabase
-          .from('usage_tracking')
-          .select('authenticated_usage_count')
-          .eq('user_id', user.id)
-          .single();
+      const count = usageData?.authenticated_usage_count || 0;
+      console.log('[useUsageCounter] Retrieved authenticated usage count:', count);
+      return count;
+    } catch (error) {
+      console.error('[useUsageCounter] Error in getAuthenticatedUsageCount:', error);
+      return 0;
+    }
+  };
 
-        if (fetchError) {
-          console.error('Error fetching usage data:', fetchError);
-          return false;
-        }
+  const incrementAuthenticatedUsage = async () => {
+    try {
+      console.log('[useUsageCounter] Incrementing authenticated usage...');
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        console.log('[useUsageCounter] No authenticated user for increment');
+        return false;
+      }
 
-        const newCount = (usageData.authenticated_usage_count || 0) + 1;
-        console.log('New authenticated usage count:', newCount);
+      // Get current plan
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('plan_id')
+        .eq('id', user.id)
+        .single();
+
+      if (profileError) {
+        console.error('[useUsageCounter] Error fetching profile:', profileError);
+        return false;
+      }
+
+      console.log('[useUsageCounter] User plan_id:', profileData?.plan_id);
+
+      // Only increment for free plan users
+      if (profileData?.plan_id === 1) {
+        const currentCount = await getAuthenticatedUsageCount();
+        const newCount = currentCount + 1;
+        console.log('[useUsageCounter] New authenticated usage count:', newCount);
 
         const { error: updateError } = await supabase
           .from('usage_tracking')
@@ -107,40 +88,60 @@ export const useUsageCounter = () => {
           .eq('user_id', user.id);
 
         if (updateError) {
-          console.error('Error updating usage count:', updateError);
+          console.error('[useUsageCounter] Error updating usage:', updateError);
           return false;
         }
 
         setUsageCount(newCount);
-        const shouldUpgrade = newCount > MAX_FREE_USES;
-        console.log('Should show upgrade dialog:', shouldUpgrade);
-        return shouldUpgrade;
-      } else {
-        console.log('Incrementing anonymous user usage');
-        const newCount = usageCount + 1;
-        setUsageCount(newCount);
-        localStorage.setItem(USAGE_KEY, newCount.toString());
-        console.log('New anonymous usage count:', newCount);
-        const shouldUpgrade = newCount > MAX_FREE_USES;
-        console.log('Should show upgrade dialog:', shouldUpgrade);
-        return shouldUpgrade;
+        return newCount > FREE_AUTHENTICATED_LIMIT;
       }
+
+      return false;
     } catch (error) {
-      console.error('Error in incrementUsage:', error);
+      console.error('[useUsageCounter] Error in incrementAuthenticatedUsage:', error);
       return false;
     }
   };
 
-  const shouldShowUpgradeDialog = () => {
-    console.log('Checking if should show upgrade dialog. Current count:', usageCount);
-    return usageCount > MAX_FREE_USES;
+  const incrementUsage = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    console.log('[useUsageCounter] Incrementing usage for user:', user?.id);
+    
+    if (user) {
+      return incrementAuthenticatedUsage();
+    } else {
+      return incrementAnonymousUsage();
+    }
   };
+
+  const shouldShowUpgradeDialog = () => {
+    const { data: { user } } = supabase.auth.getSession();
+    const count = usageCount;
+    const shouldShow = user ? count > FREE_AUTHENTICATED_LIMIT : count > FREE_ANONYMOUS_LIMIT;
+    console.log('[useUsageCounter] Should show upgrade dialog:', { count, shouldShow });
+    return shouldShow;
+  };
+
+  useEffect(() => {
+    const initializeUsageCount = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const count = await getAuthenticatedUsageCount();
+        setUsageCount(count);
+      } else {
+        setUsageCount(getAnonymousUsageCount());
+      }
+      setIsLoading(false);
+    };
+
+    console.log('[useUsageCounter] Initializing usage counter...');
+    initializeUsageCount();
+  }, []);
 
   return {
     usageCount,
-    incrementUsage,
-    maxFreeUses: MAX_FREE_USES,
     isLoading,
-    shouldShowUpgradeDialog
+    incrementUsage,
+    shouldShowUpgradeDialog,
   };
 };
