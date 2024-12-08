@@ -101,7 +101,10 @@ const Index = ({ isAuthenticated }: IndexProps) => {
               if (error) throw error;
               
               setTranscribedText(data.transcription);
+              console.log('calling incrementUsage in recording.onstop');
               const needsAuth = incrementUsage();
+              console.log('needsAuth:', needsAuth);
+              console.log('isAuthenticated:', isAuthenticated);              
               if (needsAuth && !isAuthenticated) {
                 console.log('Needs auth flag found, setting needs_auth in localStorage in recording.onstop');
                 // The auth dialog will be shown in TextEditView

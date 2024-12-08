@@ -65,6 +65,9 @@ export const useUsageCounter = () => {
 
   const incrementUsage = async () => {
     try {
+
+      console.log('incrementUsage called');
+
       const { data: { user } } = await supabase.auth.getUser();
       
       if (user) {
