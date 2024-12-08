@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Copy, ArrowLeft, Mic, Share, FileText, ChevronDown, Briefcase, Scissors, Coffee } from 'lucide-react';
+import { Copy, ArrowLeft, Mic, Share, FileText, ChevronDown, Briefcase, Scissors, Coffee, Circle } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
@@ -199,18 +199,11 @@ const TextEditView = ({ text, onBack, onNewRecording, isAuthenticated }: TextEdi
         {currentText && (
           <>
             <Button
-              onClick={handleNewRecording}
-              className="rounded-full shadow-lg flex items-center gap-2 px-4"
+              onClick={onNewRecording}
+              className="rounded-full shadow-lg flex items-center gap-2 px-4 bg-red-500 hover:bg-red-600"
             >
-              <Mic className="h-5 w-5" />
+              <Circle className="h-5 w-5 fill-current" />
               {t('buttons.newRecording')}
-            </Button>
-            <Button
-              onClick={handleStartRephrase}
-              className="rounded-full shadow-lg flex items-center gap-2 px-4"
-            >
-              <Mic className="h-5 w-5" />
-              {t('buttons.rephrase')}
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -222,7 +215,11 @@ const TextEditView = ({ text, onBack, onNewRecording, isAuthenticated }: TextEdi
                   <ChevronDown className="w-4 h-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="bg-background border border-border shadow-lg">
+              <DropdownMenuContent 
+                className="bg-background border border-border shadow-lg" 
+                side="top"
+                align="end"
+              >
                 <DropdownMenuItem onClick={() => handleStyleClick("Formal")} className="hover:bg-accent">
                   <Briefcase className="w-4 h-4 mr-2" />
                   {t('buttons.formal')}
@@ -237,14 +234,21 @@ const TextEditView = ({ text, onBack, onNewRecording, isAuthenticated }: TextEdi
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+            <Button
+              onClick={handleStartRephrase}
+              className="rounded-full shadow-lg flex items-center gap-2 px-4"
+            >
+              <Mic className="h-5 w-5" />
+              {t('buttons.rephrase')}
+            </Button>
           </>
         )}
         {!currentText && (
           <Button
             onClick={handleNewRecording}
-            className="rounded-full shadow-lg flex items-center gap-2 px-4"
+            className="rounded-full shadow-lg flex items-center gap-2 px-4 bg-red-500 hover:bg-red-600"
           >
-            <Mic className="h-5 w-5" />
+            <Circle className="h-5 w-5 fill-current" />
             {t('buttons.newRecording')}
           </Button>
         )}
