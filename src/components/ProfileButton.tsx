@@ -48,6 +48,7 @@ const ProfileButton = () => {
     getProfile();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth state changed in ProfileButton:', event);
       setIsAuthenticated(!!session?.user);
       if (session?.user) {
         if (session.user.user_metadata?.avatar_url) {
@@ -88,8 +89,14 @@ const ProfileButton = () => {
   };
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    navigate('/');
+    console.log('Signing out...');
+    try {
+      await supabase.auth.signOut();
+      console.log('Sign out successful');
+      navigate('/');
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
   };
 
   return (
