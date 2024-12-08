@@ -22,14 +22,21 @@ const Plans = () => {
         return;
       }
 
+      console.log('Calling create-checkout-session function...');
       const { data, error } = await supabase.functions.invoke('create-checkout-session', {
         body: {},
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error from create-checkout-session:', error);
+        throw error;
+      }
 
       if (data?.url) {
+        console.log('Redirecting to checkout URL:', data.url);
         window.location.href = data.url;
+      } else {
+        throw new Error('No checkout URL received');
       }
     } catch (error) {
       console.error('Error creating checkout session:', error);
@@ -90,7 +97,7 @@ const Plans = () => {
               onClick={handleUpgradeToPro}
               disabled={isLoading}
             >
-              {t('plans.upgradeToPro')}
+              {isLoading ? t('status.loading') : t('plans.upgradeToPro')}
             </Button>
             <p className="text-xs text-muted-foreground mt-4 text-center">
               {t('plans.termsNotice')}
