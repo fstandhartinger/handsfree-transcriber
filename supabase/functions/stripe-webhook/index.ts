@@ -3,8 +3,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import Stripe from 'https://esm.sh/stripe@13.10.0'
 
 const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY')!, {
-  apiVersion: '2024-10-28.acacia',
-  httpClient: Stripe.createFetchHttpClient(),
+  apiVersion: '2022-11-15'
 });
 
 const supabase = createClient(
@@ -18,91 +17,73 @@ const corsHeaders = {
 }
 
 serve(async (req) => {
-  console.log('Webhook received:', new Date().toISOString());
-  console.log('Request headers:', JSON.stringify(Object.fromEntries(req.headers.entries()), null, 2));
-
-  // Handle CORS preflight requests
+  // CORS preflight
   if (req.method === 'OPTIONS') {
-    console.log('Handling CORS preflight request');
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const signature = req.headers.get('stripe-signature')!;
-    const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET')!;
-    const body = await req.text();
-    
-    console.log('Webhook body length:', body.length);
-    console.log('Webhook signature:', signature);
+    const signature = req.headers.get('stripe-signature');
+    if (!signature) {
+      console.error('No stripe signature found');
+      throw new Error('No stripe signature found');
+    }
 
-    console.log('Constructing Stripe event...');
-    const event = await stripe.webhooks.constructEventAsync(
-      body,
+    const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET');
+    if (!webhookSecret) {
+      console.error('No webhook secret found');
+      throw new Error('No webhook secret found');
+    }
+
+    // Get the raw body
+    const rawBody = await req.text();
+    console.log('Received webhook with signature:', signature);
+
+    // Construct the event
+    const event = stripe.webhooks.constructEvent(
+      rawBody,
       signature,
       webhookSecret
     );
 
-    console.log(`Webhook event type: ${event.type}`);
+    console.log('Event type:', event.type);
 
     switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data.object;
+        console.log('Processing checkout.session.completed:', session);
+        
         const userId = session.client_reference_id;
         const subscriptionId = session.subscription as string;
         const customerId = session.customer as string;
 
-        console.log('Processing checkout.session.completed:', {
-          userId,
-          subscriptionId,
-          customerId
-        });
+        if (!userId) {
+          throw new Error('No user ID found in session');
+        }
 
-        // Update customer metadata
-        console.log('Updating Stripe customer metadata...');
+        console.log('Updating customer metadata with user_id:', userId);
         await stripe.customers.update(customerId, {
           metadata: { user_id: userId }
         });
-        console.log('Stripe customer metadata updated successfully');
 
-        // Update user profile
-        console.log('Updating user profile in Supabase...');
-        const { data, error } = await supabase
+        console.log('Updating user profile...');
+        const { error: profileError } = await supabase
           .from('profiles')
           .update({ 
-            plan_id: 2,  // Pro plan
+            plan_id: 2,
             stripe_customer_id: customerId,
             stripe_subscription_id: subscriptionId,
-            authenticated_usage_count: 0,  // Reset usage count for new subscription
+            authenticated_usage_count: 0,
             updated_at: new Date().toISOString()
           })
           .eq('id', userId);
 
-        if (error) {
-          console.error('Error updating user profile:', error);
-          throw error;
+        if (profileError) {
+          console.error('Error updating profile:', profileError);
+          throw profileError;
         }
-        console.log('User profile updated successfully:', data);
 
-        // Add payment history
-        console.log('Adding payment history...');
-        const { error: paymentError } = await supabase
-          .from('payment_history')
-          .insert({
-            user_id: userId,
-            stripe_payment_id: session.payment_intent as string,
-            amount: session.amount_total! / 100,
-            currency: session.currency,
-            token_credits_added: 0,
-            status: 'completed',
-            completed_at: new Date().toISOString()
-          });
-
-        if (paymentError) {
-          console.error('Error adding payment history:', paymentError);
-          throw paymentError;
-        }
-        console.log('Payment history added successfully');
-
+        console.log('Successfully processed checkout session');
         break;
       }
 
@@ -117,7 +98,7 @@ serve(async (req) => {
         console.log('User ID from metadata:', userId);
 
         if (userId) {
-          console.log('Resetting usage count for new billing period...');
+          console.log('Resetting usage count for user:', userId);
           const { error } = await supabase
             .from('profiles')
             .update({ 
@@ -130,7 +111,9 @@ serve(async (req) => {
             console.error('Error resetting usage count:', error);
             throw error;
           }
-          console.log('Usage count reset successfully');
+          console.log('Successfully reset usage count');
+        } else {
+          console.error('No user_id found in customer metadata');
         }
         break;
       }
@@ -146,11 +129,11 @@ serve(async (req) => {
         console.log('User ID from metadata:', userId);
 
         if (userId) {
-          console.log('Downgrading user to free plan...');
+          console.log('Downgrading user to free plan:', userId);
           const { error } = await supabase
             .from('profiles')
             .update({ 
-              plan_id: 1,  // Free plan
+              plan_id: 1,
               stripe_subscription_id: null,
               updated_at: new Date().toISOString()
             })
@@ -160,16 +143,12 @@ serve(async (req) => {
             console.error('Error downgrading user:', error);
             throw error;
           }
-          console.log('User downgraded successfully');
+          console.log('Successfully downgraded user');
         }
         break;
       }
-
-      default:
-        console.log(`Unhandled event type: ${event.type}`);
     }
 
-    console.log('Webhook processed successfully');
     return new Response(JSON.stringify({ received: true }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
@@ -184,4 +163,4 @@ serve(async (req) => {
       }
     );
   }
-})
+});
