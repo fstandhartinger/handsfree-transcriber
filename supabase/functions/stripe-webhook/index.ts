@@ -23,31 +23,43 @@ serve(async (req) => {
   }
 
   try {
+    // Get the stripe signature from headers
     const signature = req.headers.get('stripe-signature');
+    console.log('Received webhook request with signature:', signature);
+
     if (!signature) {
-      console.error('No stripe signature found');
+      console.error('No stripe signature found in headers');
       throw new Error('No stripe signature found');
     }
 
     const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET');
     if (!webhookSecret) {
-      console.error('No webhook secret found');
+      console.error('No webhook secret found in environment');
       throw new Error('No webhook secret found');
     }
 
-    // Get the raw body as a Uint8Array
-    const rawBody = await req.arrayBuffer();
-    const rawBodyString = new TextDecoder().decode(rawBody);
-    console.log('Processing webhook with signature:', signature);
+    // Get the raw body as text
+    const rawBody = await req.text();
+    console.log('Received webhook body length:', rawBody.length);
+    console.log('First 100 characters of webhook body:', rawBody.substring(0, 100));
 
-    // Construct the event asynchronously
-    const event = await stripe.webhooks.constructEventAsync(
-      rawBodyString,
-      signature,
-      webhookSecret
-    );
+    // Verify the event
+    let event;
+    try {
+      event = await stripe.webhooks.constructEventAsync(
+        rawBody,
+        signature,
+        webhookSecret
+      );
+      console.log('Successfully constructed event:', event.type);
+    } catch (err) {
+      console.error('Error constructing webhook event:', err);
+      console.error('Webhook Secret used:', webhookSecret.substring(0, 4) + '...');
+      console.error('Signature received:', signature);
+      throw err;
+    }
 
-    console.log('Event type:', event.type);
+    console.log('Processing webhook event type:', event.type);
 
     switch (event.type) {
       case 'checkout.session.completed': {
