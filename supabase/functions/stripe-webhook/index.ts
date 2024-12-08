@@ -12,21 +12,36 @@ const supabase = createClient(
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 )
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
+
 serve(async (req) => {
   console.log('Webhook received:', new Date().toISOString());
-  console.log('Request headers:', JSON.stringify(Object.fromEntries(req.headers.entries()), null, 2));
+  
+  // Handle CORS preflight requests
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
 
   try {
-    const signature = req.headers.get('stripe-signature')!;
-    const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET')!;
-    const body = await req.text();
-    
-    console.log('Webhook body length:', body.length);
+    const signature = req.headers.get('stripe-signature');
     console.log('Webhook signature:', signature);
+    
+    if (!signature) {
+      throw new Error('No stripe signature found');
+    }
 
+    // WICHTIG: Wir müssen den rohen Request Body als Text erhalten
+    const rawBody = await req.text();
+    console.log('Raw body length:', rawBody.length);
+    
+    const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET')!;
     console.log('Constructing Stripe event...');
+    
     const event = await stripe.webhooks.constructEventAsync(
-      body,
+      rawBody,
       signature,
       webhookSecret
     );
@@ -37,7 +52,7 @@ serve(async (req) => {
       case 'checkout.session.completed': {
         console.log('Processing checkout.session.completed...');
         const session = event.data.object;
-        console.log('Checkout session:', session);
+        console.log('Checkout session:', JSON.stringify(session, null, 2));
         
         const userId = session.client_reference_id;
         const subscriptionId = session.subscription as string;
@@ -80,10 +95,10 @@ serve(async (req) => {
       case 'invoice.paid': {
         console.log('Processing invoice.paid...');
         const invoice = event.data.object;
-        console.log('Invoice:', invoice);
+        console.log('Invoice:', JSON.stringify(invoice, null, 2));
 
         const customer = await stripe.customers.retrieve(invoice.customer as string);
-        console.log('Retrieved Stripe customer:', customer);
+        console.log('Retrieved Stripe customer:', JSON.stringify(customer, null, 2));
 
         // Get user_id from customer metadata
         const userId = (customer as Stripe.Customer).metadata.user_id;
@@ -113,10 +128,10 @@ serve(async (req) => {
       case 'customer.subscription.deleted': {
         console.log('Processing subscription deletion...');
         const subscription = event.data.object;
-        console.log('Subscription:', subscription);
+        console.log('Subscription:', JSON.stringify(subscription, null, 2));
 
         const customer = await stripe.customers.retrieve(subscription.customer as string);
-        console.log('Retrieved Stripe customer:', customer);
+        console.log('Retrieved Stripe customer:', JSON.stringify(customer, null, 2));
 
         const userId = (customer as Stripe.Customer).metadata.user_id;
         console.log('User ID from metadata:', userId);
@@ -149,7 +164,7 @@ serve(async (req) => {
 
     console.log('Webhook processed successfully');
     return new Response(JSON.stringify({ received: true }), {
-      headers: { 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
     });
   } catch (err) {
@@ -157,7 +172,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ error: err.message }),
       { 
-        headers: { 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 400,
       }
     );
