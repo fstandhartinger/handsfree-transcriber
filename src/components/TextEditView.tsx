@@ -1,33 +1,33 @@
 import { useEffect, useState } from 'react';
-import { Copy, ArrowLeft, Mic } from 'lucide-react';
+import { Copy, ArrowLeft, Mic, Share } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from 'react-router-dom';
 import AuthDialog from './AuthDialog';
-import RephraseModal from './RephraseModal';
+import RecordingModal from './RecordingModal';
 import { useAudioRecording } from '@/hooks/useAudioRecording';
 import { useAudioProcessing } from '@/hooks/useAudioProcessing';
 import { useUsageCounter } from '@/hooks/useUsageCounter';
+import ProfileButton from './ProfileButton';
+import ShareButton from './ShareButton';
 
 interface TextEditViewProps {
-  text: string;
+  text: string | null;
   onBack: () => void;
   onNewRecording: () => void;
   isAuthenticated: boolean;
 }
 
 const TextEditView = ({ text, onBack, onNewRecording, isAuthenticated }: TextEditViewProps) => {
-  console.log('[TextEditView] Initializing with props:', { text, isAuthenticated });
-  
   const [currentText, setCurrentText] = useState(text);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isProcessingRephrase, setIsProcessingRephrase] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
-  const [showRephraseModal, setShowRephraseModal] = useState(false);
+  const [showRecordingModal, setShowRecordingModal] = useState(false);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
-  const [history, setHistory] = useState<string[]>([text]);
+  const [history, setHistory] = useState<string[]>([text || '']);
   
   const { toast } = useToast();
   const { t } = useTranslation();
@@ -36,22 +36,18 @@ const TextEditView = ({ text, onBack, onNewRecording, isAuthenticated }: TextEdi
   const { incrementUsage, shouldShowUpgradeDialog } = useUsageCounter();
 
   const addToHistory = (newText: string) => {
-    console.log('[TextEditView] Adding to history:', newText);
     setHistory(prev => [...prev, newText]);
   };
 
-  const { processAudioForRephrase } = useAudioProcessing(currentText, addToHistory, setCurrentText);
+  const { processAudioForRephrase } = useAudioProcessing(currentText || '', addToHistory, setCurrentText);
 
   useEffect(() => {
-    console.log('[TextEditView] Component mounted, checking usage...');
     const checkUsageAndShowDialog = async () => {
       try {
         const needsUpgrade = await incrementUsage();
         const shouldUpgrade = shouldShowUpgradeDialog();
-        console.log('[TextEditView] Usage check results:', { needsUpgrade, shouldUpgrade });
         
-        if (needsUpgrade || shouldUpgrade) {
-          console.log('[TextEditView] Showing auth dialog');
+        if (needsUpgrade && !isAuthenticated) {
           setShowAuthDialog(true);
         }
       } catch (error) {
@@ -60,23 +56,11 @@ const TextEditView = ({ text, onBack, onNewRecording, isAuthenticated }: TextEdi
     };
     
     checkUsageAndShowDialog();
-  }, []);
-
-  useEffect(() => {
-    console.log('[TextEditView] State update:', {
-      isProcessing,
-      isProcessingRephrase,
-      isEditMode,
-      showRephraseModal,
-      showAuthDialog,
-      currentText,
-      history
-    });
-  }, [isProcessing, isProcessingRephrase, isEditMode, showRephraseModal, showAuthDialog, currentText, history]);
+  }, [incrementUsage, isAuthenticated, shouldShowUpgradeDialog]);
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(currentText);
+      await navigator.clipboard.writeText(currentText || '');
       toast({
         description: t('toasts.copied'),
       });
@@ -84,22 +68,16 @@ const TextEditView = ({ text, onBack, onNewRecording, isAuthenticated }: TextEdi
       console.error('[TextEditView] Failed to copy text:', err);
       toast({
         description: t('errors.copyFailed'),
-        variant: "destructive",
       });
     }
   };
 
-  const handleStartRephrase = async () => {
-    console.log('[TextEditView] Starting rephrase, authenticated:', isAuthenticated);
-    if (!isAuthenticated) {
-      setShowAuthDialog(true);
-      return;
-    }
-    setShowRephraseModal(true);
+  const handleNewRecording = () => {
+    setShowRecordingModal(true);
+    startRecording();
   };
 
-  const handleRephrase = async () => {
-    console.log('[TextEditView] Handling rephrase, recording:', isRecording);
+  const handleStopRecording = async () => {
     if (isRecording) {
       try {
         setIsProcessingRephrase(true);
@@ -108,14 +86,14 @@ const TextEditView = ({ text, onBack, onNewRecording, isAuthenticated }: TextEdi
           await processAudioForRephrase(audioBlob);
         }
       } catch (error) {
-        console.error('[TextEditView] Error processing rephrase:', error);
+        console.error('[TextEditView] Error processing recording:', error);
         toast({
-          description: t('errors.rephrasing'),
+          description: t('errors.recording'),
           variant: "destructive",
         });
       } finally {
         setIsProcessingRephrase(false);
-        setShowRephraseModal(false);
+        setShowRecordingModal(false);
       }
     }
   };
@@ -135,39 +113,45 @@ const TextEditView = ({ text, onBack, onNewRecording, isAuthenticated }: TextEdi
         >
           <ArrowLeft className="h-4 w-4" />
         </Button>
-        <div className="flex gap-2">
-          <Button
-            onClick={handleCopy}
-            variant="outline"
-          >
-            <Copy className="h-4 w-4 mr-2" />
-            {t('actions.copy')}
-          </Button>
-          <Button
-            onClick={handleStartRephrase}
-            variant="outline"
-          >
-            <Mic className="h-4 w-4 mr-2" />
-            {t('actions.rephrase')}
-          </Button>
-          <Button onClick={onNewRecording}>
-            {t('actions.newRecording')}
-          </Button>
+        <div className="flex gap-2 items-center">
+          {currentText && (
+            <>
+              <Button
+                onClick={handleCopy}
+                variant="outline"
+                size="icon"
+              >
+                <Copy className="h-4 w-4" />
+              </Button>
+              <ShareButton text={currentText || ''} />
+            </>
+          )}
+          <ProfileButton />
         </div>
       </div>
 
       <div className="space-y-4">
         <Textarea
-          value={currentText}
+          value={currentText || ''}
           onChange={handleTextChange}
           className="min-h-[200px]"
+          placeholder={t('placeholder.enterText')}
         />
       </div>
 
-      {showRephraseModal && (
-        <RephraseModal
-          onStop={handleRephrase}
-          status={isProcessingRephrase ? 'processing' : 'recording'}
+      {showRecordingModal && (
+        <RecordingModal
+          onStop={handleStopRecording}
+          mode="instruction"
+          isRecording={isRecording}
+          onStartRecording={startRecording}
+          onCancel={() => {
+            setShowRecordingModal(false);
+            if (isRecording) {
+              stopRecording();
+            }
+          }}
+          isProcessing={isProcessingRephrase}
         />
       )}
 
@@ -177,6 +161,17 @@ const TextEditView = ({ text, onBack, onNewRecording, isAuthenticated }: TextEdi
           onOpenChange={setShowAuthDialog}
         />
       )}
+
+      <div className="fixed bottom-4 right-4">
+        <Button
+          onClick={handleNewRecording}
+          className="rounded-full shadow-lg"
+          size="lg"
+        >
+          <Mic className="h-5 w-5 mr-2" />
+          {t('buttons.newRecording')}
+        </Button>
+      </div>
     </div>
   );
 };

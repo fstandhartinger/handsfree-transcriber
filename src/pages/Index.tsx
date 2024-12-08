@@ -43,26 +43,17 @@ const Index = ({ isAuthenticated }: IndexProps) => {
     }
   }, [isAuthenticated]);
 
+  // Redirect authenticated users to results page
+  useEffect(() => {
+    if (isAuthenticated) {
+      setTranscribedText('');
+    }
+  }, [isAuthenticated]);
+
   // Add error logging for auth state changes
   supabase.auth.onAuthStateChange((event, session) => {
-    console.log('Auth state changed:', event, session);
     if (event === 'SIGNED_IN') {
-      console.log('User signed in successfully');
-    }
-    if (event === 'SIGNED_OUT') {
-      console.log('User signed out');
-    }
-    if (event === 'USER_UPDATED') {
-      console.log('User was updated');
-    }
-    // Log any auth errors
-    const error = (session as unknown as { error?: AuthError })?.error;
-    if (error) {
-      console.error('Auth error:', error);
-      toast({
-        description: "Bei der Anmeldung ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.",
-        variant: "destructive",
-      });
+      setTranscribedText('');
     }
   });
 
@@ -103,7 +94,6 @@ const Index = ({ isAuthenticated }: IndexProps) => {
               setTranscribedText(data.transcription);
               const needsAuth = incrementUsage();
               if (needsAuth && !isAuthenticated) {
-                // The auth dialog will be shown in TextEditView
                 localStorage.setItem('needs_auth', 'true');
               }
             } catch (error) {
@@ -150,7 +140,7 @@ const Index = ({ isAuthenticated }: IndexProps) => {
 
   return (
     <div className="h-screen flex flex-col">
-      {transcribedText ? (
+      {transcribedText !== null ? (
         <TextEditView
           text={transcribedText}
           onBack={() => {
@@ -163,7 +153,7 @@ const Index = ({ isAuthenticated }: IndexProps) => {
           }}
           isAuthenticated={isAuthenticated}
         />
-      ) : (
+      ) : !isAuthenticated ? (
         <>
           <div className="flex justify-between items-center p-4">
             <Button
@@ -230,6 +220,19 @@ const Index = ({ isAuthenticated }: IndexProps) => {
           <CookieBanner />
           <LegalFooter />
         </>
+      ) : (
+        <TextEditView
+          text=""
+          onBack={() => {
+            setTranscribedText(null);
+            setIsRecording(false);
+          }}
+          onNewRecording={() => {
+            setTranscribedText(null);
+            handleStartRecording();
+          }}
+          isAuthenticated={isAuthenticated}
+        />
       )}
 
       <SettingsDialog
