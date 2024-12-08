@@ -1,20 +1,16 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect, useCallback } from "react";
-import { ArrowLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import EditableText from "@/components/EditableText";
 import TextControls from "@/components/TextControls";
-import ShareButton, { ClipboardButton } from "@/components/ShareButton";
 import RecordingModal from "@/components/RecordingModal";
 import { useToast } from "@/hooks/use-toast.tsx";
 import { supabase } from "@/integrations/supabase/client";
 import { useAudioRecording } from "@/hooks/useAudioRecording";
 import { useAudioProcessing } from "@/hooks/useAudioProcessing";
 import { useTranslation } from "react-i18next";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { useAutoCopyToClipboard } from "@/components/SettingsDialog";
 import { useUsageCounter } from "@/hooks/useUsageCounter";
 import AuthDialog from "@/components/AuthDialog";
+import HeaderControls from "@/components/text-edit/HeaderControls";
 
 interface TextEditViewProps {
   text: string;
@@ -40,7 +36,6 @@ const TextEditView = ({ text: initialText, onBack, onNewRecording, isAuthenticat
   const [hasInitialCopyBeenTriggered, setHasInitialCopyBeenTriggered] = useState(false);
   const { incrementUsage } = useUsageCounter();
 
-  // Check for needs_auth flag when component mounts
   useEffect(() => {
     const needsAuth = localStorage.getItem('needs_auth');
     if (needsAuth === 'true' && !isAuthenticated) {
@@ -233,30 +228,11 @@ const TextEditView = ({ text: initialText, onBack, onNewRecording, isAuthenticat
 
   return (
     <div className="h-screen flex flex-col">
-      <div className="flex items-center justify-between px-4 h-14 bg-background">
-        <Button
-          onClick={onBack}
-          variant="outline"
-          size="icon"
-          className="w-10 h-10 p-0"
-        >
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
-        
-        {isProcessing && (
-          <div className="absolute left-1/2 -translate-x-1/2">
-            <LoadingSpinner size="md" className="text-primary" />
-            <div className="sr-only">Loading indicator should be visible</div>
-          </div>
-        )}
-        
-        <div className="flex gap-2">
-          <ClipboardButton text={text} />
-          {!(window as any).chrome?.webview?.hostObjects?.transcriberHost && (
-            <ShareButton text={text} />
-          )}
-        </div>
-      </div>
+      <HeaderControls 
+        onBack={onBack}
+        text={text}
+        isProcessing={isProcessing}
+      />
 
       <div className="flex-1 flex flex-col overflow-hidden">
         <EditableText 
