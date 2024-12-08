@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Copy, ArrowLeft, Mic, Share, FileText, ChevronDown } from 'lucide-react';
+import { Copy, ArrowLeft, Mic, Share, FileText, ChevronDown, Briefcase, Scissors, Coffee } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
@@ -115,6 +115,25 @@ const TextEditView = ({ text, onBack, onNewRecording, isAuthenticated }: TextEdi
     // Handle style click
   };
 
+  const handleStartRephrase = async () => {
+    setIsProcessingRephrase(true);
+    try {
+      const audioBlob = await stopRecording();
+      if (audioBlob) {
+        await processAudioForRephrase(audioBlob);
+      }
+    } catch (error) {
+      console.error('[TextEditView] Error processing recording:', error);
+      toast({
+        description: t('errors.recording'),
+        variant: "destructive",
+      });
+    } finally {
+      setIsProcessingRephrase(false);
+      setShowRecordingModal(false);
+    }
+  };
+
   return (
     <div className="relative min-h-screen">
       <div className="fixed top-0 left-0 right-0 bg-background z-10">
@@ -148,7 +167,7 @@ const TextEditView = ({ text, onBack, onNewRecording, isAuthenticated }: TextEdi
         <Textarea
           value={currentText || ''}
           onChange={handleTextChange}
-          className="min-h-[200px] text-xl md:text-2xl border-none focus:ring-0 resize-none"
+          className="min-h-[200px] text-xl md:text-2xl border-0 focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 resize-none bg-transparent"
           placeholder={t('placeholder.enterText')}
         />
       </div>
@@ -186,6 +205,13 @@ const TextEditView = ({ text, onBack, onNewRecording, isAuthenticated }: TextEdi
               <Mic className="h-5 w-5" />
               {t('buttons.newRecording')}
             </Button>
+            <Button
+              onClick={handleStartRephrase}
+              className="rounded-full shadow-lg flex items-center gap-2 px-4"
+            >
+              <Mic className="h-5 w-5" />
+              {t('buttons.rephrase')}
+            </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button 
@@ -198,15 +224,15 @@ const TextEditView = ({ text, onBack, onNewRecording, isAuthenticated }: TextEdi
               </DropdownMenuTrigger>
               <DropdownMenuContent className="bg-background border border-border shadow-lg">
                 <DropdownMenuItem onClick={() => handleStyleClick("Formal")} className="hover:bg-accent">
-                  <FileText className="w-4 h-4 mr-2" />
+                  <Briefcase className="w-4 h-4 mr-2" />
                   {t('buttons.formal')}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => handleStyleClick("Concise")} className="hover:bg-accent">
-                  <FileText className="w-4 h-4 mr-2" />
+                  <Scissors className="w-4 h-4 mr-2" />
                   {t('buttons.concise')}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => handleStyleClick("Casual")} className="hover:bg-accent">
-                  <FileText className="w-4 h-4 mr-2" />
+                  <Coffee className="w-4 h-4 mr-2" />
                   {t('buttons.casual')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
