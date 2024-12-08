@@ -15,7 +15,14 @@ const corsHeaders = {
 serve(async (req) => {
   console.log('Webhook received:', new Date().toISOString());
   console.log('Request method:', req.method);
-  console.log('Request headers:', JSON.stringify(Object.fromEntries(req.headers.entries()), null, 2));
+  
+  // Log all request headers
+  const headersObj = Object.fromEntries(req.headers.entries());
+  console.log('All request headers:', JSON.stringify(headersObj, null, 2));
+  
+  // Log specific Stripe signature header
+  const stripeSignature = req.headers.get('stripe-signature');
+  console.log('Stripe signature header:', stripeSignature);
 
   if (req.method === 'OPTIONS') {
     console.log('Handling CORS preflight request');
@@ -23,29 +30,34 @@ serve(async (req) => {
   }
 
   try {
-    // Get the raw request body and signature
-    const rawBody = await req.text();
-    const signature = req.headers.get('stripe-signature');
+    // Get the webhook secret and log its presence
     const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET');
-
-    console.log('Raw body first 100 chars:', rawBody.substring(0, 100));
-    console.log('Raw body length:', rawBody.length);
-    console.log('Signature:', signature);
+    console.log('Webhook secret exists:', !!webhookSecret);
     console.log('Webhook secret length:', webhookSecret?.length);
-    
-    if (!signature || !webhookSecret) {
-      console.error('Missing signature or webhook secret');
+
+    if (!stripeSignature || !webhookSecret) {
+      console.error('Missing required headers or secret:');
+      console.error('- Stripe signature present:', !!stripeSignature);
+      console.error('- Webhook secret present:', !!webhookSecret);
       throw new Error('Missing signature or webhook secret');
     }
 
-    console.log('Constructing Stripe event...');
+    // Get the raw body and log its details
+    const rawBody = await req.text();
+    console.log('Raw body length:', rawBody.length);
+    console.log('Raw body preview:', rawBody.substring(0, 100));
+    console.log('Raw body is string:', typeof rawBody === 'string');
+
+    // Attempt to construct the event
+    console.log('Attempting to construct Stripe event...');
     const event = await stripe.webhooks.constructEventAsync(
       rawBody,
-      signature,
+      stripeSignature,
       webhookSecret
     );
 
-    console.log(`Webhook event type: ${event.type}`);
+    console.log('Event constructed successfully:', event.type);
+    console.log('Event ID:', event.id);
 
     switch (event.type) {
       case 'checkout.session.completed': {
@@ -56,12 +68,23 @@ serve(async (req) => {
         const subscriptionId = session.subscription as string;
         const customerId = session.customer as string;
 
-        console.log('Updating customer metadata with user_id:', userId);
+        if (!userId) {
+          console.error('No user ID found in session');
+          throw new Error('No user ID in session');
+        }
+
+        console.log('Updating customer metadata:', {
+          userId,
+          customerId,
+          subscriptionId
+        });
+
         await stripe.customers.update(customerId, {
           metadata: { user_id: userId }
         });
 
-        console.log('Updating user profile in Supabase...');
+        console.log('Customer metadata updated');
+
         const supabase = createClient(
           Deno.env.get('SUPABASE_URL')!,
           Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
@@ -90,32 +113,33 @@ serve(async (req) => {
         console.log('Processing invoice.paid:', JSON.stringify(invoice, null, 2));
 
         const customer = await stripe.customers.retrieve(invoice.customer as string);
-        console.log('Retrieved Stripe customer:', JSON.stringify(customer, null, 2));
+        console.log('Retrieved customer:', JSON.stringify(customer, null, 2));
 
         const userId = (customer as Stripe.Customer).metadata.user_id;
-        console.log('User ID from metadata:', userId);
-
-        if (userId) {
-          console.log('Resetting usage count for new billing period...');
-          const supabase = createClient(
-            Deno.env.get('SUPABASE_URL')!,
-            Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-          );
-
-          const { error } = await supabase
-            .from('profiles')
-            .update({ 
-              authenticated_usage_count: 0,
-              updated_at: new Date().toISOString()
-            })
-            .eq('id', userId);
-
-          if (error) {
-            console.error('Error resetting usage count:', error);
-            throw error;
-          }
-          console.log('Usage count reset successfully');
+        if (!userId) {
+          console.error('No user ID found in customer metadata');
+          break;
         }
+
+        console.log('Resetting usage count for user:', userId);
+        const supabase = createClient(
+          Deno.env.get('SUPABASE_URL')!,
+          Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+        );
+
+        const { error } = await supabase
+          .from('usage_tracking')
+          .update({ 
+            authenticated_usage_count: 0,
+            updated_at: new Date().toISOString()
+          })
+          .eq('user_id', userId);
+
+        if (error) {
+          console.error('Error resetting usage count:', error);
+          throw error;
+        }
+        console.log('Usage count reset successfully');
         break;
       }
 
@@ -124,33 +148,34 @@ serve(async (req) => {
         console.log('Processing subscription deletion:', JSON.stringify(subscription, null, 2));
 
         const customer = await stripe.customers.retrieve(subscription.customer as string);
-        console.log('Retrieved Stripe customer:', JSON.stringify(customer, null, 2));
+        console.log('Retrieved customer for deletion:', JSON.stringify(customer, null, 2));
 
         const userId = (customer as Stripe.Customer).metadata.user_id;
-        console.log('User ID from metadata:', userId);
-
-        if (userId) {
-          console.log('Downgrading user to free plan...');
-          const supabase = createClient(
-            Deno.env.get('SUPABASE_URL')!,
-            Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-          );
-
-          const { error } = await supabase
-            .from('profiles')
-            .update({ 
-              plan_id: 1,
-              stripe_subscription_id: null,
-              updated_at: new Date().toISOString()
-            })
-            .eq('id', userId);
-
-          if (error) {
-            console.error('Error downgrading user:', error);
-            throw error;
-          }
-          console.log('User downgraded successfully');
+        if (!userId) {
+          console.error('No user ID found in customer metadata for deletion');
+          break;
         }
+
+        console.log('Downgrading user to free plan:', userId);
+        const supabase = createClient(
+          Deno.env.get('SUPABASE_URL')!,
+          Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+        );
+
+        const { error } = await supabase
+          .from('profiles')
+          .update({ 
+            plan_id: 1,
+            stripe_subscription_id: null,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', userId);
+
+        if (error) {
+          console.error('Error downgrading user:', error);
+          throw error;
+        }
+        console.log('User downgraded successfully');
         break;
       }
 
