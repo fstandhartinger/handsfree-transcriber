@@ -27,14 +27,23 @@ serve(async (req) => {
   }
 
   try {
-    // Get the raw request body for signature verification
-    const body = await req.text();
-    const signature = req.headers.get('stripe-signature')!;
-    const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET')!;
+    // Get the raw request body and signature
+    const rawBody = await req.text();
+    const signature = req.headers.get('stripe-signature');
+    const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET');
+
+    console.log('Raw body length:', rawBody.length);
+    console.log('Signature:', signature);
+    console.log('Webhook secret exists:', !!webhookSecret);
     
+    if (!signature || !webhookSecret) {
+      console.error('Missing signature or webhook secret');
+      throw new Error('Missing signature or webhook secret');
+    }
+
     console.log('Constructing Stripe event...');
     const event = await stripe.webhooks.constructEventAsync(
-      body,
+      rawBody,
       signature,
       webhookSecret
     );
