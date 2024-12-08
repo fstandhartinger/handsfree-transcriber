@@ -3,7 +3,6 @@ import EditableText from "@/components/EditableText";
 import TextControls from "@/components/TextControls";
 import RecordingModal from "@/components/RecordingModal";
 import NewRecordingDialog from "@/components/NewRecordingDialog";
-import UpgradeDialog from "@/components/UpgradeDialog";
 import { useToast } from "@/hooks/use-toast.tsx";
 import { supabase } from "@/integrations/supabase/client";
 import { useAudioRecording } from "@/hooks/useAudioRecording";
@@ -32,7 +31,6 @@ const TextEditView = ({ text: initialText, onBack, isAuthenticated }: TextEditVi
   const [isRecordingRephrase, setIsRecordingRephrase] = useState(false);
   const [isProcessingRephrase, setIsProcessingRephrase] = useState(false);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
-  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const [showNewRecordingDialog, setShowNewRecordingDialog] = useState(false);
   const [isRecordingNew, setIsRecordingNew] = useState(false);
   const [isProcessingNew, setIsProcessingNew] = useState(false);
@@ -70,6 +68,7 @@ const TextEditView = ({ text: initialText, onBack, isAuthenticated }: TextEditVi
   }, [t, toast]);
 
   useEffect(() => {
+    console.log(`[${new Date().toISOString()}] Auto-copy check - autoCopy: ${autoCopy}, showAuthDialog: ${showAuthDialog}, isAuthenticated: ${isAuthenticated}`);
     if (autoCopy && text !== initialText && !showAuthDialog && isAuthenticated) {
       copyToClipboard(text);
     }
@@ -81,6 +80,10 @@ const TextEditView = ({ text: initialText, onBack, isAuthenticated }: TextEditVi
       setHasInitialCopyBeenTriggered(true);
     }
   }, [autoCopy, initialText, hasInitialCopyBeenTriggered, copyToClipboard, showAuthDialog, isAuthenticated]);
+
+  useEffect(() => {
+    console.log('Processing state changed:', { isProcessing });
+  }, [isProcessing]);
 
   const { isRecording, startRecording, stopRecording } = useAudioRecording();
   const { processAudioForRephrase, processNewRecording } = useAudioProcessing(text, (newText: string) => {
@@ -98,7 +101,14 @@ const TextEditView = ({ text: initialText, onBack, isAuthenticated }: TextEditVi
 
   const handleStyleChange = async (style: string) => {
     try {
+      console.log('Style change started:', { style, text });
       setIsProcessing(true);
+      console.log('Processing state set to true');
+      
+      console.log('Calling Supabase function with:', {
+        text,
+        instruction: `Make this text more ${style.toLowerCase()}`
+      });
       
       const { data, error } = await supabase.functions.invoke('refine-text', {
         body: {
@@ -107,23 +117,18 @@ const TextEditView = ({ text: initialText, onBack, isAuthenticated }: TextEditVi
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase function error:', error);
+        throw error;
+      }
 
+      console.log('Supabase response:', { data });
       addToHistory(data.text);
       setText(data.text);
 
       const host = (window as any).chrome?.webview?.hostObjects?.transcriberHost;
       if (host?.NotifyTextGenerationCompleted) {
         host.NotifyTextGenerationCompleted();
-      }
-
-      // Check usage count after successful style change
-      const needsUpgrade = await incrementUsage();
-      if (needsUpgrade && isAuthenticated) {
-        setShowUpgradeDialog(true);
-      } else if (needsUpgrade && !isAuthenticated) {
-        localStorage.setItem('needs_auth', 'true');
-        setShowAuthDialog(true);
       }
 
       toast({
@@ -137,6 +142,7 @@ const TextEditView = ({ text: initialText, onBack, isAuthenticated }: TextEditVi
         variant: "destructive",
       });
     } finally {
+      console.log('Style change completed, setting processing to false');
       setIsProcessing(false);
     }
   };
@@ -305,11 +311,6 @@ const TextEditView = ({ text: initialText, onBack, isAuthenticated }: TextEditVi
         open={showAuthDialog} 
         onOpenChange={setShowAuthDialog} 
         text={text} 
-      />
-
-      <UpgradeDialog
-        open={showUpgradeDialog}
-        onOpenChange={setShowUpgradeDialog}
       />
     </div>
   );

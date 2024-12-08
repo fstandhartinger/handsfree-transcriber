@@ -96,9 +96,5 @@
     "termsNotice": "By signing up for Professional plan you accept the terms & conditions",
     "changePlan": "Change Plan",
     "currentPlan": "Current Plan:"
-  },
-  "upgrade": {
-    "title": "Upgrade Required",
-    "description": "You have reached the limit for the free plan. Please upgrade to the Professional Plan to continue."
   }
 }
