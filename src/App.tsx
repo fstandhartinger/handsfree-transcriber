@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'r
 import { Toaster } from "@/components/ui/toaster"
 import { useEffect, useState } from 'react'
 import Index from './pages/Index'
+import Plans from './pages/Plans'
 import TermsAndConditions from './pages/TermsAndConditions'
 import DataPrivacy from './pages/DataPrivacy'
 import Imprint from './pages/Imprint'
@@ -64,6 +65,7 @@ function AppContent() {
       <main>
         <Routes>
           <Route path="/" element={<Index isAuthenticated={isAuthenticated} />} />
+          <Route path="/plans" element={<Plans />} />
           <Route path="/auth/callback" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
