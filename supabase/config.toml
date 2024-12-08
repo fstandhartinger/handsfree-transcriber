@@ -3,3 +3,7 @@ project_id = "ampuqefiqrfmimypkczi"
 verify_jwt = false
 [functions.refine-text]
 verify_jwt = false
+[functions.create-checkout-session]
+verify_jwt = true
+[functions.stripe-webhook]
+verify_jwt = false
