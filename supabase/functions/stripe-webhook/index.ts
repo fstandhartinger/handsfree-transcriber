@@ -6,6 +6,11 @@ const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY')!, {
   apiVersion: '2022-11-15'
 });
 
+const supabase = createClient(
+  Deno.env.get('SUPABASE_URL')!,
+  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+)
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -34,8 +39,8 @@ serve(async (req) => {
     const rawBody = await req.text();
     console.log('Processing webhook with signature:', signature);
 
-    // Construct the event synchronously
-    const event = stripe.webhooks.constructEvent(
+    // Construct the event asynchronously
+    const event = await stripe.webhooks.constructEventAsync(
       rawBody,
       signature,
       webhookSecret
