@@ -12,34 +12,61 @@ const supabase = createClient(
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 )
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
+
 serve(async (req) => {
-  const signature = req.headers.get('stripe-signature')!
-  const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET')!
-  const body = await req.text()
+  console.log('Webhook received:', new Date().toISOString());
+  console.log('Request headers:', JSON.stringify(Object.fromEntries(req.headers.entries()), null, 2));
+
+  // Handle CORS preflight requests
+  if (req.method === 'OPTIONS') {
+    console.log('Handling CORS preflight request');
+    return new Response(null, { headers: corsHeaders });
+  }
 
   try {
-    const event = stripe.webhooks.constructEvent(
+    const signature = req.headers.get('stripe-signature')!;
+    const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET')!;
+    const body = await req.text();
+    
+    console.log('Webhook body length:', body.length);
+    console.log('Webhook signature:', signature);
+
+    console.log('Constructing Stripe event...');
+    const event = await stripe.webhooks.constructEventAsync(
       body,
       signature,
       webhookSecret
-    )
+    );
 
-    console.log(`Webhook received: ${event.type}`)
+    console.log(`Webhook event type: ${event.type}`);
 
     switch (event.type) {
       case 'checkout.session.completed': {
-        const session = event.data.object
-        const userId = session.client_reference_id
-        const subscriptionId = session.subscription as string
-        const customerId = session.customer as string
+        const session = event.data.object;
+        const userId = session.client_reference_id;
+        const subscriptionId = session.subscription as string;
+        const customerId = session.customer as string;
+
+        console.log('Processing checkout.session.completed:', {
+          userId,
+          subscriptionId,
+          customerId
+        });
 
         // Update customer metadata
+        console.log('Updating Stripe customer metadata...');
         await stripe.customers.update(customerId, {
           metadata: { user_id: userId }
-        })
+        });
+        console.log('Stripe customer metadata updated successfully');
 
         // Update user profile
-        const { error } = await supabase
+        console.log('Updating user profile in Supabase...');
+        const { data, error } = await supabase
           .from('profiles')
           .update({ 
             plan_id: 2,  // Pro plan
@@ -48,12 +75,17 @@ serve(async (req) => {
             authenticated_usage_count: 0,  // Reset usage count for new subscription
             updated_at: new Date().toISOString()
           })
-          .eq('id', userId)
+          .eq('id', userId);
 
-        if (error) throw error
+        if (error) {
+          console.error('Error updating user profile:', error);
+          throw error;
+        }
+        console.log('User profile updated successfully:', data);
 
         // Add payment history
-        await supabase
+        console.log('Adding payment history...');
+        const { error: paymentError } = await supabase
           .from('payment_history')
           .insert({
             user_id: userId,
@@ -63,38 +95,58 @@ serve(async (req) => {
             token_credits_added: 0,
             status: 'completed',
             completed_at: new Date().toISOString()
-          })
+          });
 
-        break
+        if (paymentError) {
+          console.error('Error adding payment history:', paymentError);
+          throw paymentError;
+        }
+        console.log('Payment history added successfully');
+
+        break;
       }
 
       case 'invoice.paid': {
-        const invoice = event.data.object
-        const customer = await stripe.customers.retrieve(invoice.customer as string)
-        const userId = (customer as Stripe.Customer).metadata.user_id
+        const invoice = event.data.object;
+        console.log('Processing invoice.paid:', invoice);
+
+        const customer = await stripe.customers.retrieve(invoice.customer as string);
+        console.log('Retrieved Stripe customer:', customer);
+
+        const userId = (customer as Stripe.Customer).metadata.user_id;
+        console.log('User ID from metadata:', userId);
 
         if (userId) {
-          // Reset usage count for the new billing period
+          console.log('Resetting usage count for new billing period...');
           const { error } = await supabase
             .from('profiles')
             .update({ 
               authenticated_usage_count: 0,
               updated_at: new Date().toISOString()
             })
-            .eq('id', userId)
+            .eq('id', userId);
 
-          if (error) throw error
+          if (error) {
+            console.error('Error resetting usage count:', error);
+            throw error;
+          }
+          console.log('Usage count reset successfully');
         }
-        break
+        break;
       }
 
       case 'customer.subscription.deleted': {
-        const subscription = event.data.object
-        const customer = await stripe.customers.retrieve(subscription.customer as string)
-        const userId = (customer as Stripe.Customer).metadata.user_id
+        const subscription = event.data.object;
+        console.log('Processing subscription deletion:', subscription);
+
+        const customer = await stripe.customers.retrieve(subscription.customer as string);
+        console.log('Retrieved Stripe customer:', customer);
+
+        const userId = (customer as Stripe.Customer).metadata.user_id;
+        console.log('User ID from metadata:', userId);
 
         if (userId) {
-          // Downgrade to free plan
+          console.log('Downgrading user to free plan...');
           const { error } = await supabase
             .from('profiles')
             .update({ 
@@ -102,26 +154,34 @@ serve(async (req) => {
               stripe_subscription_id: null,
               updated_at: new Date().toISOString()
             })
-            .eq('id', userId)
+            .eq('id', userId);
 
-          if (error) throw error
+          if (error) {
+            console.error('Error downgrading user:', error);
+            throw error;
+          }
+          console.log('User downgraded successfully');
         }
-        break
+        break;
       }
+
+      default:
+        console.log(`Unhandled event type: ${event.type}`);
     }
 
+    console.log('Webhook processed successfully');
     return new Response(JSON.stringify({ received: true }), {
-      headers: { 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
-    })
+    });
   } catch (err) {
-    console.error('Webhook error:', err.message)
+    console.error('Webhook error:', err);
     return new Response(
       JSON.stringify({ error: err.message }),
       { 
-        headers: { 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 400,
       }
-    )
+    );
   }
 })
