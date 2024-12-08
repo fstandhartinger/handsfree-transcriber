@@ -3,7 +3,6 @@ import EditableText from "@/components/EditableText";
 import TextControls from "@/components/TextControls";
 import RecordingModal from "@/components/RecordingModal";
 import NewRecordingDialog from "@/components/NewRecordingDialog";
-import UpgradeDialog from "@/components/UpgradeDialog";
 import { useToast } from "@/hooks/use-toast.tsx";
 import { supabase } from "@/integrations/supabase/client";
 import { useAudioRecording } from "@/hooks/useAudioRecording";
@@ -40,8 +39,7 @@ const TextEditView = ({ text: initialText, onBack, isAuthenticated }: TextEditVi
   const [autoCopy] = useAutoCopyToClipboard();
   const [hasInitialCopyBeenTriggered, setHasInitialCopyBeenTriggered] = useState(false);
   const { incrementUsage } = useUsageCounter();
-  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
-  
+
   useEffect(() => {
     const needsAuth = localStorage.getItem('needs_auth');
     if (needsAuth === 'true' && !isAuthenticated) {
@@ -245,35 +243,6 @@ const TextEditView = ({ text: initialText, onBack, isAuthenticated }: TextEditVi
     }
   };
 
-  useEffect(() => {
-    const checkUsageAndPlan = async () => {
-      if (isAuthenticated) {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('plan_id')
-            .eq('id', user.id)
-            .single();
-
-          if (profile?.plan_id === 1) { // Free plan
-            const { data: usage } = await supabase
-              .from('usage_tracking')
-              .select('authenticated_usage_count')
-              .eq('user_id', user.id)
-              .single();
-
-            if (usage && usage.authenticated_usage_count >= 3) {
-              setShowUpgradeDialog(true);
-            }
-          }
-        }
-      }
-    };
-
-    checkUsageAndPlan();
-  }, [isAuthenticated]);
-
   console.log(`[${new Date().toISOString()}] Rendering TextEditView:`, { 
     isProcessing, 
     isProcessingRephrase,
@@ -342,11 +311,6 @@ const TextEditView = ({ text: initialText, onBack, isAuthenticated }: TextEditVi
         open={showAuthDialog} 
         onOpenChange={setShowAuthDialog} 
         text={text} 
-      />
-
-      <UpgradeDialog
-        open={showUpgradeDialog}
-        onOpenChange={setShowUpgradeDialog}
       />
     </div>
   );

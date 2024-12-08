@@ -4,11 +4,6 @@
     "maxUsageReached": "Sign in to continue",
     "signIn": "Sign in"
   },
-  "upgrade": {
-    "title": "Upgrade to Professional Plan",
-    "description": "You've reached the limit of the free plan. Upgrade to the Professional Plan to continue using all features.",
-    "upgradeNow": "Upgrade Now"
-  },
   "recording": {
     "recording": "Recording in progress...",
     "status": "Recording",
