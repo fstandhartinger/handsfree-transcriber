@@ -1,7 +1,7 @@
 {
   "auth": {
     "signOut": "Sign out",
-    "maxUsageReached": "Sign in to continue",
+    "maxUsageReached": "Please upgrade to the Professional plan to continue",
     "signIn": "Sign in"
   },
   "recording": {
