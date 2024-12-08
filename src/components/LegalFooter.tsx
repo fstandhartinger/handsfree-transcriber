@@ -2,8 +2,8 @@ import { Link } from 'react-router-dom'
 
 const LegalFooter = () => {
   return (
-    <div className="fixed bottom-0 left-0 right-0 p-4 z-40">
-      <div className="flex justify-center gap-4 text-sm text-muted-foreground">
+    <div className="fixed bottom-0 left-0 right-0 p-4 z-40 bg-background/80 backdrop-blur-sm">
+      <div className="flex justify-center gap-3 text-xs sm:text-sm text-muted-foreground">
         <Link 
           to="/terms-and-conditions"
           className="hover:text-foreground transition-colors"
@@ -27,4 +27,4 @@ const LegalFooter = () => {
   )
 }
 
-export default LegalFooter 
+export default LegalFooter

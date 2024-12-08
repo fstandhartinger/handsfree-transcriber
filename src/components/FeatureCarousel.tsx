@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const FeatureCarousel = () => {
   const { t } = useTranslation();
@@ -8,6 +9,7 @@ const FeatureCarousel = () => {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
   
   const features = [
     { key: 'fast' },
@@ -33,25 +35,29 @@ const FeatureCarousel = () => {
     setTimeout(() => setHoveredIndex(null), 5000);
   };
 
-  // Calculate sizes based on container width
-  const containerWidth = "min(600px, 100vw - 2rem)";
-  const cardWidth = "calc((min(600px, 100vw - 2rem) - 3 * min(1rem, 4vw)) / 4)";
-  const cardHeight = "calc((min(600px, 100vw - 2rem) - 3 * min(1rem, 4vw)) / 4 * 0.6)";
-  const gap = "min(1rem, 4vw)";
+  // Angepasste Größen basierend auf der Bildschirmgröße
+  const containerWidth = isMobile ? "calc(100vw - 2rem)" : "min(600px, 100vw - 2rem)";
+  const cardWidth = isMobile 
+    ? "calc((100vw - 2rem - 3 * 0.5rem) / 4)" 
+    : "calc((min(600px, 100vw - 2rem) - 3 * min(1rem, 4vw)) / 4)";
+  const cardHeight = isMobile 
+    ? "calc((100vw - 2rem - 3 * 0.5rem) / 4 * 0.8)" 
+    : "calc((min(600px, 100vw - 2rem) - 3 * min(1rem, 4vw)) / 4 * 0.6)";
+  const gap = isMobile ? "0.5rem" : "min(1rem, 4vw)";
 
-  const titleSize = "clamp(0.6rem, 1.8vw, 0.7rem)";
-  const descSize = "clamp(0.55rem, 1.6vw, 0.65rem)";
+  const titleSize = isMobile ? "0.6rem" : "clamp(0.6rem, 1.8vw, 0.7rem)";
+  const descSize = isMobile ? "0.55rem" : "clamp(0.55rem, 1.6vw, 0.65rem)";
 
   // Featured card sizes
-  const featuredWidth = "min(280px, 60vw)";
-  const featuredHeight = "min(140px, 30vw)";
-  const featuredTitleSize = "clamp(1rem, 2.5vw, 1.25rem)";
-  const featuredDescSize = "clamp(0.75rem, 2vw, 0.875rem)";
+  const featuredWidth = isMobile ? "80vw" : "min(280px, 60vw)";
+  const featuredHeight = isMobile ? "25vh" : "min(140px, 30vw)";
+  const featuredTitleSize = isMobile ? "0.9rem" : "clamp(1rem, 2.5vw, 1.25rem)";
+  const featuredDescSize = isMobile ? "0.7rem" : "clamp(0.75rem, 2vw, 0.875rem)";
 
   return (
-    <div className="relative h-[300px] w-full flex flex-col items-center justify-between py-8">
+    <div className="relative w-full flex flex-col items-center justify-between py-4 mb-20">
       {/* Large featured card */}
-      <div ref={containerRef} className="flex justify-center w-full">
+      <div ref={containerRef} className="flex justify-center w-full mb-4">
         <div 
           style={{ width: featuredWidth, height: featuredHeight }}
           className="bg-background rounded-lg p-4 flex"
@@ -106,4 +112,4 @@ const FeatureCarousel = () => {
   );
 };
 
-export default FeatureCarousel; 
+export default FeatureCarousel;
