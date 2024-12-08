@@ -23,7 +23,6 @@ serve(async (req) => {
   }
 
   try {
-    // Get the stripe signature from headers
     const signature = req.headers.get('stripe-signature');
     console.log('Received webhook request with signature:', signature);
 
@@ -38,10 +37,9 @@ serve(async (req) => {
       throw new Error('No webhook secret found');
     }
 
-    // Get the raw body as text
-    const rawBody = await req.text();
+    // Get the raw body as Uint8Array
+    const rawBody = new Uint8Array(await req.arrayBuffer());
     console.log('Received webhook body length:', rawBody.length);
-    console.log('First 100 characters of webhook body:', rawBody.substring(0, 100));
 
     // Verify the event
     let event;
