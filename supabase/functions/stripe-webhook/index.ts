@@ -35,13 +35,14 @@ serve(async (req) => {
       throw new Error('No webhook secret found');
     }
 
-    // Get the raw body
-    const rawBody = await req.text();
+    // Get the raw body as a Uint8Array
+    const rawBody = await req.arrayBuffer();
+    const rawBodyString = new TextDecoder().decode(rawBody);
     console.log('Processing webhook with signature:', signature);
 
     // Construct the event asynchronously
     const event = await stripe.webhooks.constructEventAsync(
-      rawBody,
+      rawBodyString,
       signature,
       webhookSecret
     );
