@@ -44,6 +44,7 @@ const TextEditView = ({ text: initialText, onBack, onNewRecording, isAuthenticat
   useEffect(() => {
     const needsAuth = localStorage.getItem('needs_auth');
     if (needsAuth === 'true' && !isAuthenticated) {
+      console.log('Needs auth flag found, showing auth dialog');
       // Small delay to ensure text is rendered
       setTimeout(() => {
         setShowAuthDialog(true);
@@ -214,6 +215,7 @@ const TextEditView = ({ text: initialText, onBack, onNewRecording, isAuthenticat
     console.log(`[${new Date().toISOString()}] Starting new recording`);
     const needsAuth = incrementUsage();
     if (needsAuth && !isAuthenticated) {
+      console.log('Needs auth flag found, setting needs_auth in localStorage in handleNewRecording');
       localStorage.setItem('needs_auth', 'true');
     }
     onNewRecording();

@@ -103,6 +103,7 @@ const Index = ({ isAuthenticated }: IndexProps) => {
               setTranscribedText(data.transcription);
               const needsAuth = incrementUsage();
               if (needsAuth && !isAuthenticated) {
+                console.log('Needs auth flag found, setting needs_auth in localStorage in recording.onstop');
                 // The auth dialog will be shown in TextEditView
                 localStorage.setItem('needs_auth', 'true');
               }
