@@ -276,5 +276,8 @@
     "termsNotice": "Mit der Anmeldung für den Professional Plan akzeptieren Sie die Allgemeinen Geschäftsbedingungen",
     "changePlan": "Plan ändern",
     "currentPlan": "Aktueller Plan:"
+  },
+  "placeholder": { 
+    "enterText": "Verwenden Sie 'Neue Aufnahme' um einen neuen Text zu erstellen"
   }
 }
