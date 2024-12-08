@@ -38,7 +38,7 @@ const ProUpgradeDialog = ({ open, text }: ProUpgradeDialogProps) => {
       if (error) throw error;
 
       if (data?.sessionId) {
-        const stripe = await loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+        const stripe = await loadStripe('pk_live_51QTg5LChq7rcTtxDscYbCJuNySq2LOBhokEaH5WR97cKmOwF6WtEEciOYIl9WV3lb8QINYrcPQC9Pk0iOxwR4fVP009MmyvQmg');
         if (!stripe) {
           throw new Error('Failed to load Stripe');
         }
