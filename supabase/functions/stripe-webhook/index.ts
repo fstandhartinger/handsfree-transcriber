@@ -31,6 +31,7 @@ Deno.serve(async (request) => {
       cryptoProvider
     )
   } catch (err) {
+    console.error('Error:', err);
     return new Response(err.message, { status: 400 })
   }
   console.log(`🔔 Event received: ${receivedEvent.id}`)
