@@ -28,18 +28,24 @@ serve(async (req) => {
   }
 
   try {
-    const signature = req.headers.get('stripe-signature')!;
-    const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET')!;
-    const rawBody = new Uint8Array(await req.arrayBuffer());
-    
-    console.log('Webhook body length:', rawBody.length);
-    console.log('Webhook signature:', signature);
+    // Ensure we're getting the raw body as a Uint8Array
+    const rawBody = await req.arrayBuffer();
+    const signature = req.headers.get('stripe-signature');
+    const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET');
 
-    console.log('Constructing Stripe event...');
+    if (!signature || !webhookSecret) {
+      console.error('Missing signature or webhook secret');
+      throw new Error('Missing signature or webhook secret');
+    }
+
+    console.log('Raw body length:', rawBody.byteLength);
+    console.log('Webhook signature:', signature);
+    console.log('Attempting to construct event...');
+
     const event = await stripe.webhooks.constructEventAsync(
-      rawBody,
+      new Uint8Array(rawBody),
       signature,
-      webhookSecret
+      webhookSecret,
     );
 
     console.log(`Webhook event type: ${event.type}`);
