@@ -1,6 +1,6 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import Stripe from 'https://esm.sh/stripe@13.10.0'
+import Stripe from 'https://esm.sh/stripe@13.10.0?target=deno'
 
 const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY')!, {
   apiVersion: '2024-10-28.acacia',
@@ -15,10 +15,29 @@ const supabase = createClient(
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 )
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+Deno.serve(async (request) => {
+  const signature = request.headers.get('Stripe-Signature')
+
+  // First step is to verify the event. The .text() method must be used as the
+  // verification relies on the raw request body rather than the parsed JSON.
+  const body = await request.text()
+  let receivedEvent
+  try {
+    receivedEvent = await stripe.webhooks.constructEventAsync(
+      body,
+      signature!,
+      Deno.env.get('STRIPE_WEBHOOK_SIGNING_SECRET')!,
+      undefined,
+      cryptoProvider
+    )
+  } catch (err) {
+    return new Response(err.message, { status: 400 })
+  }
+  console.log(`🔔 Event received: ${receivedEvent.id}`)
+  return new Response(JSON.stringify({ ok: true }), { status: 200 })
+})
+
+/*
 
 serve(async (req) => {
   console.log('Webhook received:', new Date().toISOString());
@@ -195,4 +214,4 @@ serve(async (req) => {
       }
     );
   }
-})
+})*/
