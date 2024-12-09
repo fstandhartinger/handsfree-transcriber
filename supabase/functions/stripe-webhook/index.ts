@@ -7,6 +7,9 @@ const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY')!, {
   httpClient: Stripe.createFetchHttpClient(),
 });
 
+// This is needed for webhook signature verification
+const cryptoProvider = Stripe.createSubtleCryptoProvider();
+
 const supabase = createClient(
   Deno.env.get('SUPABASE_URL')!,
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
@@ -19,7 +22,6 @@ const corsHeaders = {
 
 serve(async (req) => {
   console.log('Webhook received:', new Date().toISOString());
-  console.log('Request headers:', JSON.stringify(Object.fromEntries(req.headers.entries()), null, 2));
 
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -28,8 +30,6 @@ serve(async (req) => {
   }
 
   try {
-    // Ensure we're getting the raw body as a Uint8Array
-    const rawBody = await req.arrayBuffer();
     const signature = req.headers.get('stripe-signature');
     const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET');
 
@@ -38,14 +38,19 @@ serve(async (req) => {
       throw new Error('Missing signature or webhook secret');
     }
 
-    console.log('Raw body length:', rawBody.byteLength);
+    // Get the raw body as text for signature verification
+    const rawBody = await req.text();
+    
+    console.log('Raw body length:', rawBody.length);
     console.log('Webhook signature:', signature);
     console.log('Attempting to construct event...');
 
     const event = await stripe.webhooks.constructEventAsync(
-      new Uint8Array(rawBody),
+      rawBody,
       signature,
       webhookSecret,
+      undefined,
+      cryptoProvider
     );
 
     console.log(`Webhook event type: ${event.type}`);
