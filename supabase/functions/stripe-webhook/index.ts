@@ -16,53 +16,15 @@ const supabase = createClient(
 )
 
 Deno.serve(async (request) => {
-  const signature = request.headers.get('Stripe-Signature')
-
-  // First step is to verify the event. The .text() method must be used as the
-  // verification relies on the raw request body rather than the parsed JSON.
-  const body = await request.text()
-  let receivedEvent
-  try {
-    receivedEvent = await stripe.webhooks.constructEventAsync(
-      body,
-      signature!,
-      Deno.env.get('STRIPE_WEBHOOK_SECRET')!,
-      undefined,
-      cryptoProvider
-    )
-  } catch (err) {
-    console.error('Error:', err);
-    return new Response(err.message, { status: 400 })
-  }
-  console.log(`🔔 Event received: ${receivedEvent.id}`)
-  return new Response(JSON.stringify({ ok: true }), { status: 200 })
-})
-
-/*
-
-serve(async (req) => {
-  console.log('Webhook received:', new Date().toISOString());
-
-  // Handle CORS preflight requests
-  if (req.method === 'OPTIONS') {
-    console.log('Handling CORS preflight request');
-    return new Response(null, { headers: corsHeaders });
-  }
 
   try {
-    const signature = req.headers.get('stripe-signature');
+    const signature = request.headers.get('stripe-signature');
     const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET');
 
-    if (!signature || !webhookSecret) {
-      console.error('Missing signature or webhook secret');
-      throw new Error('Missing signature or webhook secret');
-    }
 
     // Get the raw body as text for signature verification
-    const rawBody = await req.text();
+    const rawBody = await request.text();
     
-    console.log('Raw body length:', rawBody.length);
-    console.log('Webhook signature:', signature);
     console.log('Attempting to construct event...');
 
     const event = await stripe.webhooks.constructEventAsync(
@@ -201,18 +163,16 @@ serve(async (req) => {
     }
 
     console.log('Webhook processed successfully');
-    return new Response(JSON.stringify({ received: true }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    return new Response(JSON.stringify({ received: true }), {      
       status: 200,
     });
   } catch (err) {
     console.error('Webhook error:', err);
     return new Response(
       JSON.stringify({ error: err.message }),
-      { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      {         
         status: 400,
       }
     );
   }
-})*/
+})
