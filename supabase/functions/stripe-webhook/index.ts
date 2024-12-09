@@ -30,14 +30,14 @@ serve(async (req) => {
   try {
     const signature = req.headers.get('stripe-signature')!;
     const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET')!;
-    const body = await req.text();
+    const rawBody = new Uint8Array(await req.arrayBuffer());
     
-    console.log('Webhook body length:', body.length);
+    console.log('Webhook body length:', rawBody.length);
     console.log('Webhook signature:', signature);
 
     console.log('Constructing Stripe event...');
     const event = await stripe.webhooks.constructEventAsync(
-      body,
+      rawBody,
       signature,
       webhookSecret
     );
